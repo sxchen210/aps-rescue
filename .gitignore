@@ -1,0 +1,15 @@
+# OAuth credentials — never commit
+credentials.json
+token.json
+
+# Raw email data — sensitive, keep local
+emails/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
