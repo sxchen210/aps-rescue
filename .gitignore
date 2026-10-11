@@ -12,3 +12,6 @@ venv/
 
 # OS
 .DS_Store
+
+# Generated universe/corpus artifacts (reproducible from seed; corpus committed separately when final)
+out/
