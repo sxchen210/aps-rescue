@@ -43,62 +43,37 @@ inbox with historical timestamps: 85 dogs (13 multi-home — "dog tetris"),
 every instant (verification asset); 8 held-out scenarios
 (`simulation/out/universe/scenarios.jsonl`) are reserved for live injection.
 
-## Phase 2 — Schema discovery (CURRENT)
+## Phase 2 — Schema discovery (DONE — artifacts in `discovery/`)
 
-`discovery/discovery.py`: an **agentic harness** running the strong model in
-a tool-use loop against the live inbox with exactly four tools —
-`inbox_stats()`, `list_threads(page)`, `get_thread(id)`, `search(query)` —
-and a mission: explore as much as needed, as many rounds as needed (the
-corpus is small enough to read in full), then emit:
+`discovery/discovery.py` ran the strong model agentically against the live
+inbox (four tools: `inbox_stats`, `list_threads`, `get_thread`, `search`),
+**blind by construction** — it can see only what those tools return, never
+`simulation/` or ground truth (which exists solely for Phase-3 scoring).
 
-1. `discovery/schema.json` — tables, columns, lifecycle enums, canonical
-   keys, a catchall bucket;
-2. `discovery/instructions.md` — the extraction playbook written *for the
-   cheap model*: per-email, emit JSON rows/updates against that schema;
-3. `discovery/DISCOVERY_NOTES.md` — workflows found, with per-table evidence
-   citations (thread ids);
-4. `discovery/discovery_log.jsonl` — the full tool-use transcript, committed
-   as evidence of *how* the schema was earned.
+**Result:** original run 39 rounds / $6.34 (paged the full index, cited
+thread evidence per workflow) + one operator-feedback revision via
+`--refine` (fosters roster requested; $2.31). Sanity gate PASS. Artifacts,
+all committed and never hand-edited: `schema.json` (**5 tables** — dogs 23
+cols w/ 6-state lifecycle, fosters 11 cols w/ active/away/departed +
+decline/return tracking, foster_applications 14, events 4, event_rsvps 5 —
+plus 7 catchall tags), `instructions.md` (Haiku playbook, worked examples),
+`DISCOVERY_NOTES.md` (evidence), `discovery_log*.jsonl` (full transcripts).
 
-**Harness contract (given to the discovery agent verbatim, so the
-instructions it writes enforce them):**
+**The envelope contract** (embedded in the mission; what extraction emits
+and Phase 3 consumes): `{"ops": [{"table", "match": {canonical keys},
+"set": {field: value}, "note"?: ≤1 line}], "catchall"?: {"tag"}}` — plus
+the dated-fields rule (stated dates, never the email's own timestamp),
+omit-never-guess, and create-vs-update decided by the harness, not the
+model.
 
-- Extraction output is ONLY a JSON operations envelope — no prose:
-  `{"ops": [{"table", "match": {canonical key fields}, "set": {field:
-  value}, "note"?: one line max}], "catchall"?: {"tag"}}`.
-- `schema.json` must declare, per table: canonical key fields, lifecycle
-  enums, and dated fields; plus a catchall tag taxonomy for mail that fits
-  no workflow.
-- **Dated-fields rule:** when an email states a date for a fact, extract
-  that stated date into the dated field — never substitute the email's own
-  timestamp (emails routinely announce future events and reference past
-  ones).
-- Create-vs-update is the harness's job (canonical-key lookup); any model
-  opinion on it is advisory only.
-- Unknown or unstated information is omitted, never guessed; emitting no
-  ops is valid for pure-noise mail (tag it catchall instead).
+**Process rules (standing):** structural sanity gate between discovery and
+populate; degenerate output or operator feedback → re-run the harness
+(`--refine`), never hand-edit artifacts. *Product note (context, not
+scope): real customers are non-technical — in the product, schema revisions
+surface as layman yes/no onboarding questions ("Will you need to find which
+fosters are free right now?"); refine mode is this prototype's stand-in.*
 
-**Sanity gate before populate:** a structural review only — schema parses,
-table count is sane, instructions emit the envelope. A degenerate result
-means re-running discovery with a clarified mission, never hand-editing its
-artifacts toward known universe facts. **Operator feedback goes the same
-way:** schema revisions run through the harness's refine mode
-(`discovery.py --refine "<request>"` — prior artifacts fed back, agent
-re-verifies against the mailbox and resubmits the full set).
-
-**Product note (context, not current scope):** in the real product there
-is no technical operator reviewing schemas. The onboarding agent must
-surface capability forks as layman yes/no questions to non-technical
-customers ("Will you need to find which fosters are free right now to do
-foster match?") and update its own schema on the answers. The refine-mode
-loop below is this prototype's stand-in for that onboarding conversation.
-
-**Blindness by construction:** the harness process can see only what its
-four tools return — not `simulation/`, not the universe code, not ground
-truth. Ground truth is touched only afterward, to score the result. This is
-also the product's actual onboarding mechanism, demonstrated end to end.
-
-## Phase 3 — Populate, verify, host
+## Phase 3 — Populate, verify, host (CURRENT — gated on user's schema verdict)
 
 - `ingest.py`: **serial, chronological** ingestion of all 831 emails by
   Haiku following the discovered instructions — one stateless single-shot
@@ -165,7 +140,8 @@ Installable from the repo; compute is the interviewer's own Claude session.
 
 ## Owner setup checklist
 
-- [ ] Turso account + database + token (no card needed)
+- [x] Turso account + database + token — done; `TURSO_DATABASE_URL` +
+      `TURSO_AUTH_TOKEN` in `.env`, connectivity verified
 - [ ] Enable Google Sheets API in the APS cloud project; create mirror sheet
       + view link
 - [ ] Portal bundle: `token_apsdemo.json` + Turso token + DEMO.md pointer

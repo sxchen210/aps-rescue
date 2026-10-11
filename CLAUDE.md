@@ -34,7 +34,8 @@ for secret-like files before each commit.
 
 - Ingestion: `claude-haiku-5-5`, pinned `output_config.effort` (no
   `temperature` — current models reject it); semantics per PLAN.md Phase 3.
-- DB: Turso is shared truth, local SQLite file for dev (one connection-
-  string env var). Google Sheets is a mirror, never a store.
+- DB: Turso is shared truth (`TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` in
+  `.env`; plain HTTP API, no client lib), local SQLite file for dev.
+  Google Sheets is a mirror, never a store.
 - API key: `set -a && . ./.env && set +a`. Scripts run from any cwd
   (anchor paths to `Path(__file__)`); `python3 -m py_compile` touched files.
