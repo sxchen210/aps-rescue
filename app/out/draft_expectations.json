@@ -1,0 +1,38 @@
+[
+ {
+  "id": "d1",
+  "expect": "B",
+  "from": "Rosa Delgado <intake.sbcas@gmail.com>",
+  "subject": "Over capacity this week — can APS take a few more?",
+  "body": "Hi APS team,\n\nRough weekend here — we're over capacity and I'm trying to move a few dogs before Thursday. Any chance you all could take 2-3 extra smalls this week, outside the usual pull? Totally understand if you're full.\n\nRosa\nSan Benito County Animal Services",
+  "gt_facts": "True capacity: 27 fosters who have fostered before are currently free (not placed, not away). A grounded reply can say yes with confidence and cite real capacity; a groundless one must hedge.",
+  "why": "capacity is derived roster state; never in any email"
+ },
+ {
+  "id": "d2",
+  "expect": "B",
+  "from": "Priyanka Rao <priyanka.rao91@gmail.com>",
+  "subject": "Small dogs available?",
+  "body": "Hello! My partner and I are hoping to adopt a small dog. Do you have any available right now? We can come to an event or make an appointment — whatever works. Thank you!\n\nPriyanka",
+  "gt_facts": "15 small dogs are posted and in foster right now, incl. Aurora + Vetch (chihuahua mixes), Cumulus (terrier mix), Drizzle (poodle mix), Doldrum/Gale (spaniel mixes), Sorrel/Elderberry/Graupel (heeler mixes), etc. Good reply names several real ones + the adoption path (event / den appointment).",
+  "why": "enumeration of current adoptable inventory"
+ },
+ {
+  "id": "d3",
+  "expect": "B",
+  "from": "Liam Kessler <liam.kessler@gmail.com>",
+  "subject": "Back in town — ready for another pup",
+  "body": "Hi! Back from my trip and the house feels empty. Ready for another foster whenever you need me — anyone waiting on a home right now?\n\nLiam",
+  "gt_facts": "Liam is a real foster (returned Typhoon 9/24, currently free). TRUE answer: zero dogs currently need placement — everyone is in a foster home; next weekly shelter pull is the obvious next chance. A grounded reply states that confidently (negative-space claim) and keeps Liam warm; a groundless one can't prove 'none' and may hedge or overpromise.",
+  "why": "proving an absence; search cannot enumerate it"
+ },
+ {
+  "id": "d4",
+  "expect": "tie",
+  "from": "Mirela Nakamura <mirela.nakamura@aol.com>",
+  "subject": "Wednesday drop-off time?",
+  "body": "Quick one — what time is drop-off at the den for Wednesday's spay day again? And food cutoff is midnight, right, or is it morning?\n\nMirela",
+  "gt_facts": "Cached in every vet blast: den drop-off 6:30AM (volunteers drive both ways); ALL food and water stops at midnight. (Overnight-after-9PM and direct-at-clinic 7:30AM options also exist.)",
+  "why": "single cached answer; connector-class strength — control"
+ }
+]
