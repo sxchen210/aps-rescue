@@ -25,16 +25,25 @@ ACCOUNTS = {
 }
 
 
-@lru_cache(maxsize=None)
-def service(account):
+def _creds(account):
     token_path = Path(ACCOUNTS[account])
     if not token_path.exists():
-        raise RuntimeError(f"{token_path} missing — run the auth flow for '{account}' first")
+        raise RuntimeError(f"{token_path} missing — run the auth flow for '{account}' first (see DEMO.md)")
     creds = Credentials.from_authorized_user_file(str(token_path))
     if creds.expired and creds.refresh_token:
         creds.refresh(Request())
         token_path.write_text(creds.to_json())
-    return build("gmail", "v1", credentials=creds)
+    return creds
+
+
+@lru_cache(maxsize=None)
+def service(account):
+    return build("gmail", "v1", credentials=_creds(account))
+
+
+@lru_cache(maxsize=None)
+def sheets_service():
+    return build("sheets", "v4", credentials=_creds("aps"))
 
 
 def profile(account):
