@@ -60,6 +60,23 @@ GUIDANCE = {
     "lost_dog": "Brief found-dog report near a landmark; asks if the rescue can take it.",
     "donation_note": "One or two lines about a small donation per the gist.",
     "catchall_reply": "Reply per the pointer fact: brief, warm, pointing them to the right place.",
+    "foster_return": "Foster admits the placement isn't working (the reason fact); apologetic, a little ashamed, asks what to do next.",
+    "return_gracious": "Zero-guilt response: these things happen, soft landings count; the logistics fact. Warm, brisk.",
+    "moving_announce": "Foster announces a move (date, destination); heartbroken but practical; asks for a plan for the dog.",
+    "bridge_ask": "Connect mover and bridge foster by first name; lay out the bridge plan with dates; ask both to confirm.",
+    "bridge_accept": "Bridge foster accepts for the stated window; one logistics question.",
+    "overflow_plea": "More dogs than homes: name the dogs, the context, the ask (short-term counts). Urgent but warm, never guilt-trippy.",
+    "plea_reply": "Reply per the answer fact in that person's voice; one line unless conditional (then explain the condition).",
+    "overflow_assign": "Reply-all assignment: who takes which dog when, who waits at the den until when; the thanks fact.",
+    "fallthrough_return": "Adopter returning the dog (the reason fact); gutted, apologetic, asks what to do.",
+    "fallthrough_gracious": "No blame at all; the logistics fact; reassure them the dog will be fine.",
+    "takeback_ask": "Ask the former foster to take the returning dog back; the context fact; easy out offered.",
+    "takeback_decline": "Decline with the reason fact; genuinely sorry; asks to be kept in the loop.",
+    "bio_nudge": "Friendly chase: we have the photos, still need the bio questionnaire; a deadline-ish nudge, light.",
+    "posting_roundup": "Internal roundup note on the shared box: three labeled lists from the facts (ready to post / waiting on bio / waiting on fix) and the rule fact. Checklist style.",
+    "roundup_reply": "Short internal reply per the note fact.",
+    "posting_query": "Foster asks whether their dog is up on the site yet; eager, one or two lines.",
+    "posting_query_reply": "Answer with the explanation fact (the posting rule and the dog's vet date); encouraging.",
 }
 
 SYSTEM = (

@@ -203,6 +203,27 @@ def unplace(dog, when):
     return h
 
 
+def household_at(dog, when):
+    """The household fostering this dog on a given date (history-aware)."""
+    w = str(when)
+    for seg in dog["foster_history"]:
+        if seg["start"] <= w and (seg["end"] is None or w < seg["end"]):
+            return next((x for x in households if x["id"] == seg["household"]), None)
+    return None
+
+
+def dogs_of(h, when):
+    """Names of dogs this household fosters on a given date."""
+    w = str(when)
+    out = []
+    for d in dogs.values():
+        for seg in d["foster_history"]:
+            if (seg["household"] == h["id"] and seg["start"] <= w
+                    and (seg["end"] is None or w < seg["end"])):
+                out.append(d["name"])
+    return out
+
+
 # 10 pre-existing dogs (placed before the window; already photographed/posted)
 for i in range(10):
     d = make_dog(take_name(), dt.date(2026, 8, 20), fixed_prob=0.5)
@@ -230,7 +251,12 @@ for bdate, bsize in zip(INTAKE_DAYS, INTAKE_SIZES):
                 "pickup": f"{SAFEHOUSE} between 4-7pm",
                 "done_at_intake": "DHPP + Bordetella, deworming, flea treatment",
                 "unknown": "no records came with them"})
+    reserve = [d["name"] for d in batch[-2:]] if bdate == dt.date(2026, 10, 1) else []
+    if reserve:
+        TETRIS2_DOGS = reserve  # picked up by the overflow set piece below
     for d in batch:
+        if d["name"] in reserve:
+            continue  # deliberately left unmatched: the overflow set piece places them
         h = match_household(d, bdate)
         if h is None:
             continue
@@ -262,6 +288,65 @@ for bdate, bsize in zip(INTAKE_DAYS, INTAKE_SIZES):
                      facts={"type": "offer_close", "dog": d["name"],
                             "household_first": h["first"],
                             "note": "confirms pickup detail, supplies at the den"})
+            # some placements don't stick: return -> re-offer chain (dog tetris)
+            if rng.random() < 0.13:
+                ret_date = r_ts.date() + dt.timedelta(days=rng.randrange(3, 9))
+                if ret_date <= END.date() - dt.timedelta(days=7):
+                    reason = rng.choice(
+                        ["resident dog isn't coping with a second dog",
+                         "way more energy than our home can handle",
+                         "kid's allergies flared badly",
+                         "landlord pushed back on the second pet",
+                         "separation anxiety too intense for our schedule"])
+                    rt = f"return_{d['name']}"
+                    rr_ts = ts_at(ret_date, 8 + rng.randrange(11))
+                    rr1 = emit(rr_ts, hh_from(h), SHARED,
+                               f"Struggling with {d['name']} — I'm so sorry",
+                               thread=rt, kind="llm", persona=h["id"],
+                               renderer=foster_renderer(h),
+                               facts={"type": "foster_return", "dog": d["name"],
+                                      "reason": reason})
+                    emit(jitter_reply(rr_ts, 6), staff_from("dana"), hh_from(h),
+                         f"Re: Struggling with {d['name']} — I'm so sorry",
+                         thread=rt, kind="llm", persona="dana", reply_to=rr1,
+                         renderer=STAFF_RENDERER,
+                         facts={"type": "return_gracious", "dog": d["name"],
+                                "household_first": h["first"],
+                                "logistics": "bring everything back to the den; no guilt, soft landings count"})
+                    unplace(d, ret_date)
+                    d["timeline"].append(["returned_by_foster", str(ret_date), reason])
+                    # re-offer: sometimes the first candidate declines too
+                    prev_ts = rr_ts
+                    for hop in range(2):
+                        h3 = match_household(d, ret_date)
+                        if h3 is None or h3 is h:
+                            break
+                        ot3 = f"reoffer{hop}_{d['name']}"
+                        o3_ts = jitter_reply(prev_ts, 10)
+                        o3 = emit(o3_ts, staff_from("dana"), hh_from(h3),
+                                  f"Second chance for {d['name']}?", thread=ot3,
+                                  kind="llm", persona="dana", renderer=STAFF_RENDERER,
+                                  facts={"type": "placement_offer", "dog": d["name"],
+                                         "pitch": f"{d['age_class']} {d['sex']} {d['breed']}, {d['size']}, {d['quirk']}; "
+                                                  f"first home wasn't the right fit ({reason}) — needs {rng.choice(['a calmer home', 'a dog-free home', 'a yard', 'patient people'])}",
+                                         "pickup": f"{SAFEHOUSE}, anytime after 4pm",
+                                         "household_first": h3["first"]})
+                        took = (hop == 1) or (rng.random() < 0.6)
+                        r3_ts = jitter_reply(o3_ts, 12)
+                        emit(r3_ts, hh_from(h3), SHARED,
+                             f"Re: Second chance for {d['name']}?", thread=ot3,
+                             kind="llm", persona=h3["id"], reply_to=o3,
+                             renderer=foster_renderer(h3),
+                             facts={"type": "offer_reply", "accept": took,
+                                    "dog": d["name"],
+                                    "detail": "accepts, mentions being ready for the challenge"
+                                              if took else
+                                              rng.choice(["declines: timing is bad this month",
+                                                          "declines: own dog is recovering from surgery"])})
+                        prev_ts = r3_ts
+                        if took:
+                            place(d, h3, r3_ts.date())
+                            break
         else:
             d["timeline"].append(["offer_declined", str(r_ts.date()), h["name"]])
             h2 = match_household(d, bdate)
@@ -281,58 +366,6 @@ for bdate, bsize in zip(INTAKE_DAYS, INTAKE_SIZES):
                      facts={"type": "offer_reply", "accept": True, "dog": d["name"],
                             "detail": "accepts warmly"})
                 place(d, h2, r2.date())
-
-# --- photos / bios / posting ---------------------------------------------
-
-def household_of(dog):
-    hid = dog["foster_history"][-1]["household"] if dog["foster_history"] else None
-    return next((h for h in households if h["id"] == hid), None)
-
-for d in dogs.values():
-    if d["posted_date"] or not d["foster_history"]:
-        continue
-    h = household_of(d)
-    if h is None:
-        continue
-    start = dt.date.fromisoformat(d["foster_history"][0]["start"])
-    pdate = start + dt.timedelta(days=rng.randrange(2, 6))
-    bdate2 = pdate + dt.timedelta(days=rng.randrange(1, 5))
-    postdate = bdate2 + dt.timedelta(days=rng.randrange(1, 3))
-    if postdate > END.date() - dt.timedelta(days=1):
-        if rng.random() < 0.5:
-            continue  # some dogs simply aren't posted yet — real state
-        postdate = None
-    t = f"bio_{d['name']}"
-    pts = ts_at(pdate, 11 + rng.randrange(9))
-    emit(pts, hh_from(h), SHARED, f"Photos of {d['name']}",
-         thread=t, kind="llm", persona=h["id"], renderer=foster_renderer(h),
-         facts={"type": "photos_submission", "dog": d["name"],
-                "note": rng.choice(["park shots", "backyard set", "couch glamour shots",
-                                     "walk photos, a little blurry"]),
-                "quirk": d["quirk"]})
-    d["photos_date"] = str(pdate)
-    if rng.random() < 0.6:
-        emit(jitter_reply(pts, 3), f"{h['name']} (via Google Docs) <drive-shares-dm-noreply@google.com>",
-             SHARED, f"Document shared with you: \"{d['name']} photos\"",
-             thread=f"share_{d['name']}p", kind="template",
-             facts={"template": "drive_share", "file": f"{d['name']} photos",
-                    "owner": h["name"]})
-    bts = ts_at(bdate2, 10 + rng.randrange(10))
-    emit(bts, hh_from(h), SHARED, f"Bio for {d['name']}",
-         thread=t, kind="llm", persona=h["id"], renderer=foster_renderer(h),
-         facts={"type": "bio_submission", "dog": d["name"], "quirk": d["quirk"],
-                "home_rec": rng.choice(["fine with small dogs", "no cats please",
-                                         "best as only dog", "great with kids",
-                                         "needs a yard", "apartment-fine, low energy"])})
-    d["bio_date"] = str(bdate2)
-    if postdate:
-        emit(ts_at(postdate, 9 + rng.randrange(8)), staff_from("june"), hh_from(h),
-             f"Re: Bio for {d['name']}", thread=t, kind="llm", persona="june",
-             renderer=STAFF_RENDERER,
-             facts={"type": "posting_confirm", "dog": d["name"],
-                    "household_first": h["first"]})
-        d["posted_date"] = str(postdate)
-        d["timeline"].append(["posted", str(postdate)])
 
 # --- vet batch days -------------------------------------------------------
 
@@ -357,7 +390,7 @@ for vdate in VET_DAYS:
                 "photographer": PHOTOGRAPHER,
                 "dogs": ", ".join(d["name"] for d in due)})
     for d in rng.sample(due, k=min(6, len(due))):
-        h = household_of(d)
+        h = household_at(d, plan_date)
         if not h or rng.random() < 0.5:
             continue
         emit(jitter_reply(pt_, 26), hh_from(h), SHARED,
@@ -382,7 +415,7 @@ for vdate in VET_DAYS:
                 "fasting": "all food and water STOPS at midnight",
                 "dogs": ", ".join(d["name"] for d in due)})
     for d in due:
-        h = household_of(d)
+        h = household_at(d, detail_date)
         if h is None:
             continue
         d["vet_date"] = str(vdate)
@@ -408,6 +441,148 @@ for vdate in VET_DAYS:
                     "crate_protocol": variant != "direct",
                     "direct_tips": variant == "direct"})
 
+# --- photos / bios / posting ---------------------------------------------
+
+def household_of(dog):
+    hid = dog["foster_history"][-1]["household"] if dog["foster_history"] else None
+    return next((h for h in households if h["id"] == hid), None)
+
+for d in dogs.values():
+    if d["posted_date"] or not d["foster_history"]:
+        continue
+    settle = dt.date.fromisoformat(d["foster_history"][-1]["start"])
+    pdate = settle + dt.timedelta(days=rng.randrange(2, 6))
+    bdate2 = pdate + dt.timedelta(days=rng.randrange(1, 5))
+    postdate = bdate2 + dt.timedelta(days=rng.randrange(1, 3))
+    gate_note = None
+    if not d["fixed"] and d["vet_date"] is None:
+        postdate = None          # bio in hand, no neuter scheduled yet: waiting
+        d["waiting_on"] = "spay/neuter (unscheduled)"
+    elif d["vet_date"] and dt.date.fromisoformat(d["vet_date"]) >= postdate:
+        postdate = dt.date.fromisoformat(d["vet_date"]) + dt.timedelta(days=rng.randrange(1, 3))
+        gate_note = "posted right after the spay/neuter"
+    if postdate and postdate > END.date() - dt.timedelta(days=1):
+        if rng.random() < 0.5:
+            continue  # some dogs simply aren't posted yet — real state
+        postdate = None
+        d["waiting_on"] = d.get("waiting_on") or "final posting pass"
+    t = f"bio_{d['name']}"
+    h = household_at(d, pdate)
+    if h is None:
+        continue
+    pts = ts_at(pdate, 11 + rng.randrange(9))
+    emit(pts, hh_from(h), SHARED, f"Photos of {d['name']}",
+         thread=t, kind="llm", persona=h["id"], renderer=foster_renderer(h),
+         facts={"type": "photos_submission", "dog": d["name"],
+                "note": rng.choice(["park shots", "backyard set", "couch glamour shots",
+                                     "walk photos, a little blurry"]),
+                "quirk": d["quirk"]})
+    d["photos_date"] = str(pdate)
+    if rng.random() < 0.6:
+        emit(jitter_reply(pts, 3), f"{h['name']} (via Google Docs) <drive-shares-dm-noreply@google.com>",
+             SHARED, f"Document shared with you: \"{d['name']} photos\"",
+             thread=f"share_{d['name']}p", kind="template",
+             facts={"template": "drive_share", "file": f"{d['name']} photos",
+                    "owner": h["name"]})
+    hb = household_at(d, bdate2) or h
+    bts = ts_at(bdate2, 10 + rng.randrange(10))
+    emit(bts, hh_from(hb), SHARED, f"Bio for {d['name']}",
+         thread=t, kind="llm", persona=hb["id"], renderer=foster_renderer(hb),
+         facts={"type": "bio_submission", "dog": d["name"], "quirk": d["quirk"],
+                "home_rec": rng.choice(["fine with small dogs", "no cats please",
+                                         "best as only dog", "great with kids",
+                                         "needs a yard", "apartment-fine, low energy"])})
+    d["bio_date"] = str(bdate2)
+    if postdate:
+        hp = household_at(d, postdate) or hb
+        emit(ts_at(postdate, 9 + rng.randrange(8)), staff_from("june"), hh_from(hp),
+             f"Re: Bio for {d['name']}", thread=t, kind="llm", persona="june",
+             renderer=STAFF_RENDERER,
+             facts={"type": "posting_confirm", "dog": d["name"],
+                    "household_first": hp["first"],
+                    "note": gate_note or ""})
+        d["posted_date"] = str(postdate)
+        d["timeline"].append(["posted", str(postdate)])
+
+# --- posting readiness: nudges, weekly roundups, "is she posted yet?" --------
+
+# June chases missing bios when photos arrived but the bio lags
+for d in dogs.values():
+    if d["photos_date"] and not d["bio_date"] and not d.get("held_out"):
+        nd = dt.date.fromisoformat(d["photos_date"]) + dt.timedelta(days=6)
+        if nd <= END.date():
+            h = household_at(d, nd)
+            if h:
+                emit(ts_at(nd, 9 + rng.randrange(8)), staff_from("june"), hh_from(h),
+                     f"Bio for {d['name']}?", thread=f"nudge_{d['name']}", kind="llm",
+                     persona="june", renderer=STAFF_RENDERER,
+                     facts={"type": "bio_nudge", "dog": d["name"],
+                            "household_first": h["first"],
+                            "have": "photos", "need": "bio questionnaire"})
+
+def _readiness(asof):
+    ready, wait_bio, wait_fix = [], [], []
+    for d in dogs.values():
+        if d.get("held_out") or d["status"] != "in_foster":
+            continue
+        if d["posted_date"] and d["posted_date"] <= str(asof):
+            continue
+        has_bio = d["bio_date"] and d["bio_date"] <= str(asof)
+        has_photos = d["photos_date"] and d["photos_date"] <= str(asof)
+        fixed_by = d["fixed"] and (d["vet_date"] is None or d["vet_date"] <= str(asof))
+        if has_bio and has_photos and fixed_by:
+            ready.append(d["name"])
+        elif has_photos and not has_bio:
+            wait_bio.append(d["name"])
+        elif has_bio and not fixed_by:
+            tag = f"{d['name']} (fix {d['vet_date']})" if d["vet_date"] else f"{d['name']} (fix unscheduled)"
+            wait_fix.append(tag)
+    return ready, wait_bio, wait_fix
+
+for rdate in (dt.date(2026, 9, 14), dt.date(2026, 9, 28), dt.date(2026, 10, 5)):
+    ready, wait_bio, wait_fix = _readiness(rdate)
+    rt_ = f"roundup_{rdate}"
+    r_ts = ts_at(rdate, 8, 5)
+    r1 = emit(r_ts, f"{ORG} <{SHARED}>", SHARED,
+              f"Posting roundup — week of {rdate.strftime('%-m/%-d')}",
+              thread=rt_, kind="llm", persona="june", renderer=STAFF_RENDERER,
+              facts={"type": "posting_roundup",
+                     "ready_to_post": ", ".join(ready[:10]) or "none",
+                     "waiting_on_bio": ", ".join(wait_bio[:10]) or "none",
+                     "waiting_on_fix": ", ".join(wait_fix[:10]) or "none",
+                     "rule": "a dog goes up once we have photos + bio AND they're fixed"})
+    emit(jitter_reply(r_ts, 6), f"{ORG} <{SHARED}>", SHARED,
+         f"Re: Posting roundup — week of {rdate.strftime('%-m/%-d')}",
+         thread=rt_, kind="llm", persona="dana", reply_to=r1,
+         renderer=STAFF_RENDERER,
+         facts={"type": "roundup_reply",
+                "note": "picks 1-2 dogs from the lists to chase personally; thanks June"})
+
+# fosters asking when their dog goes up (dogs gated on the neuter)
+asked = 0
+for d in dogs.values():
+    if asked >= 4 or d.get("held_out"):
+        continue
+    if d["bio_date"] and d["posted_date"] and d["vet_date"] and d["vet_date"] < d["posted_date"]:
+        qd = dt.date.fromisoformat(d["bio_date"]) + dt.timedelta(days=2)
+        if qd >= dt.date.fromisoformat(d["posted_date"]):
+            continue
+        h = household_at(d, qd)
+        if not h:
+            continue
+        qt_ = f"postq_{d['name']}"
+        q_ts = ts_at(qd, 10 + rng.randrange(9))
+        q1 = emit(q_ts, hh_from(h), SHARED, f"Is {d['name']} posted yet?",
+                  thread=qt_, kind="llm", persona=h["id"], renderer=foster_renderer(h),
+                  facts={"type": "posting_query", "dog": d["name"]})
+        emit(jitter_reply(q_ts, 7), staff_from("june"), hh_from(h),
+             f"Re: Is {d['name']} posted yet?", thread=qt_, kind="llm",
+             persona="june", reply_to=q1, renderer=STAFF_RENDERER,
+             facts={"type": "posting_query_reply", "dog": d["name"],
+                    "household_first": h["first"],
+                    "explanation": f"bio and photos are in; we post once they're fixed — {d['name']} is on the {d['vet_date']} list and goes up right after"})
+        asked += 1
+
 # --- adoption events -------------------------------------------------------
 
 for edate in EVENT_DAYS:
@@ -427,13 +602,13 @@ for edate in EVENT_DAYS:
                 "disregard": "if your adoption appointment before Saturday goes through, disregard"})
     responders = [d for d in attendees if rng.random() < 0.8]
     for d in responders:
-        h = household_of(d)
+        h = household_at(d, blast_date)
         if h is None:
             continue
         d["events"].append(str(edate))
         emit(jitter_reply(bt, 40), hh_from(h), SHARED, f"Re: {subj}", thread=et,
              kind="llm", persona=h["id"], renderer=foster_renderer(h),
-             facts={"type": "rsvp", "dogs": [x for x in h["dogs"]],
+             facts={"type": "rsvp", "dogs": dogs_of(h, blast_date),
                     "flavor": rng.choice(["bare confirm", "bare confirm", "bare confirm",
                                            "confirm + nail trim ask",
                                            "confirm + check-a-thing ask",
@@ -442,7 +617,7 @@ for edate in EVENT_DAYS:
     missed = [d for d in attendees if d not in responders]
     if missed:
         d = missed[0]
-        h = household_of(d)
+        h = household_at(d, blast_date)
         if h:
             d["events"].append(str(edate))
             emit(jitter_reply(bt, 1, 20), staff_from("dana"), hh_from(h),
@@ -459,7 +634,7 @@ for edate in EVENT_DAYS:
     lucky = [d for d in attendees if str(edate) in [e for e in d["events"]]]
     lucky = rng.sample(lucky, k=min(len(lucky), max(3, int(len(lucky) * 0.4))))
     for d in lucky:
-        h = household_of(d)
+        h = household_at(d, edate)
         if h is None:
             continue
         adopter = f"{rng.choice(FIRST)} {rng.choice(LAST)}"
@@ -568,10 +743,10 @@ CONCERNS = ["favoring a back leg on stairs (no limp on walks)",
             "not finishing meals since yesterday", "sneezing fits in the morning",
             "chewing a paw", "a cloudy left eye", "sleeping way more than usual"]
 for d, concern in zip(med_dogs, CONCERNS):
-    h = household_of(d)
+    start = dt.date.fromisoformat(d["foster_history"][-1]["start"]) + dt.timedelta(days=rng.randrange(3, 12))
+    h = household_at(d, start)
     if h is None:
         continue
-    start = dt.date.fromisoformat(d["foster_history"][0]["start"]) + dt.timedelta(days=rng.randrange(3, 12))
     if start > END.date() - dt.timedelta(days=2):
         continue
     mt = f"med_{d['name']}"
@@ -614,12 +789,15 @@ for d, concern in zip(med_dogs, CONCERNS):
 
 fostering = [h for h in households if h["state"] == "fostering"]
 for h in rng.sample(fostering, k=min(8, len(fostering))):
-    if not h["dogs"]:
-        continue
-    dog = dogs[h["dogs"][0]]
     away = START.date() + dt.timedelta(days=rng.randrange(8, 32))
     if away > END.date() - dt.timedelta(days=3):
         continue
+    held = dogs_of(h, away)
+    if not held:
+        continue
+    dog = dogs[held[0]]
+    if dog["name"] not in h["dogs"]:
+        continue  # dog has since moved on; skip
     h2 = match_household(dog, away)
     if h2 is None or h2 is h:
         continue
@@ -646,6 +824,198 @@ for h in rng.sample(fostering, k=min(8, len(fostering))):
     place(dog, h2, away)
     h["state"] = "vacation"
     h["timeline"].append(["vacation", str(away)])
+
+# --- dog tetris set pieces ---------------------------------------------------
+
+# 1) A foster moves away: bridge foster for five days, then a permanent home.
+cands = [d for d in dogs.values()
+         if d["status"] == "in_foster" and d["foster_history"]
+         and d["foster_history"][-1]["start"] <= "2026-09-12"
+         and (d["posted_date"] or d["bio_date"])]
+if cands:
+    d = cands[0]
+    move_date = dt.date(2026, 9, 22)
+    h1 = household_at(d, move_date)
+    if h1:
+        h2 = match_household(d, move_date)          # bridge
+        h3 = match_household(d, move_date)          # permanent
+        if h2 and h3 and h2 is not h3 and h1 not in (h2, h3):
+            mt_ = f"tetris_move_{d['name']}"
+            t0 = ts_at(dt.date(2026, 9, 16), 19)
+            m1 = emit(t0, hh_from(h1), SHARED,
+                      f"We're moving — {d['name']} needs a new foster by 9/22",
+                      thread=mt_, kind="llm", persona=h1["id"],
+                      renderer=foster_renderer(h1),
+                      facts={"type": "moving_announce", "dog": d["name"],
+                             "move_date": "9/22", "destination": "out of state",
+                             "tone": "heartbroken but practical"})
+            t1 = jitter_reply(t0, 10)
+            m2 = emit(t1, staff_from("dana"), [hh_from(h1), hh_from(h2)],
+                      f"Re: We're moving — {d['name']} needs a new foster by 9/22",
+                      thread=mt_, kind="llm", persona="dana", reply_to=m1,
+                      renderer=STAFF_RENDERER,
+                      facts={"type": "bridge_ask", "dog": d["name"],
+                             "mover_first": h1["first"], "bridge_first": h2["first"],
+                             "plan": f"{h2['first']} bridges from 9/22 while a permanent home is lined up; handoff at the den"})
+            t2 = jitter_reply(t1, 9)
+            emit(t2, hh_from(h2), [SHARED, hh_from(h1)],
+                 f"Re: We're moving — {d['name']} needs a new foster by 9/22",
+                 thread=mt_, kind="llm", persona=h2["id"], reply_to=m2,
+                 renderer=foster_renderer(h2),
+                 facts={"type": "bridge_accept", "dog": d["name"],
+                        "window": "9/22 to about 9/27"})
+            pt_ = f"tetris_perm_{d['name']}"
+            t3 = ts_at(dt.date(2026, 9, 24), 10)
+            p1 = emit(t3, staff_from("dana"), hh_from(h3),
+                      f"Longer-term home for {d['name']}?",
+                      thread=pt_, kind="llm", persona="dana",
+                      renderer=STAFF_RENDERER,
+                      facts={"type": "placement_offer", "dog": d["name"],
+                             "pitch": f"{d['age_class']} {d['sex']} {d['breed']}, {d['quirk']}; "
+                                      f"with a bridge foster until 9/27 after his foster family moved"
+                                      if d["sex"] == "M" else
+                                      f"{d['age_class']} {d['sex']} {d['breed']}, {d['quirk']}; "
+                                      f"with a bridge foster until 9/27 after her foster family moved",
+                             "pickup": "handoff from the bridge foster on 9/27, at the den",
+                             "household_first": h3["first"]})
+            t4 = jitter_reply(t3, 14)
+            emit(t4, hh_from(h3), SHARED, f"Re: Longer-term home for {d['name']}?",
+                 thread=pt_, kind="llm", persona=h3["id"], reply_to=p1,
+                 renderer=foster_renderer(h3),
+                 facts={"type": "offer_reply", "accept": True, "dog": d["name"],
+                        "detail": "accepts; asks one question about the handoff"})
+            unplace(d, move_date)
+            place(d, h2, move_date)
+            unplace(d, dt.date(2026, 9, 27))
+            place(d, h3, dt.date(2026, 9, 27))
+            d["timeline"].append(["foster_moved_away", "2026-09-22", h1["name"]])
+            h1["state"] = "churned"
+            h1["timeline"].append(["moved_away", "2026-09-22"])
+
+# 2) Intake overflow: two dogs, not enough homes — plea, juggling, den interim.
+t2dogs = [dogs[n] for n in globals().get("TETRIS2_DOGS", []) if n in dogs]
+if len(t2dogs) == 2:
+    dA, dB = t2dogs
+    plea_date = dt.date(2026, 10, 1)
+    pool = [h for h in available_households()][:5]
+    if len(pool) >= 3:
+        hyes, hcond, hno = pool[0], pool[1], pool[2]
+        ot_ = "tetris_overflow_oct1"
+        t0 = ts_at(plea_date, 13, 40)
+        o1 = emit(t0, staff_from("dana"), [hh_from(x) for x in pool[:4]],
+                  f"Two more pups than homes — can anyone squeeze one in?",
+                  thread=ot_, kind="llm", persona="dana", renderer=STAFF_RENDERER,
+                  facts={"type": "overflow_plea",
+                         "dogs": f"{dA['name']} ({dA['age_class']} {dA['size']} {dA['breed']}) and "
+                                 f"{dB['name']} ({dB['age_class']} {dB['size']} {dB['breed']})",
+                         "context": "today's pull was bigger than the homes we have; den can hold them a few nights only",
+                         "ask": "short-term counts! even a week helps the juggle"})
+        t1 = jitter_reply(t0, 5)
+        emit(t1, hh_from(hyes), SHARED, f"Re: Two more pups than homes — can anyone squeeze one in?",
+             thread=ot_, kind="llm", persona=hyes["id"], renderer=foster_renderer(hyes),
+             facts={"type": "plea_reply", "answer": "yes — can take one tonight",
+                    "dog_hint": dA["name"]})
+        t2 = jitter_reply(t0, 9)
+        emit(t2, hh_from(hcond), SHARED, f"Re: Two more pups than homes — can anyone squeeze one in?",
+             thread=ot_, kind="llm", persona=hcond["id"], renderer=foster_renderer(hcond),
+             facts={"type": "plea_reply",
+                    "answer": "conditional — yes but only after Saturday's event frees my weekend"})
+        t3 = jitter_reply(t0, 12)
+        emit(t3, hh_from(hno), SHARED, f"Re: Two more pups than homes — can anyone squeeze one in?",
+             thread=ot_, kind="llm", persona=hno["id"], renderer=foster_renderer(hno),
+             facts={"type": "plea_reply", "answer": "sorry, can't this time"})
+        t4 = jitter_reply(t3, 4)
+        emit(t4, staff_from("dana"), [hh_from(x) for x in pool[:4]],
+             f"Re: Two more pups than homes — can anyone squeeze one in?",
+             thread=ot_, kind="llm", persona="dana", renderer=STAFF_RENDERER,
+             facts={"type": "overflow_assign",
+                    "plan": f"{dA['name']} goes to {hyes['first']} tonight; "
+                            f"{dB['name']} sleeps at the den until Sunday, then to {hcond['first']} after the event",
+                    "thanks": "this is the tetris we could not do without you all"})
+        place(dA, hyes, plea_date)
+        dB["timeline"].append(["holding_at_den", str(plea_date)])
+        sunday = dt.date(2026, 10, 4)
+        place(dB, hcond, sunday)
+        ct_ = f"tetris_denpickup_{dB['name']}"
+        t5 = ts_at(sunday, 9, 30)
+        c1 = emit(t5, staff_from("dana"), hh_from(hcond),
+                  f"{dB['name']} pickup today?", thread=ct_, kind="llm",
+                  persona="dana", renderer=STAFF_RENDERER,
+                  facts={"type": "placement_offer", "dog": dB["name"],
+                         "pitch": f"as promised after the event — {dB['quirk']}, settled well at the den",
+                         "pickup": f"{SAFEHOUSE}, anytime today",
+                         "household_first": hcond["first"]})
+        emit(jitter_reply(t5, 6), hh_from(hcond), SHARED,
+             f"Re: {dB['name']} pickup today?", thread=ct_, kind="llm",
+             persona=hcond["id"], reply_to=c1, renderer=foster_renderer(hcond),
+             facts={"type": "offer_reply", "accept": True, "dog": dB["name"],
+                    "detail": "confirms a pickup time this afternoon"})
+
+# 3) An adoption falls through; the old foster is unavailable; new home found.
+fell = [d for d in dogs.values() if d["adopted"]
+        and "2026-09-20" <= d["adopted"]["date"] <= "2026-09-28"]
+if fell:
+    d = fell[0]
+    adopter = d["adopted"]["adopter"]
+    aemail = f"{adopter.split()[0].lower()}.{adopter.split()[1].lower()}44@{rng.choice(FREEMAIL)}"
+    back_date = dt.date(2026, 10, 5)
+    old_h = next((x for x in households
+                  if x["id"] == d["foster_history"][-1]["household"]), None)
+    new_h = match_household(d, back_date)
+    if old_h and new_h and new_h is not old_h:
+        ft_ = f"tetris_fallthrough_{d['name']}"
+        t0 = ts_at(back_date, 7, 55)
+        f1 = emit(t0, f"{adopter} <{aemail}>", SHARED,
+                  f"I'm so sorry — we can't keep {d['name']}",
+                  thread=ft_, kind="llm", persona=f"fallthrough_{d['name']}",
+                  renderer=pick_renderer(),
+                  facts={"type": "fallthrough_return", "dog": d["name"],
+                         "reason": "landlord refused the pet addendum after all",
+                         "tone": "genuinely gutted, asks what to do"})
+        t1 = jitter_reply(t0, 5)
+        emit(t1, staff_from("dana"), f"{adopter} <{aemail}>",
+             f"Re: I'm so sorry — we can't keep {d['name']}", thread=ft_,
+             kind="llm", persona="dana", reply_to=f1, renderer=STAFF_RENDERER,
+             facts={"type": "fallthrough_gracious", "dog": d["name"],
+                    "logistics": "bring him to the den today or tomorrow; paperwork is easy"
+                                 if d["sex"] == "M" else
+                                 "bring her to the den today or tomorrow; paperwork is easy"})
+        tt_ = f"tetris_takeback_{d['name']}"
+        t2 = ts_at(back_date, 11, 20)
+        k1 = emit(t2, staff_from("dana"), hh_from(old_h),
+                  f"{d['name']} is coming back — any chance you'd take {'him' if d['sex']=='M' else 'her'}?",
+                  thread=tt_, kind="llm", persona="dana", renderer=STAFF_RENDERER,
+                  facts={"type": "takeback_ask", "dog": d["name"],
+                         "household_first": old_h["first"],
+                         "context": "adoption fell through (landlord); you two were great together"})
+        t3 = jitter_reply(t2, 9)
+        emit(t3, hh_from(old_h), SHARED,
+             f"Re: {d['name']} is coming back — any chance you'd take {'him' if d['sex']=='M' else 'her'}?",
+             thread=tt_, kind="llm", persona=old_h["id"], reply_to=k1,
+             renderer=foster_renderer(old_h),
+             facts={"type": "takeback_decline", "dog": d["name"],
+                    "reason": "out of town until mid-October — timing is terrible, so sorry"})
+        nt_ = f"tetris_newhome_{d['name']}"
+        t4 = jitter_reply(t3, 6)
+        n1 = emit(t4, staff_from("dana"), hh_from(new_h),
+                  f"Foster match: {d['name']} (back with us)?", thread=nt_,
+                  kind="llm", persona="dana", renderer=STAFF_RENDERER,
+                  facts={"type": "placement_offer", "dog": d["name"],
+                         "pitch": f"{d['age_class']} {d['sex']} {d['breed']}, {d['quirk']}; "
+                                  "adoption fell through on the landlord, zero fault of the dog's",
+                         "pickup": f"{SAFEHOUSE}, tomorrow 4-7pm",
+                         "household_first": new_h["first"]})
+        t5 = jitter_reply(t4, 10)
+        emit(t5, hh_from(new_h), SHARED,
+             f"Re: Foster match: {d['name']} (back with us)?", thread=nt_,
+             kind="llm", persona=new_h["id"], reply_to=n1,
+             renderer=foster_renderer(new_h),
+             facts={"type": "offer_reply", "accept": True, "dog": d["name"],
+                    "detail": "accepts warmly, asks how the dog is holding up"})
+        d["adopted"] = None
+        d["status"] = "in_foster"
+        d["timeline"].append(["adoption_fell_through", str(back_date), "landlord"])
+        place(d, new_h, t5.date())
 
 # --- alumni follow-ups -------------------------------------------------------
 
@@ -832,3 +1202,8 @@ print("households fostering at end:", sum(1 for h in households if h['state']=='
       "| available:", sum(1 for h in households if h['state']=='available'),
       "| vacation:", sum(1 for h in households if h['state']=='vacation'))
 print("applications:", len(applications), collections.Counter(a['outcome'] for a in applications))
+multi = [d for d in dogs.values() if len(d["foster_history"]) >= 2 and not d.get("held_out")]
+print("dogs with 2+ foster homes:", len(multi),
+      "| 3+ homes:", sum(1 for d in multi if len(d["foster_history"]) >= 3))
+print("foster returns:", sum(1 for d in dogs.values() for t in d["timeline"] if t[0] == "returned_by_foster"),
+      "| waiting_on at end:", sum(1 for d in dogs.values() if d.get("waiting_on")))
