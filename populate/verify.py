@@ -14,7 +14,7 @@ import sqlite3
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-GT_PATH = HERE.parent / "simulation" / "out" / "ground_truth.json"
+GT_PATH = HERE.parent / "simulation" / "out" / "universe" / "ground_truth.json"
 
 
 def norm(v):
