@@ -73,7 +73,7 @@ scope): real customers are non-technical — in the product, schema revisions
 surface as layman yes/no onboarding questions ("Will you need to find which
 fosters are free right now?"); refine mode is this prototype's stand-in.*
 
-## Phase 3 — Populate + verify (DONE — see `populate/VERIFICATION.md`) · Turso push PENDING user review
+## Phase 3 — Populate + verify + host (DONE — see `populate/VERIFICATION.md`)
 
 All 831 emails ingested serially by Haiku at effort medium (A/B vs high:
 tie; medium per rule): zero parse failures, zero anomalies, zero invented
@@ -83,10 +83,13 @@ applications 33/33 w/ correct lifecycle, events 3/3, RSVPs 56/56, coverage
 arithmetic exact. Misses decompose to pre-corpus facts (unknowable from
 email) + one name-only dog + status-label lag on future-dated absences
 (dates themselves 4/4). Discovery cost $8.65 vs populate $0.36 — the
-two-tier economics in one line. **Turso push happens only on the user's
-explicit go after manual review.**
+two-tier economics in one line. After the user's review, the verified
+state was pushed to Turso (`populate/push_turso.py`, 1,187 rows across 7
+tables incl. the ingest log, exact count match) and the **Sheets mirror is
+live** (`app/mirror.py`: table tabs + append-only Activity/Drafts, first
+full refresh served from the hosted DB).
 
-## Phase 4 — App layer + plugin (NEXT, after Turso go)
+## Phase 4 — App layer + plugin (IN PROGRESS — mirror done; next: pre-render scenarios, simulate_send_and_process, /ask)
 
 Build order: pre-render the 8 held-out scenarios into data files (so the
 send path needs no API key) → Sheets mirror → `app/` core → live dry run →
@@ -141,10 +144,9 @@ plugin wrapping.
 
 - [x] Turso account + database + token — done; `TURSO_DATABASE_URL` +
       `TURSO_AUTH_TOKEN` in `.env`, connectivity verified
-- [ ] Enable Google Sheets API in the APS cloud project; re-auth the APS
-      token once with the spreadsheets scope; create the mirror sheet, set
-      link-sharing to viewer, drop SHEET_ID in .env
-- [ ] Give the Turso-push go after reviewing populate/VERIFICATION.md
+- [x] Sheets API enabled; token re-authed with spreadsheets scope; mirror
+      sheet created + SHEET_ID in .env; first refresh live
+- [x] Turso push reviewed and executed (1,187 rows verified)
 - [ ] Portal bundle: `token_apsdemo.json` + Turso token + DEMO.md pointer
 - [ ] Add interviewer delegates to the APS Gmail when known
 - [ ] Set token revocation date after the interview window
