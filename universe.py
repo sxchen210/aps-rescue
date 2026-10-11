@@ -135,8 +135,8 @@ def emit(ts, frm, to, subject, *, thread, kind, persona=None, facts=None,
         "from": frm, "to": to if isinstance(to, list) else [to],
         "cc": cc or [], "subject": subject, "kind": kind,
         "persona": persona, "facts": facts or {}, "reply_to": reply_to,
-        "labels": labels or (["SENT"] if frm == SHARED_DISPLAY or "apsrescue" in frm
-                             else ["INBOX", "UNREAD"]),
+        "labels": labels or ((["SENT"] + (["INBOX"] if SHARED in str(to) else []))
+                             if SHARED in frm else ["INBOX", "UNREAD"]),
         "renderer": renderer,
     }
     if held:
@@ -515,8 +515,8 @@ while day <= END.date():
             "other_pets": rng.choice(["none", "none", "one senior dog", "two cats", "one cat"]),
             "pref": rng.choice(["small only", "medium", "no puppies", "any", "low energy"]),
         }
-        emit(a_ts, f"APS Foster <tom.apsrescue@gmail.com>",
-             [SHARED, "info.apsrescue@gmail.com", email], subj,
+        emit(a_ts, f"{ORG} Applications <{SHARED}>",
+             [SHARED, email], subj,
              thread=at, kind="template",
              facts={"template": "application_form", "profile": profile})
         ack_ts = jitter_reply(a_ts, 20)
@@ -669,7 +669,7 @@ for d, newname in zip(rng.sample(adopted, k=min(5, len(adopted))), NEW_NAMES):
          f"Re: {d['name']} update!", thread=at, kind="llm", persona="dana",
          reply_to=a1, renderer=STAFF_RENDERER,
          facts={"type": "alumni_reply", "dog": d["name"], "new_name": newname,
-                "workaround": "files too large for the shared mailbox; will send from personal account"})
+                "workaround": "files too large to attach; will put them in a share link instead"})
 
 # --- catchall ---------------------------------------------------------------
 
@@ -776,8 +776,8 @@ emit(dt.datetime(2026, 10, 15, 9, 10, tzinfo=PT), staff_from("dana"), SHARED,
 
 nm = "Harriet Lindqvist"
 emit(dt.datetime(2026, 10, 12, 11, 5, tzinfo=PT),
-     f"APS Foster <tom.apsrescue@gmail.com>",
-     [SHARED, "info.apsrescue@gmail.com", "harriet.lindqvist7@yahoo.com"],
+     f"{ORG} Applications <{SHARED}>",
+     [SHARED, "harriet.lindqvist7@yahoo.com"],
      f"Thank you for your foster application, {nm}", thread="app_live1",
      kind="template", held=True, scenario=scen("application"),
      facts={"template": "application_form",

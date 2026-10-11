@@ -119,7 +119,7 @@ def t_application_form(spec):
     pr = spec["facts"]["profile"]
     first, last = pr["name"].split()[0], pr["name"].split()[-1]
     return (
-        f"Why do you want to become a foster home for {ORG}? I'd love to help a "
+        f"What draws you to fostering with {ORG}? I'd love to help a "
         "dog decompress while it finds its family\nAbout you\n"
         f"Your first name {first}\nYour last name {last}\n"
         f"City {pr['city']}\nState CA\n"

@@ -23,7 +23,7 @@ PHOTOGRAPHER = "Opal (our volunteer photographer — she doesn't drive, so you'd
 STAFF = {
     "dana": {
         "name": "Dana Whitfield",
-        "from": f"Dana Whitfield <dana.apsrescue@gmail.com>",
+        "from": f"{ORG} <{SHARED}>",
         "role": "general coordinator (events, placements, posting nudges, alumni)",
         "voice": ("warm, fast, exclamation-heavy; short paragraphs; ALL-CAPS for "
                   "hard rules; signs 'Dana'; sometimes self-deprecating asides in "
@@ -41,7 +41,7 @@ STAFF = {
     },
     "priya": {
         "name": "Priya Raghunathan",
-        "from": f"Priya Raghunathan <priya.apsrescue@gmail.com>",
+        "from": f"{ORG} <{SHARED}>",
         "role": "vet-day coordinator (batch spay/neuter, clinic records)",
         "voice": ("organized, directive, bulleted instructions, caps for the "
                   "fasting rule, reassuring close; signs 'Priya'; triple "
@@ -60,7 +60,7 @@ STAFF = {
     },
     "tom": {
         "name": "Tom Okafor",
-        "from": f"Tom Okafor <tom.apsrescue@gmail.com>",
+        "from": f"{ORG} <{SHARED}>",
         "role": "applications coordinator (intake of fosters, interviews, screening)",
         "voice": ("measured, kind, complete sentences, one question at a time; "
                   "signs 'Tom'; declines are two warm sentences, never argued"),
@@ -77,7 +77,7 @@ STAFF = {
     },
     "june": {
         "name": "June Castillo",
-        "from": f"June Castillo <june.apsrescue@gmail.com>",
+        "from": f"{ORG} <{SHARED}>",
         "role": "posting/web volunteer (bios, photos, website, social)",
         "voice": ("brisk, friendly, deadline-forward; loves a checklist; signs "
                   "'June'; celebrates postings with a single emoji"),
