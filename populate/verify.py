@@ -34,9 +34,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=str(HERE / "out" / "state.sqlite"))
     ap.add_argument("--json", default=None)
+    ap.add_argument("--gt", default=None)
     args = ap.parse_args()
 
-    gt = json.loads(GT_PATH.read_text())
+    gt = json.loads(Path(args.gt).read_text() if args.gt else GT_PATH.read_text())
     conn = sqlite3.connect(args.db)
     conn.row_factory = sqlite3.Row
 
