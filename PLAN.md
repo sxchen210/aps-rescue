@@ -107,9 +107,17 @@ plugin wrapping.
   The ingest path imports nothing under `simulation/`; Haiku never sees
   specs or ground truth. DEMO.md pre-empts the "answers were in the repo"
   question by pointing at this separation + the discovery transcripts.
-- **Thought-process narrative** (terminal + Activity tab), four beats per
+- **Thought-process narrative** (terminal + Activity tab), five beats per
   email: the email that arrived → trimmed Haiku thinking excerpt → the ops
-  envelope + create/update as resolved → what changed (cells, draft).
+  envelope + create/update as resolved → the DRAFT DECISION → what changed
+  (cells, draft).
+- **Draft triage (two-stage):** mechanical never-draft filter first (mail
+  sent by the shared box, no-reply senders, machine catchall tags
+  promo/drive-share/donation-receipt, and anything that is not the latest
+  inbound message of its thread), then ONE Opus call returning
+  {should_reply, reason, draft?} — so judged no-replies (bare RSVPs) and
+  judged yes-replies to catchall (lost-dog redirect, volunteer ack) both
+  work, and the decision is displayed either way with its reason.
 - **Models:** extraction = `claude-haiku-5-5` (blind); `/ask` (NL→SQL,
   queries echoed) and reply drafts = **Opus 5.5** — via the interviewer's
   own Claude session (subagents; no API key distributed) in the plugin,
