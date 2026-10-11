@@ -2,10 +2,13 @@
 
 A proof of concept for **self-building structured data** — entities,
 relationships, and workflows discovered from free-form communication and
-represented in tables instead of remaining trapped in text. A strong model
-discovered the schema from a busy shared inbox, a cheap model maintains it
-continuously, and the resulting state answers operational questions and
-drafts replies that search-only inbox access gets wrong. Everything is
+represented in tables instead of remaining trapped in text. The setup: a real shared
+Gmail inbox mirroring a local animal rescue's foster inbox, with ~1,000
+simulated email correspondences; Fable suggested the schema from the inbox
+alone, Haiku 5.5 ingested every email to build today's state, and the demo
+shows that point in time — plus new emails being processed live, and the
+strength a database gives when answering questions that search-only inbox
+access gets wrong. Everything is
 synthetic (a simulated rescue; see `simulation/`), everything runs live (a
 real Gmail inbox, a hosted database, a public Google Sheet), and every
 claim traces to committed evidence.

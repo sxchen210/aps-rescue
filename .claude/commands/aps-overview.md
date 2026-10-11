@@ -22,16 +22,21 @@ data entry, schema shaped by plain-language onboarding questions ("Will you
 need to find which fosters are free right now?"), every cell traceable to
 the email that set it.
 
-**This prototype** narrows that to one proof of concept: a fictional dog
-rescue (APS Rescue) run from a real Gmail inbox seeded with ~950 synthetic
-emails over nine simulated weeks. A strong model discovered a 5-table
-schema from the inbox alone (blind — transcripts committed); a cheap model
-populated and now maintains it at ~$0.0004/email, verified 97%+ against the
-simulation's ground truth. The practical benefit on display: maintaining
-structured data, workflows, and relationships OVER TIME means day-to-day
-operational questions ("who's free?", "what's ready to post?") and reply
-drafts come out right — where search-only inbox access returns confident,
-stale, or incomplete answers (measured head-to-head, exhibits in the repo).
+**This prototype** narrows that to one proof of concept. We set up a real
+shared Gmail inbox that mirrors the activity of a local animal rescue's
+foster inbox, and simulated ~1,000 email correspondences over nine weeks of
+rescue operations — intakes, foster matching, vet days, adoption events,
+applications, returns, noise. Then the pipeline ran exactly as the product
+would: **Fable** went through the inbox and suggested the schema (blind —
+its full exploration transcript is committed), and **Haiku 5.5** ingested
+every email to build the state the database is in today, at ~$0.0004 per
+email, verified 97%+ against the simulation's ground truth. The demo shows
+that point in time — all mail so far processed — and then two things live:
+NEW emails being processed as they arrive, and the strength a database
+gives when answering questions: operational asks ("who's free?", "what's
+ready to post?") and reply drafts come out right where search-only inbox
+access returns confident, stale, or incomplete answers (measured
+head-to-head; exhibits in the repo).
 
 **Try it in this order:**
 1. `/aps-status` — the world right now + the live Google Sheet link (open
