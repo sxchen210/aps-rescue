@@ -87,7 +87,13 @@ class TursoDB:
 
 def connect(path=None):
     if os.environ.get("APS_DB") == "turso":
-        return TursoDB()
+        if os.environ.get("TURSO_DATABASE_URL") and os.environ.get("TURSO_AUTH_TOKEN"):
+            return TursoDB()
+        snap = HERE / "out" / "state_v2.sqlite"
+        print(f"[db] Turso credentials missing — falling back to the shipped "
+              f"read-only snapshot ({snap.name}); live/shared state needs the "
+              f"portal .env (see DEMO.md)")
+        return LocalDB(str(snap))
     return LocalDB(path or str(HERE / "out" / "state.sqlite"))
 
 
