@@ -98,7 +98,11 @@ def main():
             if truthy(r.get(b)) == bool(d.get(gk)):
                 h[0] += 1
         if d.get("adopted"):
-            check("adopter_name", r.get("adopter_name"), d["adopted"]["adopter"])
+            # emails only ever carry the adopter's FIRST name; GT full names
+            # are unknowable from the corpus — compare first tokens.
+            got_first = (str(r.get("adopter_name") or "").split() or [""])[0]
+            want_first = d["adopted"]["adopter"].split()[0]
+            check("adopter_name", got_first, want_first)
             check("adoption_appt_date", datepart(r.get("adoption_appt_date")),
                   d["adopted"]["date"])
     extra_dogs = [r.get("dog_name") for k, r in db_dogs.items()

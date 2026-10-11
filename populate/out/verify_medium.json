@@ -1,0 +1,164 @@
+{
+ "tables": {
+  "dogs": {
+   "gt_dogs": 79,
+   "found": 19,
+   "missing": [
+    "Chicory",
+    "Monsoon",
+    "Squall",
+    "Granite",
+    "Tempest",
+    "Zephyr",
+    "Gusty",
+    "Delta",
+    "Glacier",
+    "Aurora",
+    "Tamarack",
+    "Gypsum",
+    "Sage",
+    "Doldrum",
+    "Sedge",
+    "Cumulus",
+    "Typhoon",
+    "Bluff",
+    "Thistle",
+    "Chinook",
+    "Basalt",
+    "Cascade",
+    "Petrichor",
+    "Gale",
+    "Shasta",
+    "Vetch",
+    "Drumlin",
+    "Kettle",
+    "Sorrel",
+    "Elderberry",
+    "Nettle",
+    "Scree",
+    "Denali",
+    "Graupel",
+    "Ridge",
+    "Anvil",
+    "Esker",
+    "Downburst",
+    "Pumice",
+    "Hoarfrost",
+    "Bedrock",
+    "Nimbus",
+    "Fennel",
+    "Slate",
+    "Rowan",
+    "Cairn",
+    "Fjord",
+    "Crag",
+    "Stratus",
+    "Scarp",
+    "Shale",
+    "Aspen",
+    "Rush",
+    "Rime",
+    "Virga",
+    "Juniper",
+    "Sierra",
+    "Marram",
+    "Col",
+    "Mesa"
+   ],
+   "hallucinated": [],
+   "fields": {
+    "adopter_name": {
+     "acc": 0.0,
+     "n": 14
+    },
+    "adoption_appt_date": {
+     "acc": 0.143,
+     "n": 14
+    },
+    "age_group": {
+     "acc": 0.579,
+     "n": 19
+    },
+    "bio_received": {
+     "acc": 0.105,
+     "n": 19
+    },
+    "breed": {
+     "acc": 0.579,
+     "n": 19
+    },
+    "foster_name": {
+     "acc": 0.6,
+     "n": 5
+    },
+    "intake_date": {
+     "acc": 0.579,
+     "n": 19
+    },
+    "photos_received": {
+     "acc": 0.421,
+     "n": 19
+    },
+    "posted": {
+     "acc": 0.0,
+     "n": 19
+    },
+    "sex": {
+     "acc": 0.579,
+     "n": 19
+    },
+    "size": {
+     "acc": 0.579,
+     "n": 19
+    },
+    "spay_neuter_date": {
+     "acc": 1.0,
+     "n": 16
+    },
+    "status": {
+     "acc": 0.211,
+     "n": 19
+    }
+   }
+  },
+  "fosters": {
+   "gt_people_who_fostered": 90,
+   "found": 23,
+   "rows_in_db": 24,
+   "vacation_marked_away": "0/3",
+   "moved_marked_departed": "0/1"
+  },
+  "foster_applications": {
+   "gt": 33,
+   "found": 3,
+   "status_correct": 3,
+   "rows_in_db": 3
+  },
+  "events": {
+   "gt": [
+    "2026-09-05",
+    "2026-09-19",
+    "2026-10-03"
+   ],
+   "found": [
+    "2026-09-05"
+   ],
+   "all_present": false
+  },
+  "event_rsvps": {
+   "gt_confirmed": 56,
+   "found_matching": 10,
+   "rows_in_db": 10
+  }
+ },
+ "coverage": {
+  "processed_ok": 120,
+  "failed": 0,
+  "emails_with_ops": 108,
+  "emails_catchalled": 12,
+  "both": 0,
+  "anomaly_emails": 0,
+  "catchall_rows": 12
+ },
+ "notes": []
+}
