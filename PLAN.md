@@ -86,6 +86,13 @@ way:** schema revisions run through the harness's refine mode
 (`discovery.py --refine "<request>"` — prior artifacts fed back, agent
 re-verifies against the mailbox and resubmits the full set).
 
+**Product note (context, not current scope):** in the real product there
+is no technical operator reviewing schemas. The onboarding agent must
+surface capability forks as layman yes/no questions to non-technical
+customers ("Will you need to find which fosters are free right now to do
+foster match?") and update its own schema on the answers. The refine-mode
+loop below is this prototype's stand-in for that onboarding conversation.
+
 **Blindness by construction:** the harness process can see only what its
 four tools return — not `simulation/`, not the universe code, not ground
 truth. Ground truth is touched only afterward, to score the result. This is
