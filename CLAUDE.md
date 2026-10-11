@@ -1,20 +1,25 @@
 # CLAUDE.md
 
-Prototype of self-building tables over a shared Gmail inbox. Read `PLAN.md`
-for the phase arc (simulation → schema discovery → haiku populate → demo).
+Prototype of self-building tables over a shared Gmail inbox. `PLAN.md` is the
+authoritative architecture and phase arc (simulation → discovery → populate →
+plugin → unattended). **Doc-evolution rule: any change to architecture or a
+standing decision updates PLAN.md and CLAUDE.md in the same commit.**
 
 ## Accounts & secrets
 
 - `animalprotectiveservices2026@gmail.com` ("aps" in `gmail_io.py`): the
   fictional rescue's shared inbox. The only writable account —
-  `messages.insert` for scenario injection and `drafts.create` for output.
-  **Never send email. Drafts only.**
+  `messages.insert` for scenario/custom injection and `drafts.create` for
+  output. **Never send email. Drafts only.** Interviewer viewing happens via
+  Gmail delegation, never shared passwords.
 - foster@ reference account ("ref"): a real rescue's inbox, read-only by
-  OAuth scope. Consult → distill → discard: real content is read transiently,
-  never written to disk, quoted, or committed. `simulation/leakcheck.py`
-  enforces the boundary over generated text.
-- Secrets live at repo root: `.env` (ANTHROPIC_API_KEY), `*credentials*.json`,
-  `token*.json` — all gitignored. Never echo, copy, or commit them. Load the
+  OAuth scope. Consult → distill → discard; nothing real is written to disk,
+  quoted, or committed (`simulation/leakcheck.py` enforces the boundary).
+- Secrets at repo root, all gitignored: `.env` (ANTHROPIC_API_KEY),
+  `*credentials*.json`, `token*.json`, Turso token. Token files may be
+  legitimately ABSENT on a fresh clone — they are distributed through the
+  submission portal, not GitHub; scripts should fail with a pointer to
+  DEMO.md, not a traceback. Never echo, copy, or commit secrets. Load the
   API key with `set -a && . ./.env && set +a`.
 
 ## Git workflow
@@ -25,24 +30,35 @@ forward. Check `git status` for secret-like files before every commit.
 
 ## Phase discipline
 
-- **Discovery blindness:** Phase-2 schema discovery reads the inbox via the
-  Gmail API only. It must not read `simulation/` code, specs, or
-  `ground_truth.json` — the schema is earned from emails alone. Ground truth
-  is used only for post-hoc verification in Phase 3+.
-- Scenario emails (`simulation/out/universe/scenarios.jsonl`) are held out
-  for live demo injection; don't seed them in bulk.
-- The seeded inbox is the fixture: don't bulk-delete or re-seed it without
+- **Discovery blindness:** canonical schema discovery happens ONLY through
+  the `discovery/discovery.py` harness (isolated tool-loop; sees nothing but
+  its Gmail tools). Never hand-edit its artifacts to match universe
+  knowledge; refinements re-run the harness. `simulation/` internals and
+  `ground_truth.json` are off-limits to discovery and ingestion — ground
+  truth exists solely for post-hoc verification (`VERIFICATION.md`).
+- **Ingest means catch-up:** always process every email not yet in state
+  (keyed by gmail id, idempotent) — never just the message that triggered
+  the run. Scenario injection dedups globally via deterministic Message-IDs.
+- The seeded inbox is the shared fixture: no bulk-delete or re-seed without
   the user's say-so (`simulation/aps_insert.py` is idempotent via
-  `simulation/out/seeded_ids.json`).
+  `simulation/out/seeded_ids.json`). Held-out scenarios
+  (`simulation/out/universe/scenarios.jsonl`) are injected one at a time,
+  never bulk-seeded.
+- Draft-generation guardrails (hard rules): never narrate the database,
+  never re-ask for something the thread already contains, prefer the thread
+  over the table on conflict, match the sender's brevity and sign-off.
 
 ## Conventions
 
-- Models: strong tier = Fable/Opus for discovery and exemplars; cheap tier =
-  `claude-haiku-5-5` for per-email ingestion. Pin `output_config.effort`;
-  current models reject the `temperature` param.
+- Models: strong tier (Fable/Opus) for discovery and exemplars; cheap tier
+  `claude-haiku-5-5` for per-email ingestion. In the plugin, ingestion runs
+  as Haiku subagents on the interviewer's session (no API key distributed).
+  Pin `output_config.effort`; current models reject `temperature`.
+- Database: Turso (libSQL) is the shared source of truth, pre-seeded in
+  Phase 3; the same code runs against a local SQLite file via one
+  connection-string env var for dev. Google Sheets is a one-way mirror
+  (tables + Drafts tab + activity log), never a store.
 - Scripted model calls go through the API (reproducible, cost-measured);
   interactive work stays in the session.
-- SQLite is the local source of truth; Google Sheets is a one-way mirror for
-  cloud visibility. No remote database.
-- Run `python3 -m py_compile` on touched files; scripts should run from any
+- Run `python3 -m py_compile` on touched files; scripts must run from any
   cwd (anchor paths to `Path(__file__)`).

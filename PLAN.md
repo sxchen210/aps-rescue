@@ -11,72 +11,116 @@ drafts that thread-search alone cannot produce.
 `simulation/SIMULATION_DESIGN.md`); a real rescue inbox was consulted
 read-only for structure, behind a leak-checked boundary.
 
-## Architecture (pull-based; nothing serves Gmail — Gmail serves us)
+## Architecture
 
 ```
-Gmail inbox  --(Gmail API fetch)-->  ingestion loop (Haiku)  -->  SQLite (truth, local file)
-     ^                                                               |
-     |                                                               v
- drafts.create <-- draft generation (tables + thread context)    Google Sheets mirror
- (never send)                                                    (cloud-visible state)
+                         Gmail inbox (the fixture + live arrivals)
+                          ^  messages.insert        |  fetch (API)
+                          |  drafts.create          v
+ interviewer's Claude ----+----->  ingest (Haiku, catch-up by gmail id)
+ session (plugin)                        |
+                                         v
+                       Turso (hosted libSQL = shared source of truth,
+                        pre-seeded; same code runs on a local file for
+                        dev via one connection string)
+                                         |
+                                         v
+                       Google Sheets mirror (view link, no login:
+                        one tab per table + Drafts tab + activity log)
 ```
 
-No remote database: SQLite is the local source of truth; the cloud-visible
-surfaces are the inbox itself and the Sheets mirror. The simulator's held-out
-scenarios are injected with `messages.insert` to simulate live arrival.
+Pull-based: nothing serves Gmail — Gmail serves us. Drafts are created, never
+sent. One shared hosted DB means every interviewer sees the same world and
+no one rebuilds state. Interviewers who want the real Gmail view get
+**delegated access** (tested) — no password sharing, no login-challenge risk.
 
 ## Phase 1 — Simulation (DONE)
 
 831 seed emails over six simulated weeks (Aug 31 – Oct 9, 2026), generated
 from a deterministic universe and seeded into the live inbox with historical
-timestamps. 85 dogs (13 with multiple foster homes), ~200 households, 33
-applications, 3 adoption events, 3 vet days, returns/bridges/overflow
-("dog tetris"), a posting-readiness rule (photos + bio + fixed), ~25%
-catchall noise. Because emails derive from a simulated world,
-`simulation/out/ground_truth.json` holds the true state at every instant —
-later phases are *verifiable*, not eyeballed. 8 held-out scenario emails
-(`simulation/out/universe/scenarios.jsonl`) are reserved for live demo
-injection.
+timestamps: 85 dogs (13 with multiple foster homes — returns, bridges,
+overflow "dog tetris"), ~200 households, 33 applications, 3 adoption events,
+3 vet days, a posting-readiness rule (photos + bio + fixed), ~25% catchall
+noise. `simulation/out/ground_truth.json` holds the true state at every
+instant, so later phases are *verifiable*. 8 held-out scenario emails
+(`simulation/out/universe/scenarios.jsonl`) are reserved for live injection.
 
 ## Phase 2 — Schema discovery (CURRENT)
 
-The strong model (Fable) reads the seeded inbox **cold, via the Gmail API
-only** and produces:
+`discovery/discovery.py`: an **agentic harness** running the strong model in
+a tool-use loop against the live inbox with exactly four tools —
+`inbox_stats()`, `list_threads(page)`, `get_thread(id)`, `search(query)` —
+and a mission: explore as much as needed, as many rounds as needed (the
+corpus is small enough to read in full), then emit:
 
-1. `discovery/schema.json` — tables, columns, enums/lifecycles, canonical
-   keys, a catchall bucket for mail that fits no workflow;
-2. `discovery/instructions.md` — extraction instructions written *for the
-   cheap model*: per-email, emit rows/updates as JSON against that schema;
-3. `discovery/DISCOVERY_NOTES.md` — what workflows it found and why.
+1. `discovery/schema.json` — tables, columns, lifecycle enums, canonical
+   keys, a catchall bucket;
+2. `discovery/instructions.md` — the extraction playbook written *for the
+   cheap model*: per-email, emit JSON rows/updates against that schema;
+3. `discovery/DISCOVERY_NOTES.md` — workflows found, with per-table evidence
+   citations (thread ids);
+4. `discovery/discovery_log.jsonl` — the full tool-use transcript, committed
+   as evidence of *how* the schema was earned.
 
-**Blindness rule (demo integrity):** discovery may read the inbox and nothing
-else — never `simulation/` internals, the universe code, or ground truth.
-The schema must be earned from the emails alone. Ground truth is touched
-only afterward, to score the result.
+**Blindness by construction:** the harness process can see only what its
+four tools return — not `simulation/`, not the universe code, not ground
+truth. Ground truth is touched only afterward, to score the result. This is
+also the product's actual onboarding mechanism, demonstrated end to end.
 
-## Phase 3 — Haiku populate (NEXT)
+## Phase 3 — Populate, verify, host
 
-Chronological ingestion of all 831 emails by Haiku following the Phase-2
-instructions: one email per call, rows upserted into SQLite via canonical
-keys, every write mirrored to the Google Sheet. Then:
+- `ingest.py`: chronological ingestion of all 831 emails by Haiku following
+  the discovered instructions — one call per email, upserts via canonical
+  keys, catchall for noise, **idempotent by gmail id** (ingest always means
+  "process everything unprocessed," never just one message).
+- Runs against a local SQLite file first. Then **verification**: diff final
+  tables against `ground_truth.json` → `VERIFICATION.md` with real accuracy
+  numbers (dogs, placements, statuses, dates) and measured per-email cost.
+- Flip the connection string and push the verified state to **Turso** — by
+  the time an interviewer arrives, the shared DB already holds the world.
+- Build the **Sheets mirror** + view link.
 
-- **Verification:** diff final tables against `ground_truth.json` — a real
-  accuracy number (dogs, placements, statuses, dates), on screen.
-- **Economics:** measured cost of cheap-tier maintenance per email, vs the
-  strong tier used once for discovery.
-- **Live loop:** scenario emails injected one at a time → incremental
-  ingestion → sheet cells update → reply drafts appear in Gmail Drafts
-  (drafts only; nothing is ever auto-sent).
+## Phase 4 — Plugin (the interviewer experience)
 
-Draft-generation guardrails (hard rules): never narrate the database
-("our records show…"), never re-ask for something the thread already
-contains, prefer the thread over the table on conflict, match the sender's
-brevity and sign-off conventions.
+Installable from the repo; compute is the interviewer's own Claude session.
 
-## Phase 4 — Demo surface
+- `/simulate-email [next | custom "…"]` — inject the next held-out scenario
+  (Message-ID dedup: two interviewers can't double-inject) or a custom
+  email; then auto-ingest.
+- Ingest-as-catch-up self-heals shared state, including emails anyone sent
+  to the inbox directly (which is encouraged: "email it anything
+  dog-rescue-flavored and watch").
+- `/ask "…"` — NL→SQL against the shared Turso DB, queries shown in the
+  terminal.
+- Extraction runs as **Haiku subagents** following
+  `discovery/instructions.md` — no Anthropic API key is distributed.
+- Reply drafts: created in Gmail Drafts AND mirrored to the Sheet's Drafts
+  tab. Guardrails: never narrate the database, never re-ask for something
+  the thread contains, prefer thread over table on conflict, match the
+  sender's brevity and sign-off.
+- **Credentials via the submission portal, not GitHub**: the portal bundle
+  carries `token_apsdemo.json` (gmail.modify, throwaway account) and the
+  Turso token; `DEMO.md` says "drop them at the repo root" (gitignore
+  already covers them). The public repo alone still supports a degraded
+  tier: `/ask` against a shipped read-only SQLite snapshot.
+- `DEMO.md` + a recorded GIF of the full loop as the no-setup fallback.
 
-Claude-driven commands over the same pipeline: `/onboard` (run or replay
-discovery), `/simulate-email <scenario>` (inject + watch ingestion reasoning
-+ sheet update + draft), `/ask` (table-backed answers vs connector-style
-search, side by side — e.g. "which dogs are ready to post but not fixed?").
-Google Sheet pinned open; Gmail Drafts folder as the payoff shot.
+## Phase 5 — Unattended durability & hygiene
+
+- One daily **Claude cloud schedule** under the owner's account: catch-up
+  ingest + Sheet refresh, so mail sent while nobody runs the plugin still
+  lands in the tables.
+- Gmail **delegation** for interviewers who want the real mailbox view
+  (added per-person by address).
+- Hygiene: stated token revocation date, Turso token scoped to the demo DB,
+  a "reset the demo world" note (re-seed from `simulation/out/corpus.jsonl`
+  + re-populate).
+
+## Owner setup checklist
+
+- [ ] Turso account + database + token (no card needed)
+- [ ] Enable Google Sheets API in the APS cloud project; create mirror sheet
+      + view link
+- [ ] Portal bundle: `token_apsdemo.json` + Turso token + DEMO.md pointer
+- [ ] Add interviewer delegates to the APS Gmail when known
+- [ ] Set token revocation date after the interview window
