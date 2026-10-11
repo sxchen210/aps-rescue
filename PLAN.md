@@ -89,11 +89,30 @@ tables incl. the ingest log, exact count match) and the **Sheets mirror is
 live** (`app/mirror.py`: table tabs + append-only Activity/Drafts, first
 full refresh served from the hosted DB).
 
-## Phase 4 — App layer + plugin (IN PROGRESS — mirror done; next: pre-render scenarios, simulate_send_and_process, /ask)
+## Phase 4 — App layer + plugin (IN PROGRESS — mirror done; QA + draft showdowns validated)
 
-Build order: pre-render the 8 held-out scenarios into data files (so the
-send path needs no API key) → Sheets mirror → `app/` core → live dry run →
-plugin wrapping.
+Validated so far: QA comparison (B 3 / tie 6 / A 0, below) and the draft
+showdown (`app/out/draft_transcripts.jsonl`, 4 pre-registered inbound
+emails): decisive on inventory enumeration — connector arm named 5
+available smalls, 0 correct; table arm 9/9 — modest edges on capacity and
+negative-space, tie control held, both arms caught a false premise.
+
+**Execution order (agreed):**
+A. `app/pipeline.py`: `ingest_new()` + `simulate_send_and_process()` —
+   dedup → insert → blind ingest → apply → scorecard vs spec facts →
+   draft triage → mirror/Activity/Drafts; five-beat narrative; runs on
+   Turso.
+B. `simulation/universe_extend.py`: continuation from ground_truth (re-run
+   would scramble the verified 831). Week 1 (Oct 10–16, ~130, in+outbound)
+   = history to inject; Weeks 2–3 (Oct 17–30, **inbound-only**, ~150) =
+   firing pool (scripted staff replies excluded — live drafts take their
+   place). Old 8 held-outs fold in. Ground truth v2; render; leak check v2.
+C. Inject Week 1: first ~15 interactive with expected-ops verification
+   (acceptance suite), then batch-drip ~115; latest-inbound rule keeps
+   Drafts to the open tail; verify v2 (~960 emails); mirror refresh.
+D. Package pool: rendered text + spec answer keys + deterministic
+   Message-IDs, fired oldest-first. Extension is rerunnable any week —
+   the universe is endless (candidate post-submission cloud-tick job).
 
 - **`app/` core:** `ingest_new(db, on_event)` (the ingest loop as a
   function), `mirror.py` (full-rewrite Sheet refresh: one tab per table +
