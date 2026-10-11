@@ -34,12 +34,15 @@ def fetch_corpus():
     svc = gmail_io.service("aps")
     ids, page = [], None
     while True:
-        resp = svc.users().messages().list(userId="me", q="in:inbox OR in:sent",
-                                           maxResults=500, pageToken=page).execute()
+        resp = gmail_io._retry_quota(
+            lambda: svc.users().messages().list(
+                userId="me", q="in:inbox OR in:sent",
+                maxResults=500, pageToken=page).execute())
         ids += resp.get("messages", [])
         page = resp.get("nextPageToken")
         if not page:
             break
+        time.sleep(0.4)
     cache_path = HERE / "out" / "corpus_cache.json"
     if cache_path.exists():
         cached = json.loads(cache_path.read_text())
@@ -51,7 +54,7 @@ def fetch_corpus():
         threads.setdefault(m["threadId"], None)
     msgs = []
     for i, tid in enumerate(threads):
-        time.sleep(0.12)
+        time.sleep(0.5)
         if i and i % 50 == 0:
             print(f"  fetching threads… {i}/{len(threads)}", flush=True)
         for m in gmail_io.get_thread("aps", tid, trim_quotes=True):
