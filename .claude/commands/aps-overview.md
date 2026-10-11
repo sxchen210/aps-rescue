@@ -7,10 +7,11 @@ and order, compactly (one screen). Do not run tools first.
 **The capability prediction.** Frontier models are now cheap enough to read
 every message an organization receives as it arrives, and reliable enough
 at structured extraction to turn those messages into database rows. That
-makes a new kind of software possible: systems whose schema is not designed
-by an engineer up front but DISCOVERED by a strong model from the
-organization's own communications, then MAINTAINED continuously by a cheap
-model for fractions of a cent — with the strong model returning only for
+makes a new kind of software possible: **self-building structured data** —
+the entities, relationships, and workflows buried in an organization's
+free-form communications, discovered by a strong model and represented in
+tables rather than text, then MAINTAINED continuously by a cheap model for
+fractions of a cent — with the strong model returning only for
 design, revision, and the judgment calls.
 
 **The general product.** Any shared operations inbox — rescues, clinics,

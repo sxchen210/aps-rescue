@@ -1,7 +1,9 @@
 # APS Rescue — live demo guide
 
-A proof of concept for **self-building tables**: a strong model discovered a
-database schema from a busy shared inbox, a cheap model maintains it
+A proof of concept for **self-building structured data** — entities,
+relationships, and workflows discovered from free-form communication and
+represented in tables instead of remaining trapped in text. A strong model
+discovered the schema from a busy shared inbox, a cheap model maintains it
 continuously, and the resulting state answers operational questions and
 drafts replies that search-only inbox access gets wrong. Everything is
 synthetic (a simulated rescue; see `simulation/`), everything runs live (a

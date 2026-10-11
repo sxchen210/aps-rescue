@@ -1,10 +1,11 @@
-# Self-building tables over a shared inbox — plan
+# Self-building structured data over a shared inbox — plan
 
-A busy shared mailbox encodes real operational state (who has which dog, what
-happens Saturday, who's waiting on what) that today lives only in scrollback.
-This prototype makes a strong model **discover** that structure, a cheap model
-**maintain** it continuously, and the resulting tables power answers and
-drafts that thread-search alone cannot produce.
+A busy shared mailbox encodes real operational state — entities,
+relationships, workflows (who has which dog, what happens Saturday, who's
+waiting on what) — that today lives only as free-form text in scrollback.
+This prototype makes a strong model **discover** that structure, a cheap
+model **maintain** it continuously as tables, and the resulting state power
+answers and drafts that thread-search alone cannot produce.
 
 **Stage: APS Rescue** — a fictional dog rescue run entirely out of
 `animalprotectiveservices2026@gmail.com`. Every email is synthetic (see
