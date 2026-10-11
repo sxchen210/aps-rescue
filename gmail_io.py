@@ -123,7 +123,8 @@ def render_thread(msgs, max_body=1200):
 
 def insert_message(account, *, from_addr, to, subject, body, date,
                    cc=None, in_reply_to=None, references=None,
-                   message_id=None, label_ids=("INBOX", "UNREAD")):
+                   message_id=None, label_ids=("INBOX", "UNREAD"),
+                   thread_id=None):
     """Place a fully-formed message in the mailbox (no delivery, no sending).
 
     `date` is an RFC 2822 string; internalDateSource=dateHeader makes Gmail
@@ -143,10 +144,11 @@ def insert_message(account, *, from_addr, to, subject, body, date,
         msg["References"] = references
     msg.set_content(body)
     raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    payload = {"raw": raw, "labelIds": list(label_ids)}
+    if thread_id:
+        payload["threadId"] = thread_id
     return service(account).users().messages().insert(
-        userId="me",
-        body={"raw": raw, "labelIds": list(label_ids)},
-        internalDateSource="dateHeader",
+        userId="me", body=payload, internalDateSource="dateHeader",
     ).execute()
 
 
