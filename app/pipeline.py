@@ -33,6 +33,7 @@ from ingest import build_prompt, parse_envelope, PRICE_IN, PRICE_OUT, PRICE_CREA
 import mirror
 
 INSTRUCTIONS = (HERE.parent / "discovery" / "instructions.md").read_text()
+DEFAULT_POOL = HERE.parent / "simulation" / "out" / "extension" / "pool.jsonl"
 SHARED = "animalprotectiveservices2026@gmail.com"
 HAIKU, OPUS = "claude-haiku-5-5", "claude-opus-5-5"
 NEVER_DRAFT_TAGS = {"promo-marketing", "drive-share-notification", "donation"}
@@ -283,7 +284,7 @@ def simulate_send_and_process(custom=None, pool=None, on_event=print_event,
               "message_id": f"<sim-{uuid.uuid4().hex[:16]}@apsdemo.sim>",
               "expected_ops": None}
     else:
-        sc = _pool_next(pool)
+        sc = _pool_next(pool or DEFAULT_POOL)
         if sc is None:
             on_event("info", "pool exhausted — every scenario already fired")
             return None
@@ -347,7 +348,7 @@ def main():
             mirror.refresh_tables(db)
     elif args.cmd == "simulate":
         custom = None
-        if args.custom_body:
+        if args.custom_body:  # dev/testing only; the plugin command is zero-arg
             custom = {"from": args.custom_from, "subject": args.custom_subject,
                       "body": args.custom_body}
         simulate_send_and_process(custom=custom, pool=args.pool)

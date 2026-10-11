@@ -160,8 +160,11 @@ D. Package pool: rendered text + spec answer keys + deterministic
   `spreadsheets` scope — one token serves mail + sheet) + Turso token.
   Degraded no-token tier: `/ask` against a shipped read-only SQLite
   snapshot.
-- Plugin commands are thin wrappers over `app/`: `/simulate-email`,
-  `/ask`, `/aps-status`. DEMO.md + a recorded GIF as the no-setup
+- Plugin commands are thin wrappers over `app/` and take no arguments
+  except the question: `/simulate-email` (fire next pool scenario),
+  `/aps-ingest` (catch-up: processes anything that arrived, incl. emails
+  interviewers send directly), `/ask "…"`, `/showdown "…"`, `/aps-status`.
+  DEMO.md + a recorded GIF as the no-setup
   fallback.
 
 ## Phase 5 — Unattended durability & hygiene
