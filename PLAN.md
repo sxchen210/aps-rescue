@@ -124,6 +124,14 @@ plugin wrapping.
   via API in our testing. Draft guardrails: never narrate the database,
   never re-ask for what the thread contains, thread beats table on
   conflict, match the sender's brevity and sign-off.
+- **Validated (read-only QA comparison, 9 pre-registered questions × both
+  arms, same model/budget — `app/out/QA_COMPARE_REPORT.md`):** B 3 · tie 6 ·
+  A 0. Clear win on derived roster state (~2.5× recall, equal precision,
+  emergent map-then-verify + self-flagged DB errors); ties where the org's
+  own mail caches answers and on entity-name sagas (search reconstructs
+  those — demo centerpieces must be derived/drift questions, not named-dog
+  stories). Maintenance gaps propagate to B (observed, 2 dogs). Scale
+  argument: A capped out at 831 emails; the reference inbox is 117K.
 - **`/ask` demo question classes** (where tables beat connector search):
   negative space ("ready to post but not posted?", "who hasn't RSVPed?"),
   aggregates, current-state-after-moves (tetris dogs, with provenance),
