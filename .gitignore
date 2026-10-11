@@ -4,12 +4,6 @@ token.json
 token_*.json
 .env
 
-# De-anonymization key — never commit
-anon_map.json
-
-# Raw email data — sensitive, keep local
-emails/
-
 # Python
 __pycache__/
 *.pyc
