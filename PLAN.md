@@ -73,59 +73,58 @@ scope): real customers are non-technical — in the product, schema revisions
 surface as layman yes/no onboarding questions ("Will you need to find which
 fosters are free right now?"); refine mode is this prototype's stand-in.*
 
-## Phase 3 — Populate, verify, host (CURRENT — gated on user's schema verdict)
+## Phase 3 — Populate + verify (DONE — see `populate/VERIFICATION.md`) · Turso push PENDING user review
 
-- `ingest.py`: **serial, chronological** ingestion of all 831 emails by
-  Haiku following the discovered instructions — one stateless single-shot
-  call per email (email + its thread tail only; the model never sees the
-  DB), generous max_tokens so the JSON can never truncate, **idempotent by
-  gmail id** (ingest always means "process everything unprocessed," never
-  just one message).
-- Effort: **medium** by default; an A/B vs **high** on ~60 ground-truth
-  emails decides empirically (low is ruled out); result recorded in
-  VERIFICATION.md.
-- Apply semantics: timestamp-ordered, **per-field merge** (an op overwrites
-  only the fields it sets; corrections win, unrelated facts survive);
-  create-vs-update derived mechanically via normalized canonical-key
-  lookup; unknown fields dropped and logged, never voiding the op; every
-  write stamped with `source_email_id` / `updated_at` provenance so any
-  value traces to the email that set it.
-- **System tables (harness-owned, not part of the discovered schema, like
-  provenance):** `catchall` (gmail_id, date, from, subject, tag) materializes
-  every catchall emission so coverage is auditable arithmetic — each of the
-  831 emails lands as table ops or a catchall row — plus ingest bookkeeping
-  (processed gmail ids, usage/cost per email).
-- Runs against a local SQLite file first. Then **verification**: diff final
-  tables against `ground_truth.json` → `VERIFICATION.md` with real accuracy
-  numbers (dogs, placements, statuses, dates) and measured per-email cost.
-- Flip the connection string and push the verified state to **Turso** — by
-  the time an interviewer arrives, the shared DB already holds the world.
-- Build the **Sheets mirror** + view link.
+All 831 emails ingested serially by Haiku at effort medium (A/B vs high:
+tie; medium per rule): zero parse failures, zero anomalies, zero invented
+entities, $0.36 total (~$0.0004/email). Scores vs ground truth: dogs 78/79
+(status 97.4%, vet dates 49/49, adoption appts 20/20), fosters 90/90,
+applications 33/33 w/ correct lifecycle, events 3/3, RSVPs 56/56, coverage
+arithmetic exact. Misses decompose to pre-corpus facts (unknowable from
+email) + one name-only dog + status-label lag on future-dated absences
+(dates themselves 4/4). Discovery cost $8.65 vs populate $0.36 — the
+two-tier economics in one line. **Turso push happens only on the user's
+explicit go after manual review.**
 
-## Phase 4 — Plugin (the interviewer experience)
+## Phase 4 — App layer + plugin (NEXT, after Turso go)
 
-Installable from the repo; compute is the interviewer's own Claude session.
+Build order: pre-render the 8 held-out scenarios into data files (so the
+send path needs no API key) → Sheets mirror → `app/` core → live dry run →
+plugin wrapping.
 
-- `/simulate-email [next | custom "…"]` — inject the next held-out scenario
-  (Message-ID dedup: two interviewers can't double-inject) or a custom
-  email; then auto-ingest.
-- Ingest-as-catch-up self-heals shared state, including emails anyone sent
-  to the inbox directly (which is encouraged: "email it anything
-  dog-rescue-flavored and watch").
-- `/ask "…"` — NL→SQL against the shared Turso DB, queries shown in the
-  terminal.
-- Extraction runs as **Haiku subagents** following
-  `discovery/instructions.md` — no Anthropic API key is distributed.
-- Reply drafts: created in Gmail Drafts AND mirrored to the Sheet's Drafts
-  tab. Guardrails: never narrate the database, never re-ask for something
-  the thread contains, prefer thread over table on conflict, match the
-  sender's brevity and sign-off.
-- **Credentials via the submission portal, not GitHub**: the portal bundle
-  carries `token_apsdemo.json` (gmail.modify, throwaway account) and the
-  Turso token; `DEMO.md` says "drop them at the repo root" (gitignore
-  already covers them). The public repo alone still supports a degraded
-  tier: `/ask` against a shipped read-only SQLite snapshot.
-- `DEMO.md` + a recorded GIF of the full loop as the no-setup fallback.
+- **`app/` core:** `ingest_new(db, on_event)` (the ingest loop as a
+  function), `mirror.py` (full-rewrite Sheet refresh: one tab per table +
+  catchall + **Activity** log + **Drafts** tab; latest-run rows
+  highlighted), and `simulate_send_and_process(scenario|custom_text)` —
+  pick next un-injected scenario (Message-ID dedup) or custom text →
+  `messages.insert` → blind catch-up ingest → apply → mirror → draft.
+- **Blindness inside simulate (hard rule):** the function touches
+  `simulation/` only to pick the next scenario email and to grade AFTER
+  extraction (live scorecard: applied ops vs the scenario spec's facts).
+  The ingest path imports nothing under `simulation/`; Haiku never sees
+  specs or ground truth. DEMO.md pre-empts the "answers were in the repo"
+  question by pointing at this separation + the discovery transcripts.
+- **Thought-process narrative** (terminal + Activity tab), four beats per
+  email: the email that arrived → trimmed Haiku thinking excerpt → the ops
+  envelope + create/update as resolved → what changed (cells, draft).
+- **Models:** extraction = `claude-haiku-5-5` (blind); `/ask` (NL→SQL,
+  queries echoed) and reply drafts = **Opus 5.5** — via the interviewer's
+  own Claude session (subagents; no API key distributed) in the plugin,
+  via API in our testing. Draft guardrails: never narrate the database,
+  never re-ask for what the thread contains, thread beats table on
+  conflict, match the sender's brevity and sign-off.
+- **`/ask` demo question classes** (where tables beat connector search):
+  negative space ("ready to post but not posted?", "who hasn't RSVPed?"),
+  aggregates, current-state-after-moves (tetris dogs, with provenance),
+  joins ("which fosters are free this weekend?"), dated lookups (next vet
+  list) — plus one honest single-thread tie shown for fairness.
+- **Credentials:** portal bundle = Gmail token (re-authed once to add the
+  `spreadsheets` scope — one token serves mail + sheet) + Turso token.
+  Degraded no-token tier: `/ask` against a shipped read-only SQLite
+  snapshot.
+- Plugin commands are thin wrappers over `app/`: `/simulate-email`,
+  `/ask`, `/aps-status`. DEMO.md + a recorded GIF as the no-setup
+  fallback.
 
 ## Phase 5 — Unattended durability & hygiene
 
@@ -142,8 +141,10 @@ Installable from the repo; compute is the interviewer's own Claude session.
 
 - [x] Turso account + database + token — done; `TURSO_DATABASE_URL` +
       `TURSO_AUTH_TOKEN` in `.env`, connectivity verified
-- [ ] Enable Google Sheets API in the APS cloud project; create mirror sheet
-      + view link
+- [ ] Enable Google Sheets API in the APS cloud project; re-auth the APS
+      token once with the spreadsheets scope; create the mirror sheet, set
+      link-sharing to viewer, drop SHEET_ID in .env
+- [ ] Give the Turso-push go after reviewing populate/VERIFICATION.md
 - [ ] Portal bundle: `token_apsdemo.json` + Turso token + DEMO.md pointer
 - [ ] Add interviewer delegates to the APS Gmail when known
 - [ ] Set token revocation date after the interview window
