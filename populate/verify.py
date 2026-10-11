@@ -134,7 +134,8 @@ def main():
     # ---- applications -----------------------------------------------------
     db_a = {norm(r.get("applicant_name")): r for r in rows("foster_applications")}
     AMAP = {"approved": {"approved", "intro_call_scheduled"},
-            "declined": {"declined"}, "stall": {"received"}}
+            "declined": {"declined"}, "stall": {"received"},
+            "received": {"received", "intro_call_scheduled"}}
     a_found = a_status = 0
     for a in gt["applications"]:
         r = db_a.get(norm(a["name"]))

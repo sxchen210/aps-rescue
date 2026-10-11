@@ -11,8 +11,8 @@ from pathlib import Path
 
 import anthropic
 
-from qa_compare import (GMAIL_TOOLS, SQL_TOOL, SCHEMA_BRIEF, MODEL, EFFORT,
-                        MAX_TOKENS, PRICE, run_tool)
+from qa_compare import MODEL, EFFORT, MAX_TOKENS, PRICE
+from tools import GMAIL_TOOLS, SQL_TOOL, SCHEMA_BRIEF, run_tool
 
 HERE = Path(__file__).resolve().parent
 TOOL_BUDGET = 20

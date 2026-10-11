@@ -7,7 +7,7 @@ Writes app/out/qa_expectations.json.
 import json
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # app/
 GT = json.loads((HERE.parent / "simulation" / "out" / "universe" / "ground_truth.json").read_text())
 CORPUS = json.loads((HERE.parent / "populate" / "out" / "corpus_cache.json").read_text())["msgs"]
 

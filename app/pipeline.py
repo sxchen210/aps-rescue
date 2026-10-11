@@ -31,6 +31,7 @@ import gmail_io
 import db as dblib
 from ingest import build_prompt, parse_envelope, PRICE_IN, PRICE_OUT, PRICE_CREAD, PRICE_CWRITE
 import mirror
+from tools import GMAIL_TOOLS, SQL_TOOL, run_tool, SCHEMA_BRIEF
 
 INSTRUCTIONS = (HERE.parent / "discovery" / "instructions.md").read_text()
 DEFAULT_POOL = HERE.parent / "simulation" / "out" / "extension" / "pool.jsonl"
@@ -212,12 +213,11 @@ def triage_and_draft(result, db, on_event=print_event, client=None):
         return None
 
     client = client or anthropic.Anthropic(max_retries=6)
-    from qa_compare import GMAIL_TOOLS, SQL_TOOL, run_tool
     email_text = (f"From: {m['from']}\nDate: {m['date']}\nSubject: {m['subject']}\n\n{m['body']}")
     if m["prior"]:
         email_text += "\n\n=== EARLIER IN THIS THREAD ===\n" + "\n---\n".join(
             f"{p['from']}: {p['body'][:500]}" for p in m["prior"][-3:])
-    system = TRIAGE_SYSTEM + "\n\nDatabase schema (read-only SQL):\n" + _schema_brief()
+    system = TRIAGE_SYSTEM + "\n\nDatabase schema (read-only SQL):\n" + SCHEMA_BRIEF
     messages = [{"role": "user", "content": email_text}]
     calls = 0
     for _ in range(30):
@@ -260,16 +260,27 @@ def triage_and_draft(result, db, on_event=print_event, client=None):
 # --------------------------------------------------------------------------
 
 def _pool_next(pool_path):
+    """Next unfired scenario: local fired-state first, one Gmail
+    Message-ID verification for the candidate (shared-state safe)."""
     svc = gmail_io.service("aps")
+    fired_path = Path(str(pool_path) + ".fired.json")
+    fired = set(json.loads(fired_path.read_text())) if fired_path.exists() else set()
     for line in Path(pool_path).read_text().splitlines():
         if not line.strip():
             continue
         sc = json.loads(line)
+        if sc["id"] in fired:
+            continue
         q = f"rfc822msgid:{sc['message_id']}"
         hit = gmail_io._retry_quota(lambda: svc.users().messages().list(
             userId="me", q=q, maxResults=1).execute())
-        if not hit.get("messages"):
-            return sc
+        if hit.get("messages"):
+            fired.add(sc["id"])  # fired elsewhere; record and keep scanning
+            continue
+        fired.add(sc["id"])
+        fired_path.write_text(json.dumps(sorted(fired)))
+        return sc
+    fired_path.write_text(json.dumps(sorted(fired)))
     return None
 
 
