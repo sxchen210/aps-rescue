@@ -105,6 +105,11 @@ also the product's actual onboarding mechanism, demonstrated end to end.
   lookup; unknown fields dropped and logged, never voiding the op; every
   write stamped with `source_email_id` / `updated_at` provenance so any
   value traces to the email that set it.
+- **System tables (harness-owned, not part of the discovered schema, like
+  provenance):** `catchall` (gmail_id, date, from, subject, tag) materializes
+  every catchall emission so coverage is auditable arithmetic — each of the
+  831 emails lands as table ops or a catchall row — plus ingest bookkeeping
+  (processed gmail ids, usage/cost per email).
 - Runs against a local SQLite file first. Then **verification**: diff final
   tables against `ground_truth.json` → `VERIFICATION.md` with real accuracy
   numbers (dogs, placements, statuses, dates) and measured per-email cost.
