@@ -81,7 +81,10 @@ instructions it writes enforce them):**
 **Sanity gate before populate:** a structural review only — schema parses,
 table count is sane, instructions emit the envelope. A degenerate result
 means re-running discovery with a clarified mission, never hand-editing its
-artifacts toward known universe facts.
+artifacts toward known universe facts. **Operator feedback goes the same
+way:** schema revisions run through the harness's refine mode
+(`discovery.py --refine "<request>"` — prior artifacts fed back, agent
+re-verifies against the mailbox and resubmits the full set).
 
 **Blindness by construction:** the harness process can see only what its
 four tools return — not `simulation/`, not the universe code, not ground

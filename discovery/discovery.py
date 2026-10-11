@@ -178,9 +178,32 @@ def run_tool(name, inp):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--refine", help="operator revision request; prior artifacts are fed back")
+    args = ap.parse_args()
+
     client = anthropic.Anthropic(max_retries=6)
-    log = open(HERE / "discovery_log.jsonl", "w")
-    messages = [{"role": "user", "content": "Begin. The mailbox is connected; your tools are live."}]
+    if args.refine:
+        prior = {f: (HERE / f).read_text() for f in
+                 ("schema.json", "instructions.md", "DISCOVERY_NOTES.md")}
+        opener = (
+            "You previously completed discovery on this mailbox and submitted the "
+            "artifacts below. The OPERATOR has reviewed them and requests a revision.\n\n"
+            f"=== OPERATOR REQUEST ===\n{args.refine}\n\n"
+            "=== YOUR PRIOR schema.json ===\n" + prior["schema.json"] + "\n\n"
+            "=== YOUR PRIOR instructions.md ===\n" + prior["instructions.md"] + "\n\n"
+            "=== YOUR PRIOR DISCOVERY_NOTES.md ===\n" + prior["DISCOVERY_NOTES.md"] + "\n\n"
+            "Revise to satisfy the request. Keep everything that was right. Re-verify "
+            "against the mailbox with your tools wherever the revision needs evidence, "
+            "then call submit_artifacts ONCE with the COMPLETE updated artifact set "
+            "(full documents, not diffs). All original contract rules still apply."
+        )
+        log = open(HERE / "discovery_log_refine.jsonl", "w")
+        messages = [{"role": "user", "content": opener}]
+    else:
+        log = open(HERE / "discovery_log.jsonl", "w")
+        messages = [{"role": "user", "content": "Begin. The mailbox is connected; your tools are live."}]
     usage = [0, 0, 0, 0]
     submitted = False
 
