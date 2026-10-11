@@ -27,7 +27,14 @@ schema was earned, round by round).
 - From the portal bundle, drop `token_apsdemo.json` and `.env` at the repo
   root (both gitignored). `.env` carries the Turso database credentials,
   the Sheet id, and an Anthropic API key used only by the ingestion and
-  draft-triage scripts.
+  draft-triage scripts. **About that key:** it is usage-capped, scoped to
+  this demo, and will be revoked when the demo window closes — shipping it
+  is acceptable only because this is a temporary demonstration. It is also
+  deliberate: metered API calls make every ingestion and draft an
+  attributable line item, which is the instrumentation for the question
+  this prototype exists to answer — whether maintained tables earn their
+  keep on cost over time (see the measured economics in
+  `populate/VERIFICATION.md`).
 - `pip install -r requirements.txt`
 - Type `/aps-overview`, then follow its order. Without the API key, the
   read-only commands (`/aps-status`, `/aps-ask`, `/aps-showdown`) still
@@ -84,8 +91,10 @@ email the address and run `/aps-ingest` to watch your message become rows.)
 
 ## Teardown
 
-All credentials are demo-scoped and revocable in one click (Gmail token in
-the Google account's security page; Turso token in its dashboard). To reset
+All credentials are demo-scoped, temporary, and revocable in one click
+(Gmail token in the Google account's security page; Turso token in its
+dashboard; the Anthropic key in the API console — it is usage-capped and
+will be deprecated when the demo window closes). To reset
 the world: clear the inbox, re-run `simulation/aps_insert.py` (seed) and
 `app/week1_inject.py` (extension), re-push Turso via
 `populate/push_turso.py --force`, refresh the mirror.
