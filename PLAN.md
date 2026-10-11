@@ -34,15 +34,13 @@ sent. One shared hosted DB means every interviewer sees the same world and
 no one rebuilds state. Interviewers who want the real Gmail view get
 **delegated access** (tested) — no password sharing, no login-challenge risk.
 
-## Phase 1 — Simulation (DONE)
+## Phase 1 — Simulation (DONE — see `simulation/SIMULATION_DESIGN.md`)
 
-831 seed emails over six simulated weeks (Aug 31 – Oct 9, 2026), generated
-from a deterministic universe and seeded into the live inbox with historical
-timestamps: 85 dogs (13 with multiple foster homes — returns, bridges,
-overflow "dog tetris"), ~200 households, 33 applications, 3 adoption events,
-3 vet days, a posting-readiness rule (photos + bio + fixed), ~25% catchall
-noise. `simulation/out/ground_truth.json` holds the true state at every
-instant, so later phases are *verifiable*. 8 held-out scenario emails
+831 seed emails over six simulated weeks (Aug 31 – Oct 9, 2026) live in the
+inbox with historical timestamps: 85 dogs (13 multi-home — "dog tetris"),
+~200 households, events/vet days/applications, a posting-readiness rule,
+~25% catchall noise. `simulation/out/ground_truth.json` holds true state at
+every instant (verification asset); 8 held-out scenarios
 (`simulation/out/universe/scenarios.jsonl`) are reserved for live injection.
 
 ## Phase 2 — Schema discovery (CURRENT)
