@@ -161,7 +161,7 @@ D. Package pool: rendered text + spec answer keys + deterministic
   Degraded no-token tier: `/aps-ask` against a shipped read-only SQLite
   snapshot.
 - Plugin commands are thin wrappers over `app/` and take no arguments
-  except the question: `/simulate-email` (fire next pool scenario),
+  except the question: `/aps-simulate-email` (fire next pool scenario),
   `/aps-ingest` (catch-up: processes anything that arrived, incl. emails
   interviewers send directly), `/aps-ask "…"`, `/aps-showdown "…"`, `/aps-status`.
   DEMO.md + a recorded GIF as the no-setup

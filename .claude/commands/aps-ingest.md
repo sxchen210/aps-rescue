@@ -6,7 +6,7 @@ Run (works as a project command or an installed plugin):
 
 This processes everything not yet ingested — most usefully, emails the user
 (or anyone) sent to animalprotectiveservices2026@gmail.com directly. Relay
-the five-beat narrative for each processed email as in /simulate-email. If
+the five-beat narrative for each processed email as in /aps-simulate-email. If
 nothing was pending, say the inbox is fully processed and suggest sending
 an email to the address and re-running this command.
 

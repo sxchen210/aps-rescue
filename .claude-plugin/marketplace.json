@@ -5,7 +5,7 @@
     {
       "name": "aps-rescue-demo",
       "source": "./",
-      "description": "APS Rescue demo: /aps-status, /simulate-email, /aps-ingest, /aps-ask, /aps-showdown"
+      "description": "APS Rescue demo: /aps-status, /aps-simulate-email, /aps-ingest, /aps-ask, /aps-showdown"
     }
   ]
 }
