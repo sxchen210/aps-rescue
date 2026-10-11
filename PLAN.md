@@ -156,8 +156,11 @@ D. Package pool: rendered text + spec answer keys + deterministic
   aggregates, current-state-after-moves (tetris dogs, with provenance),
   joins ("which fosters are free this weekend?"), dated lookups (next vet
   list) — plus one honest single-thread tie shown for fairness.
-- **Credentials:** portal bundle = Gmail token (re-authed once to add the
-  `spreadsheets` scope — one token serves mail + sheet) + Turso token.
+- **Credentials:** portal bundle = Gmail token (gmail.modify +
+  spreadsheets; one token serves mail + sheet) + Turso token + a
+  usage-capped revocable Anthropic API key (DECIDED: acceptable because
+  temporary/demo-only, deprecated after the window; benefit: metered
+  per-call cost tracking for the long-term table-economics question).
   Degraded no-token tier: `/aps-ask` against a shipped read-only SQLite
   snapshot.
 - Plugin commands are thin wrappers over `app/` and take no arguments
