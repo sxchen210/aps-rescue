@@ -167,16 +167,13 @@ D. Package pool: rendered text + spec answer keys + deterministic
   DEMO.md + a recorded GIF as the no-setup
   fallback.
 
-## Phase 5 — Unattended durability & hygiene
+## Phase 5 — Hygiene (no unattended automation — by decision)
 
-- One daily **Claude cloud schedule** under the owner's account: catch-up
-  ingest + Sheet refresh, so mail sent while nobody runs the plugin still
-  lands in the tables.
-- Gmail **delegation** for interviewers who want the real mailbox view
-  (added per-person by address).
-- Hygiene: stated token revocation date, Turso token scoped to the demo DB,
-  a "reset the demo world" note (re-seed from `simulation/out/corpus.jsonl`
-  + re-populate).
+No scheduled/daily processing: the demo is interviewer-driven, and mail
+sent while nobody runs the plugin simply waits for the next /aps-ingest.
+Remaining items: Gmail **delegation** for interviewers who want the real
+mailbox view (added per-person by address); stated token revocation date;
+Turso token scoped to the demo DB; a "reset the demo world" note.
 
 ## Owner setup checklist
 
