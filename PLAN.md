@@ -137,7 +137,7 @@ D. Package pool: rendered text + spec answer keys + deterministic
   {should_reply, reason, draft?} — so judged no-replies (bare RSVPs) and
   judged yes-replies to catchall (lost-dog redirect, volunteer ack) both
   work, and the decision is displayed either way with its reason.
-- **Models:** extraction = `claude-haiku-5-5` (blind); `/ask` (NL→SQL,
+- **Models:** extraction = `claude-haiku-5-5` (blind); `/aps-ask` (NL→SQL,
   queries echoed) and reply drafts = **Opus 5.5** — via the interviewer's
   own Claude session (subagents; no API key distributed) in the plugin,
   via API in our testing. Draft guardrails: never narrate the database,
@@ -151,19 +151,19 @@ D. Package pool: rendered text + spec answer keys + deterministic
   those — demo centerpieces must be derived/drift questions, not named-dog
   stories). Maintenance gaps propagate to B (observed, 2 dogs). Scale
   argument: A capped out at 831 emails; the reference inbox is 117K.
-- **`/ask` demo question classes** (where tables beat connector search):
+- **`/aps-ask` demo question classes** (where tables beat connector search):
   negative space ("ready to post but not posted?", "who hasn't RSVPed?"),
   aggregates, current-state-after-moves (tetris dogs, with provenance),
   joins ("which fosters are free this weekend?"), dated lookups (next vet
   list) — plus one honest single-thread tie shown for fairness.
 - **Credentials:** portal bundle = Gmail token (re-authed once to add the
   `spreadsheets` scope — one token serves mail + sheet) + Turso token.
-  Degraded no-token tier: `/ask` against a shipped read-only SQLite
+  Degraded no-token tier: `/aps-ask` against a shipped read-only SQLite
   snapshot.
 - Plugin commands are thin wrappers over `app/` and take no arguments
   except the question: `/simulate-email` (fire next pool scenario),
   `/aps-ingest` (catch-up: processes anything that arrived, incl. emails
-  interviewers send directly), `/ask "…"`, `/showdown "…"`, `/aps-status`.
+  interviewers send directly), `/aps-ask "…"`, `/aps-showdown "…"`, `/aps-status`.
   DEMO.md + a recorded GIF as the no-setup
   fallback.
 
