@@ -20,7 +20,7 @@ import gmail_io
 HERE = Path(__file__).resolve().parent
 MODEL = "claude-fable-5"
 EFFORT = "high"
-MAX_TOKENS = 16000
+MAX_TOKENS = 48000
 MAX_ROUNDS = 120
 BUDGET_USD = 30.0
 PRICE_IN, PRICE_OUT, PRICE_CREAD, PRICE_CWRITE = 10.0, 50.0, 1.0, 20.0  # proxy $/M
@@ -221,12 +221,13 @@ def main():
         resp = None
         for attempt in range(4):
             try:
-                resp = client.messages.create(
-                    model=MODEL, max_tokens=MAX_TOKENS,
-                    output_config={"effort": EFFORT},
-                    system=[{"type": "text", "text": MISSION,
-                             "cache_control": {"type": "ephemeral"}}],
-                    tools=TOOLS, messages=messages)
+                with client.messages.stream(
+                        model=MODEL, max_tokens=MAX_TOKENS,
+                        output_config={"effort": EFFORT},
+                        system=[{"type": "text", "text": MISSION,
+                                 "cache_control": {"type": "ephemeral"}}],
+                        tools=TOOLS, messages=messages) as _stream:
+                    resp = _stream.get_final_message()
                 break
             except Exception as e:
                 if attempt == 3:
@@ -268,9 +269,27 @@ def main():
             break
 
         messages.append({"role": "assistant", "content": resp.content})
+        if resp.stop_reason == "max_tokens":
+            results = [{"type": "tool_result", "tool_use_id": tu.id,
+                        "content": "ERROR: your response hit the output-token limit and this "
+                                   "tool call arrived truncated — NOTHING was executed. "
+                                   "Re-issue the call completely."}
+                       for tu in tool_uses]
+            if not results:
+                results = [{"type": "text",
+                            "text": "Your response hit the output-token limit and was cut off. Continue."}]
+            messages.append({"role": "user", "content": results})
+            continue
         results = []
         for tu in tool_uses:
             if tu.name == "submit_artifacts":
+                missing = [k for k in ("schema", "instructions_md", "notes_md")
+                           if k not in tu.input or not tu.input[k]]
+                if missing:
+                    results.append({"type": "tool_result", "tool_use_id": tu.id,
+                                    "content": f"ERROR: submission incomplete (missing {missing}). "
+                                               "Call submit_artifacts again with ALL three fields complete."})
+                    continue
                 schema = tu.input["schema"]
                 (HERE / "schema.json").write_text(json.dumps(schema, indent=2, ensure_ascii=False))
                 (HERE / "instructions.md").write_text(tu.input["instructions_md"])
