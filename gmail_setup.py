@@ -20,8 +20,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
-TOKEN = Path("token_apsdemo.json")
-CLIENT = "aps_credentials.json"
+ROOT = Path(__file__).resolve().parent
+TOKEN = ROOT / "token_apsdemo.json"
+CLIENT = str(ROOT / "aps_credentials.json")
 EXPECTED = "animalprotectiveservices2026@gmail.com"
 
 

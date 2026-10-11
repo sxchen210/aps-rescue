@@ -14,6 +14,10 @@ import re
 import time
 from pathlib import Path
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root: gmail_io
 import gmail_io
 
 UNREAD_AFTER = "2026-10-07"

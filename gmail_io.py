@@ -17,9 +17,10 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
+ROOT = Path(__file__).resolve().parent
 ACCOUNTS = {
-    "ref": "token.json",           # created read-only; do not re-auth wider
-    "aps": "token_apsdemo.json",   # gmail.modify (read + insert + drafts)
+    "ref": ROOT / "token.json",           # created read-only; do not re-auth wider
+    "aps": ROOT / "token_apsdemo.json",   # gmail.modify (read + insert + drafts)
 }
 
 

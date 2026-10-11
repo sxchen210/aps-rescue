@@ -20,9 +20,30 @@ import argparse
 import json
 import re
 import sys
+import time
 from pathlib import Path
 
+from googleapiclient.errors import HttpError
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root: gmail_io
 import gmail_io
+
+
+def _call(req_fn, tries=6):
+    """Execute a Gmail API call with quota backoff (403/429 rate limits)."""
+    for attempt in range(tries):
+        try:
+            return req_fn()
+        except HttpError as e:
+            if e.resp.status in (403, 429) and attempt < tries - 1:
+                wait = 15 * (attempt + 1)
+                print(f"  quota hit; sleeping {wait}s…", flush=True)
+                time.sleep(wait)
+            else:
+                raise
 from personas import STAFF, DOG_NAMES
 
 WORD = re.compile(r"[A-Za-z][a-z']+")
@@ -46,18 +67,21 @@ def harvest(headers_n, bodies_n):
     page = None
     svc = gmail_io.service("ref")
     while len(msgs) < headers_n:
-        resp = svc.users().messages().list(
+        resp = _call(lambda: svc.users().messages().list(
             userId="me", maxResults=min(500, headers_n - len(msgs)),
-            pageToken=page).execute()
+            pageToken=page).execute())
         msgs += resp.get("messages", [])
         page = resp.get("nextPageToken")
         if not page:
             break
     print(f"harvesting headers from {len(msgs)} messages…", flush=True)
     for i, m in enumerate(msgs):
-        meta = svc.users().messages().get(
+        time.sleep(0.12)  # stay under per-minute query-cost quota
+        if i and i % 100 == 0:
+            print(f"  …{i} headers", flush=True)
+        meta = _call(lambda: svc.users().messages().get(
             userId="me", id=m["id"], format="metadata",
-            metadataHeaders=["From", "To", "Cc"]).execute()
+            metadataHeaders=["From", "To", "Cc"]).execute())
         for h in meta.get("payload", {}).get("headers", []):
             for part in h["value"].split(","):
                 part = part.strip()
@@ -70,8 +94,9 @@ def harvest(headers_n, bodies_n):
                 elif "@" in part:
                     addrs.add(part.lower())
         if i < bodies_n:
+            time.sleep(0.25)
             try:
-                full = gmail_io.get_thread("ref", meta["threadId"], trim_quotes=False)
+                full = _call(lambda: gmail_io.get_thread("ref", meta["threadId"], trim_quotes=False))
                 for mm in full[:3]:
                     body = mm["body"]
                     tokens.update(CAP.findall(body))
