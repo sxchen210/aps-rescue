@@ -66,6 +66,24 @@ class TursoDB:
         return [dict(zip(cols, [c.get("value") for c in row]))
                 for row in result.get("rows", [])]
 
+    def execute_batch(self, stmts):
+        """Many (sql, args) in one pipeline call."""
+        def enc(args):
+            return [{"type": "text", "value": str(a)} if a is not None
+                    else {"type": "null"} for a in args]
+        body = {"requests": [{"type": "execute",
+                              "stmt": {"sql": sql, "args": enc(args)}}
+                             for sql, args in stmts] + [{"type": "close"}]}
+        req = urllib.request.Request(
+            self.endpoint, data=json.dumps(body).encode(),
+            headers={"Authorization": f"Bearer {self.token}",
+                     "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            out = json.loads(r.read())
+        for res in out["results"]:
+            if res.get("type") == "error":
+                raise RuntimeError(res["error"]["message"])
+
 
 def connect(path=None):
     if os.environ.get("APS_DB") == "turso":
