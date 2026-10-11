@@ -1,0 +1,65 @@
+[
+ {
+  "id": "q1",
+  "expect": "B",
+  "question": "Which of our fosters (people who have fostered for us before) are currently free — not fostering a dog right now and not away?",
+  "gt": "27 people: Anouk Ferreira, Bennett Lombardi, Bianca Valdez, Bianca Whitaker, Cesar Birkeland, Ezra Goldbaum, Grant Birkeland, Hana Faraday, Hana Ivanova, Iris Birkeland, Liam Kessler, Lorenzo Jarrett, Nils Quintero, Pearl Abernathy, Reuben Cervantes, Rohan Ashford, Rosa Engstrom, Stellan Thackeray, Theo Yates, Tobias Ibarra, Ursula Nakamura, Vince Valdez, Winnie Holloway, Winnie Rutherford, Yara Prescott, Yolanda Xiong, Zainab Ibarra",
+  "why": "roster state x current placements; never co-located in any email"
+ },
+ {
+  "id": "q2",
+  "expect": "B",
+  "question": "Which fosters with posted (adoptable) dogs never RSVPed to the October 3 adoption event?",
+  "gt": "6: Bennett Grimaldi (Gale), Farah Villanueva (Granite), Helena Sterling (Doldrum), Nadia Ashford (Aurora), Otis Ellsworth (Glacier), Tobias Cervantes (Scree)",
+  "why": "blast was BCC — no email enumerates invitees; absence is uncomputable by search"
+ },
+ {
+  "id": "q3",
+  "expect": "B",
+  "question": "How many dogs were adopted in September 2026, and what was their average number of days from intake to adoption?",
+  "gt": "9 adoptions (incl. Moraine, whose adoption later fell through in October); avg 19.0 days. Dogs: Altocumulus, Tundra, Spire, Alder, Flurry, Dune, Larch, Cyclone, Talus",
+  "why": "cross-month arithmetic over ~20 threads"
+ },
+ {
+  "id": "q4",
+  "expect": "B",
+  "question": "Which dogs are ready to post right now (photos + bio in, spay/neuter done) but not yet posted?",
+  "gt": "7: Anvil, Cairn, Col, Kettle, Ridge, Shasta, Slate",
+  "why": "the Oct 5 roundup email is a stale cache; state moved after it"
+ },
+ {
+  "id": "q5",
+  "expect": "B",
+  "question": "Who has Moraine right now — what's her current situation?",
+  "gt": "status in_foster, with Theo Sandoval (adoption on 2026-10-05 fell through — landlord; timeline tail: [['adopted', '2026-09-23', 'Helena Whitaker'], ['adoption_fell_through', '2026-10-05', 'landlord'], ['in_foster', '2026-10-05', 'Theo Sandoval']])",
+  "why": "strongest search signal (adoption appt thread) is stale truth"
+ },
+ {
+  "id": "q6",
+  "expect": "tie",
+  "question": "What did the Crestview clinic say when we sent them Scree's records about the cloudy eye?",
+  "gt": "Reference (from corpus): Fri, 02 Oct 2026 | Records for Scree | Hi there!\n\nSending over what we have on Scree ahead of his visit. He's a young poodle mix we pulled from San Benito County Animal Services. Unfortunately he came to us with NO prior records, so this i || Fri, 02 Oct 2026 | Re: Records for Scree | Hi there,\n\nThank you so much for sending over Scree's info ahead of his visit! I've flagged the cloudy left eye for the doctor so she knows to give it a thorough look and can walk you through what she",
+  "why": "single-thread retrieval; connector-class strength"
+ },
+ {
+  "id": "q7",
+  "expect": "tie",
+  "question": "What are the drop-off and pickup logistics options for a spay/neuter day?",
+  "gt": "den default 6:30AM both ways (volunteers drive); overnight drop at the den after 9PM night before; direct at Crestview Livermore 7:30AM drop / 3-4PM pickup; fasting from midnight",
+  "why": "stated verbatim in every vet blast — a cached answer"
+ },
+ {
+  "id": "q8",
+  "expect": "A",
+  "question": "Summarize the most recent email Hana Faraday sent us.",
+  "gt": "Reference: Sun, 20 Sep 2026 | Re: Adoption appointment for Talus! | Hi APS Rescue,\n\nYes, I can make it Monday 9/21 at 6pm at the den. I am thrilled that Imani is meeting Talus, and I will bring her things and her medications. Thank you for the wonderful news!\n\nHana Faraday",
+  "why": "pure retrieval; tables add nothing"
+ },
+ {
+  "id": "q9",
+  "expect": "A",
+  "question": "What exactly did the foster report about Hoarfrost's ear, in their own words?",
+  "gt": "Reference: Tue, 06 Oct 2026 | Hoarfrost - scratching one ear a lot | scratching at his left ear since yesterday, maybe more often than usual. no discharge that i can see, not shaking his head hard, just going at it when he's settled. he's eating and walking fine. notic",
+  "why": "verbatim detail; the table keeps only a one-line health_note"
+ }
+]
