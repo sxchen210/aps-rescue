@@ -1,11 +1,5 @@
 # Simulated rescue inbox — design
 
-**Goal:** a working prototype of *self-building tables*: an LLM watches a busy
-shared inbox, discovers its recurring workflows, builds structured tables from
-them (schema designed by a strong model, rows maintained by a cheap one), keeps
-those tables current as mail arrives, and uses them to answer questions and
-draft replies that thread-only inbox access cannot match.
-
 **Stage:** a fictional dog-rescue org operating entirely out of one Gmail
 account — `animalprotectiveservices2026@gmail.com` ("APS Rescue", Redwood
 City, CA). Every email in it is synthetic. A real rescue's foster inbox is
