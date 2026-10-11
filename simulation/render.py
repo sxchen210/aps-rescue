@@ -147,8 +147,8 @@ def t_application_form(spec):
         f"Home type {pr['home']}\nHours the dog would be alone {pr['hours_alone']}\n"
         f"Children at home {pr['kids']}\nOther pets {pr['other_pets']}\n"
         f"Size/age preference {pr['pref']}\n"
-        f"We are based in Redwood City where dog/supply pickups, vet transports, "
-        "and our events are held. Able to transport? Yes\n"
+        f"Home base for pickups, vet runs, and events is Redwood City. Able to "
+        "get there? Yes\n"
         "Ready to bring home a foster dog within the next 5-7 days? Yes"
     )
 
