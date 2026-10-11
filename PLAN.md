@@ -62,6 +62,29 @@ corpus is small enough to read in full), then emit:
 4. `discovery/discovery_log.jsonl` — the full tool-use transcript, committed
    as evidence of *how* the schema was earned.
 
+**Harness contract (given to the discovery agent verbatim, so the
+instructions it writes enforce them):**
+
+- Extraction output is ONLY a JSON operations envelope — no prose:
+  `{"ops": [{"table", "match": {canonical key fields}, "set": {field:
+  value}, "note"?: one line max}], "catchall"?: {"tag"}}`.
+- `schema.json` must declare, per table: canonical key fields, lifecycle
+  enums, and dated fields; plus a catchall tag taxonomy for mail that fits
+  no workflow.
+- **Dated-fields rule:** when an email states a date for a fact, extract
+  that stated date into the dated field — never substitute the email's own
+  timestamp (emails routinely announce future events and reference past
+  ones).
+- Create-vs-update is the harness's job (canonical-key lookup); any model
+  opinion on it is advisory only.
+- Unknown or unstated information is omitted, never guessed; emitting no
+  ops is valid for pure-noise mail (tag it catchall instead).
+
+**Sanity gate before populate:** a structural review only — schema parses,
+table count is sane, instructions emit the envelope. A degenerate result
+means re-running discovery with a clarified mission, never hand-editing its
+artifacts toward known universe facts.
+
 **Blindness by construction:** the harness process can see only what its
 four tools return — not `simulation/`, not the universe code, not ground
 truth. Ground truth is touched only afterward, to score the result. This is
@@ -69,10 +92,21 @@ also the product's actual onboarding mechanism, demonstrated end to end.
 
 ## Phase 3 — Populate, verify, host
 
-- `ingest.py`: chronological ingestion of all 831 emails by Haiku following
-  the discovered instructions — one call per email, upserts via canonical
-  keys, catchall for noise, **idempotent by gmail id** (ingest always means
-  "process everything unprocessed," never just one message).
+- `ingest.py`: **serial, chronological** ingestion of all 831 emails by
+  Haiku following the discovered instructions — one stateless single-shot
+  call per email (email + its thread tail only; the model never sees the
+  DB), generous max_tokens so the JSON can never truncate, **idempotent by
+  gmail id** (ingest always means "process everything unprocessed," never
+  just one message).
+- Effort: **medium** by default; an A/B vs **high** on ~60 ground-truth
+  emails decides empirically (low is ruled out); result recorded in
+  VERIFICATION.md.
+- Apply semantics: timestamp-ordered, **per-field merge** (an op overwrites
+  only the fields it sets; corrections win, unrelated facts survive);
+  create-vs-update derived mechanically via normalized canonical-key
+  lookup; unknown fields dropped and logged, never voiding the op; every
+  write stamped with `source_email_id` / `updated_at` provenance so any
+  value traces to the email that set it.
 - Runs against a local SQLite file first. Then **verification**: diff final
   tables against `ground_truth.json` → `VERIFICATION.md` with real accuracy
   numbers (dogs, placements, statuses, dates) and measured per-email cost.

@@ -39,6 +39,18 @@ forward. Check `git status` for secret-like files before every commit.
 - **Ingest means catch-up:** always process every email not yet in state
   (keyed by gmail id, idempotent) — never just the message that triggered
   the run. Scenario injection dedups globally via deterministic Message-IDs.
+- **Extraction/apply semantics (locked):** serial chronological processing;
+  stateless single-shot Haiku calls (email + thread tail, never the DB);
+  output is the JSON ops envelope only; effort medium (A/B vs high on
+  ground truth; low ruled out); generous max_tokens; apply is a
+  timestamp-ordered per-field merge with mechanical create-vs-update and
+  `source_email_id`/`updated_at` provenance on every write; stated dates
+  beat email dates (the dated-fields rule). These rules are part of the
+  discovery mission so the generated instructions enforce them.
+- **Sanity gate:** between discovery and populate, review discovery output
+  structurally only (parses, sane table count, envelope-compliant
+  instructions). Degenerate → re-run discovery with a clarified mission;
+  never hand-edit its artifacts.
 - The seeded inbox is the shared fixture: no bulk-delete or re-seed without
   the user's say-so (`simulation/aps_insert.py` is idempotent via
   `simulation/out/seeded_ids.json`). Held-out scenarios
