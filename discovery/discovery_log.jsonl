@@ -1,0 +1,40 @@
+{"round": 1, "stop": "tool_use", "cost_usd": 0.04, "text": "", "tools": [{"name": "inbox_stats", "input": {}}, {"name": "list_threads", "input": {"page": 1}}]}
+{"round": 2, "stop": "tool_use", "cost_usd": 0.1, "text": "", "tools": [{"name": "list_threads", "input": {"page": 2}}, {"name": "list_threads", "input": {"page": 3}}]}
+{"round": 3, "stop": "tool_use", "cost_usd": 0.2, "text": "", "tools": [{"name": "list_threads", "input": {"page": 4}}, {"name": "list_threads", "input": {"page": 5}}]}
+{"round": 4, "stop": "tool_use", "cost_usd": 0.31, "text": "", "tools": [{"name": "list_threads", "input": {"page": 6}}, {"name": "list_threads", "input": {"page": 7}}]}
+{"round": 5, "stop": "tool_use", "cost_usd": 0.34, "text": "Hit a rate limit; let me slow down and retry.", "tools": [{"name": "list_threads", "input": {"page": 6}}]}
+{"round": 6, "stop": "tool_use", "cost_usd": 0.37, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a107ae748504560"}}]}
+{"round": 7, "stop": "tool_use", "cost_usd": 0.39, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a107ae748504560"}}]}
+{"round": 8, "stop": "tool_use", "cost_usd": 0.57, "text": "This is clearly a dog rescue/foster operation. Now let me read representative threads of each workflow.", "tools": [{"name": "get_thread", "input": {"thread_id": "1a11c681fad0007a"}}, {"name": "get_thread", "input": {"thread_id": "1a11d62ae2fa2149"}}]}
+{"round": 9, "stop": "tool_use", "cost_usd": 0.64, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a11369335a4bc16"}}, {"name": "get_thread", "input": {"thread_id": "1a121c5ec380d555"}}]}
+{"round": 10, "stop": "tool_use", "cost_usd": 0.7, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a108e9ef0affff1"}}, {"name": "get_thread", "input": {"thread_id": "1a10c90704aa3679"}}]}
+{"round": 11, "stop": "tool_use", "cost_usd": 0.78, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a10d4b5902bfed0"}}, {"name": "get_thread", "input": {"thread_id": "1a0fe72f5fdd0ed0"}}]}
+{"round": 12, "stop": "tool_use", "cost_usd": 0.85, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0ff7b78c8a7b2e"}}, {"name": "get_thread", "input": {"thread_id": "1a10c991b02cc330"}}]}
+{"round": 13, "stop": "tool_use", "cost_usd": 0.92, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a109068f1c5b825"}}, {"name": "get_thread", "input": {"thread_id": "1a10dd03b2d72d28"}}]}
+{"round": 14, "stop": "tool_use", "cost_usd": 1.0, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0fd35417dd0cfd"}}, {"name": "get_thread", "input": {"thread_id": "1a107c0ffa7f5eee"}}]}
+{"round": 15, "stop": "tool_use", "cost_usd": 1.07, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0edc07577caeb4"}}]}
+{"round": 16, "stop": "tool_use", "cost_usd": 1.23, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0f932113fa08ec"}}, {"name": "get_thread", "input": {"thread_id": "1a0f8245cb2a9e58"}}]}
+{"round": 17, "stop": "tool_use", "cost_usd": 1.32, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a11d55034ae8eab"}}, {"name": "get_thread", "input": {"thread_id": "1a111c52167ab0ae"}}]}
+{"round": 18, "stop": "tool_use", "cost_usd": 1.39, "text": "", "tools": [{"name": "list_threads", "input": {"page": 6}}]}
+{"round": 19, "stop": "tool_use", "cost_usd": 1.48, "text": "", "tools": [{"name": "list_threads", "input": {"page": 7}}]}
+{"round": 20, "stop": "tool_use", "cost_usd": 1.58, "text": "", "tools": [{"name": "list_threads", "input": {"page": 8}}]}
+{"round": 21, "stop": "tool_use", "cost_usd": 1.67, "text": "", "tools": [{"name": "list_threads", "input": {"page": 9}}]}
+{"round": 22, "stop": "tool_use", "cost_usd": 1.77, "text": "", "tools": [{"name": "list_threads", "input": {"page": 10}}]}
+{"round": 23, "stop": "tool_use", "cost_usd": 1.87, "text": "", "tools": [{"name": "list_threads", "input": {"page": 11}}]}
+{"round": 24, "stop": "tool_use", "cost_usd": 1.97, "text": "", "tools": [{"name": "list_threads", "input": {"page": 12}}]}
+{"round": 25, "stop": "tool_use", "cost_usd": 2.04, "text": "", "tools": [{"name": "list_threads", "input": {"page": 12}}]}
+{"round": 26, "stop": "tool_use", "cost_usd": 2.1, "text": "", "tools": [{"name": "list_threads", "input": {"page": 12}}]}
+{"round": 27, "stop": "tool_use", "cost_usd": 2.17, "text": "", "tools": [{"name": "list_threads", "input": {"page": 12}}]}
+{"round": 28, "stop": "tool_use", "cost_usd": 2.27, "text": "", "tools": [{"name": "list_threads", "input": {"page": 13}}]}
+{"round": 29, "stop": "tool_use", "cost_usd": 2.4, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0c5f35bfd22529"}}, {"name": "get_thread", "input": {"thread_id": "1a0b1ad16bace753"}}]}
+{"round": 30, "stop": "tool_use", "cost_usd": 2.51, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0d46dab2b962da"}}, {"name": "get_thread", "input": {"thread_id": "1a0ad2c03cc21301"}}]}
+{"round": 31, "stop": "tool_use", "cost_usd": 2.64, "text": "", "tools": [{"name": "search", "input": {"query": "reschedule OR cancelled OR cancel OR postpone", "limit": 20}}, {"name": "search", "input": {"query": "adopted", "limit": 20}}]}
+{"round": 32, "stop": "tool_use", "cost_usd": 2.72, "text": "", "tools": [{"name": "search", "input": {"query": "subject:\"Adoption appointment\"", "limit": 40}}]}
+{"round": 33, "stop": "tool_use", "cost_usd": 2.81, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0cb43ca7a78079"}}, {"name": "get_thread", "input": {"thread_id": "1a11c887aaca44db"}}]}
+{"round": 34, "stop": "tool_use", "cost_usd": 2.92, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a08dfc0496797cf"}}, {"name": "get_thread", "input": {"thread_id": "1a0ff9f3829af746"}}]}
+{"round": 35, "stop": "tool_use", "cost_usd": 3.03, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a104290a73d3578"}}]}
+{"round": 36, "stop": "tool_use", "cost_usd": 3.16, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a129975d5e5ebd6"}}, {"name": "get_thread", "input": {"thread_id": "1a0edd9efef03fae"}}]}
+{"round": 37, "stop": "tool_use", "cost_usd": 3.28, "text": "", "tools": [{"name": "search", "input": {"query": "subject:correction", "limit": 10}}, {"name": "get_thread", "input": {"thread_id": "1a0bf95c7616e280"}}]}
+{"round": 38, "stop": "tool_use", "cost_usd": 3.92, "text": "", "tools": [{"name": "get_thread", "input": {"thread_id": "1a0822f6258dcca8"}}]}
+{"round": 39, "stop": "tool_use", "cost_usd": 6.34, "text": "I have a complete picture of this mailbox. Submitting the three artifacts now.", "tools": [{"name": "submit_artifacts", "input": {}}]}
+{"final": true, "submitted": true, "usage": {"in": 169, "out": 28194, "cache_read": 1544274, "cache_write": 169200}, "cost_usd": 6.34}

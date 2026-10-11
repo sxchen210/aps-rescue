@@ -1,0 +1,268 @@
+{
+  "tables": {
+    "dogs": {
+      "description": "One row per rescue dog. Tracks the full lifecycle: pulled from the shelter -> placed with a foster -> spay/neuter -> photos+bio -> posted for adoption -> adoption appointment -> adopted, including returns ('struggling' fosters, failed adoptions), temporary coverage/bridge fostering, and open health concerns.",
+      "canonical_keys": [
+        "dog_name"
+      ],
+      "columns": {
+        "dog_name": {
+          "type": "string",
+          "description": "The dog's name exactly as it appears in email (e.g. 'Nettle', 'Rime'). Unique across the rescue."
+        },
+        "sex": {
+          "type": "enum",
+          "values": [
+            "M",
+            "F"
+          ],
+          "description": "Sex as stated at intake ('adult F hound mix')."
+        },
+        "age_group": {
+          "type": "enum",
+          "values": [
+            "puppy",
+            "young",
+            "adult",
+            "senior"
+          ],
+          "description": "Age bracket as stated at intake."
+        },
+        "size": {
+          "type": "enum",
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ],
+          "description": "Size as stated at intake."
+        },
+        "breed": {
+          "type": "string",
+          "description": "Breed mix as stated, e.g. 'hound mix', 'poodle mix'."
+        },
+        "intake_date": {
+          "type": "date",
+          "description": "Date the dog was pulled from the shelter (stated in the pull announcement subject/body, e.g. '10/8' -> 2026-10-08). NOT the email sent date unless they coincide."
+        },
+        "source_shelter": {
+          "type": "string",
+          "description": "Shelter the dog was pulled from, e.g. 'San Benito County Animal Services'."
+        },
+        "status": {
+          "type": "enum",
+          "values": [
+            "needs_foster",
+            "foster_offered",
+            "in_foster",
+            "returning_to_rescue",
+            "pending_adoption",
+            "adopted"
+          ],
+          "description": "Placement lifecycle. needs_foster = at the den / unplaced (incl. after a decline or completed return). foster_offered = staff offered the dog to a candidate, no acceptance yet. in_foster = a foster accepted / has the dog. returning_to_rescue = current foster or adopter has said they are giving the dog back but handoff not confirmed done. pending_adoption = adoption appointment scheduled. adopted = adoption went through (adopter writes post-adoption updates)."
+        },
+        "foster_name": {
+          "type": "string",
+          "description": "Current foster's name. Set when a foster ACCEPTS a match (not on the mere offer)."
+        },
+        "foster_pickup_date": {
+          "type": "date",
+          "description": "Date the foster picks the dog up from the den, when a concrete date is stated or agreed."
+        },
+        "return_reason": {
+          "type": "string",
+          "description": "Short reason a placement failed, e.g. 'landlord refused pets', 'too high energy for home'."
+        },
+        "coverage_foster": {
+          "type": "string",
+          "description": "Temporary/bridge foster covering while the regular foster is away or between placements."
+        },
+        "coverage_start_date": {
+          "type": "date",
+          "description": "Start of temporary coverage, as stated."
+        },
+        "coverage_end_date": {
+          "type": "date",
+          "description": "End of temporary coverage, as stated."
+        },
+        "spay_neuter_date": {
+          "type": "date",
+          "description": "Scheduled (or completed) spay/neuter surgery date, as stated in vet-day or planning emails. Always the stated surgery date, never the email date."
+        },
+        "spay_neuter_clinic": {
+          "type": "string",
+          "description": "Clinic performing the surgery, e.g. 'Crestview Veterinary Clinic, Livermore'."
+        },
+        "transport_option": {
+          "type": "enum",
+          "values": [
+            "den_default",
+            "overnight",
+            "direct"
+          ],
+          "description": "Vet-day logistics the foster chose: den_default = drop/pick up at the den at 6:30AM (base option), overnight = crate left at den the night before, direct = foster drives to the clinic themselves."
+        },
+        "photos_received": {
+          "type": "boolean",
+          "description": "True once the foster has sent adoption-listing photos."
+        },
+        "bio_received": {
+          "type": "boolean",
+          "description": "True once the foster has returned the bio questionnaire."
+        },
+        "posted": {
+          "type": "boolean",
+          "description": "True once staff say the dog's adoption listing is live. Rule of the org: posted only after photos + bio + fixed."
+        },
+        "health_note": {
+          "type": "string",
+          "description": "Latest open health observation/concern for the dog (e.g. 'cloudy left eye', 'scratching left ear, dark residue'). Includes add-on concerns flagged for a vet-day visit. Overwrite with the newest concern."
+        },
+        "adoption_appt_date": {
+          "type": "datetime",
+          "description": "Scheduled adoption appointment, as stated (e.g. 'Wednesday 10/7 at 11am' -> '2026-10-07 11:00'). Never the email sent date."
+        },
+        "adopter_name": {
+          "type": "string",
+          "description": "Name of the (potential) adopter mentioned for the appointment."
+        }
+      }
+    },
+    "foster_applications": {
+      "description": "One row per foster applicant. Created by the automated application form email; moves through intro-call scheduling to approval/decline.",
+      "canonical_keys": [
+        "applicant_name"
+      ],
+      "columns": {
+        "applicant_name": {
+          "type": "string",
+          "description": "Full name, e.g. 'Hugo Ueda' (from the form or subject 'Thank you for your foster application, Hugo Ueda')."
+        },
+        "email": {
+          "type": "string",
+          "description": "Applicant's email address from the form."
+        },
+        "city": {
+          "type": "string",
+          "description": "City from the form."
+        },
+        "state": {
+          "type": "string",
+          "description": "State from the form."
+        },
+        "occupation": {
+          "type": "string",
+          "description": "Occupation from the form."
+        },
+        "home_type": {
+          "type": "string",
+          "description": "e.g. 'house w/ yard', 'townhome', 'apartment'."
+        },
+        "hours_alone": {
+          "type": "string",
+          "description": "Hours the dog would be alone, as given, e.g. '6-8', '9+'."
+        },
+        "children_at_home": {
+          "type": "string",
+          "description": "e.g. 'none', 'toddler'."
+        },
+        "other_pets": {
+          "type": "string",
+          "description": "e.g. 'one senior dog', 'one cat'."
+        },
+        "size_age_preference": {
+          "type": "string",
+          "description": "Preferred dog size/age, e.g. 'medium', 'any'."
+        },
+        "can_transport": {
+          "type": "boolean",
+          "description": "Able to transport to/from Redwood City."
+        },
+        "ready_within_week": {
+          "type": "boolean",
+          "description": "Ready to bring home a foster dog within 5-7 days."
+        },
+        "status": {
+          "type": "enum",
+          "values": [
+            "received",
+            "intro_call_scheduled",
+            "approved",
+            "declined"
+          ],
+          "description": "Application lifecycle. received = form arrived / guide sent. intro_call_scheduled = a concrete call time agreed. approved = cleared to foster. declined = staff say it's not a fit this round."
+        },
+        "intro_call_date": {
+          "type": "datetime",
+          "description": "Agreed intro-call date/time, resolved to a concrete date (e.g. 'Thursday at 5:30pm' agreed on 2026-10-04 -> '2026-10-08 17:30'). Only set once both sides agree."
+        }
+      }
+    },
+    "events": {
+      "description": "One row per adoption event (roughly biweekly Saturdays at Bark & Barrel Pet Supply, Redwood City).",
+      "canonical_keys": [
+        "event_date"
+      ],
+      "columns": {
+        "event_date": {
+          "type": "date",
+          "description": "The stated event date (e.g. 'Saturday, October 3' -> 2026-10-03). Never the email sent date."
+        },
+        "location": {
+          "type": "string",
+          "description": "Venue, e.g. 'Bark & Barrel Pet Supply, Redwood City'."
+        },
+        "dropoff_window": {
+          "type": "string",
+          "description": "Stated drop-off window, e.g. '10:30-11:00am'."
+        },
+        "pickup_time": {
+          "type": "string",
+          "description": "Stated pickup time, e.g. '3:00pm'."
+        }
+      }
+    },
+    "event_rsvps": {
+      "description": "One row per dog per adoption event: whether the foster confirmed attendance, and any day-of requests (nail trim, check something).",
+      "canonical_keys": [
+        "event_date",
+        "dog_name"
+      ],
+      "columns": {
+        "event_date": {
+          "type": "date",
+          "description": "Date of the event this RSVP is for."
+        },
+        "dog_name": {
+          "type": "string",
+          "description": "Dog attending."
+        },
+        "foster_name": {
+          "type": "string",
+          "description": "Foster bringing the dog, from the reply's sender/signature."
+        },
+        "rsvp": {
+          "type": "enum",
+          "values": [
+            "confirmed",
+            "declined"
+          ],
+          "description": "confirmed = foster says they'll be there; declined = they can't make it / dog adopted before the event."
+        },
+        "request": {
+          "type": "string",
+          "description": "Day-of request, e.g. 'nail trim', 'check scab on flank'."
+        }
+      }
+    }
+  },
+  "catchall_tags": [
+    "promo-marketing",
+    "drive-share-notification",
+    "found-stray-inquiry",
+    "donation",
+    "adopter-update",
+    "supply-logistics-chatter",
+    "other"
+  ]
+}
