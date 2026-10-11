@@ -28,7 +28,9 @@ PRICE_IN, PRICE_OUT, PRICE_CREAD, PRICE_CWRITE = 0.10, 0.50, 0.01, 0.125
 
 
 def fetch_corpus():
-    """All inbox+sent messages with headers/bodies, grouped and sorted."""
+    """All inbox+sent messages with headers/bodies, grouped and sorted.
+    Cached to out/corpus_cache.json; refetched only when the mailbox's
+    message count changes (throttled to respect Gmail's per-minute quota)."""
     svc = gmail_io.service("aps")
     ids, page = [], None
     while True:
@@ -38,11 +40,20 @@ def fetch_corpus():
         page = resp.get("nextPageToken")
         if not page:
             break
+    cache_path = HERE / "out" / "corpus_cache.json"
+    if cache_path.exists():
+        cached = json.loads(cache_path.read_text())
+        if cached.get("n_messages") == len(ids):
+            print(f"corpus cache hit ({len(ids)} messages)", flush=True)
+            return cached["msgs"]
     threads = {}
     for m in ids:
         threads.setdefault(m["threadId"], None)
     msgs = []
-    for tid in threads:
+    for i, tid in enumerate(threads):
+        time.sleep(0.12)
+        if i and i % 50 == 0:
+            print(f"  fetching threads… {i}/{len(threads)}", flush=True)
         for m in gmail_io.get_thread("aps", tid, trim_quotes=True):
             m["thread_id"] = tid
             msgs.append(m)
@@ -55,6 +66,8 @@ def fetch_corpus():
         except Exception:
             m["_ts"] = 0
     msgs.sort(key=lambda m: (m["_ts"], m["gmail_id"]))
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(json.dumps({"n_messages": len(ids), "msgs": msgs}))
     return msgs
 
 

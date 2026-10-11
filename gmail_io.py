@@ -9,6 +9,7 @@ Two accounts:
 """
 import base64
 import re
+import time
 from email.message import EmailMessage
 from functools import lru_cache
 from pathlib import Path
@@ -85,10 +86,22 @@ def _trim_quoted(body):
     return "\n".join(out).strip()
 
 
+def _retry_quota(fn, tries=6):
+    from googleapiclient.errors import HttpError
+    for attempt in range(tries):
+        try:
+            return fn()
+        except HttpError as e:
+            if e.resp.status in (403, 429) and attempt < tries - 1:
+                time.sleep(15 * (attempt + 1))
+            else:
+                raise
+
+
 def get_thread(account, thread_id, trim_quotes=True):
     """Thread as a list of {date, from, to, cc, subject, body}, oldest first."""
-    t = service(account).users().threads().get(
-        userId="me", id=thread_id, format="full").execute()
+    t = _retry_quota(lambda: service(account).users().threads().get(
+        userId="me", id=thread_id, format="full").execute())
     msgs = []
     for m in t.get("messages", []):
         p = m["payload"]
