@@ -340,17 +340,40 @@ def simulate_send_and_process(custom=None, pool=None, on_event=print_event,
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["status", "ingest", "simulate"])
+    ap.add_argument("cmd", choices=["status", "ingest", "simulate", "sql",
+                                     "gmail-search", "gmail-thread"])
+    ap.add_argument("arg", nargs="?", help="sql text / search query / thread id")
     ap.add_argument("--pool")
     ap.add_argument("--custom-from")
     ap.add_argument("--custom-subject")
     ap.add_argument("--custom-body")
     args = ap.parse_args()
     db = dblib.connect()
+    if args.cmd == "sql":
+        print(run_tool("sql_query", {"sql": args.arg or ""}))
+        return
+    if args.cmd == "gmail-search":
+        print(run_tool("gmail_search", {"query": args.arg or "", "limit": 15}))
+        return
+    if args.cmd == "gmail-thread":
+        print(run_tool("gmail_get_thread", {"thread_id": args.arg or ""}))
+        return
     if args.cmd == "status":
         for t in list(dblib.load_schema()["tables"]) + ["catchall", "ingest_log"]:
             n = db.execute(f'SELECT COUNT(*) AS c FROM "{t}"')[0]["c"]
             print(f"{t}: {n}")
+        import os
+        fired = Path(str(DEFAULT_POOL) + ".fired.json")
+        n_fired = len(json.loads(fired.read_text())) if fired.exists() else 0
+        n_pool = sum(1 for l in DEFAULT_POOL.read_text().splitlines() if l.strip())
+        print(f"scenario pool: {n_pool - n_fired} of {n_pool} remaining")
+        sid = os.environ.get("SHEET_ID", "")
+        if not sid:
+            for line in (HERE.parent / ".env").read_text().splitlines():
+                if line.startswith("SHEET_ID="):
+                    sid = line.split("=", 1)[1].strip()
+        if sid:
+            print(f"sheet: https://docs.google.com/spreadsheets/d/{sid}")
     elif args.cmd == "ingest":
         results = ingest_new(db)
         for r in results:
