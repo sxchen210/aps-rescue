@@ -210,12 +210,17 @@ def main():
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--limit", type=int, default=0,
                     help="render only the first N threads (smoke test)")
+    ap.add_argument("--src", help="specs file to render")
+    ap.add_argument("--out", help="output corpus file")
+    ap.add_argument("--gt", help="ground truth file for persona lookup")
     args = ap.parse_args()
 
-    src = Path("out/universe/scenarios.jsonl" if args.scenarios else "out/universe/specs.jsonl")
-    out_path = Path("out/scenario_corpus.jsonl" if args.scenarios else "out/corpus.jsonl")
+    src = Path(args.src) if args.src else Path(
+        "out/universe/scenarios.jsonl" if args.scenarios else "out/universe/specs.jsonl")
+    out_path = Path(args.out) if args.out else Path(
+        "out/scenario_corpus.jsonl" if args.scenarios else "out/corpus.jsonl")
     specs = [json.loads(l) for l in src.read_text().splitlines() if l.strip()]
-    gt = json.loads(Path("out/universe/ground_truth.json").read_text())
+    gt = json.loads(Path(args.gt or "out/universe/ground_truth.json").read_text())
     people = {h["id"]: h for h in gt["households"]}
 
     done = set()
