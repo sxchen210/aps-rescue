@@ -161,13 +161,13 @@ def main():
 
     # ---- coverage ---------------------------------------------------------
     il = rows("ingest_log")
-    ok = [r for r in il if r["ok"]]
-    with_ops = sum(1 for r in ok if (r["ops"] or 0) > 0)
+    ok = [r for r in il if int(r["ok"] or 0)]
+    with_ops = sum(1 for r in ok if int(r["ops"] or 0) > 0)
     with_tag = sum(1 for r in ok if r["catchall_tag"])
     report["coverage"] = {
         "processed_ok": len(ok), "failed": len(il) - len(ok),
         "emails_with_ops": with_ops, "emails_catchalled": with_tag,
-        "both": sum(1 for r in ok if (r["ops"] or 0) > 0 and r["catchall_tag"]),
+        "both": sum(1 for r in ok if int(r["ops"] or 0) > 0 and r["catchall_tag"]),
         "anomaly_emails": sum(1 for r in ok if r["anomalies"]),
         "catchall_rows": len(rows("catchall"))}
 

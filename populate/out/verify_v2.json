@@ -1,0 +1,112 @@
+{
+ "tables": {
+  "dogs": {
+   "gt_dogs": 90,
+   "found": 89,
+   "missing": [
+    "Monsoon"
+   ],
+   "hallucinated": [
+    "Sferic",
+    "Tuff"
+   ],
+   "fields": {
+    "adopter_name": {
+     "acc": 1.0,
+     "n": 20
+    },
+    "adoption_appt_date": {
+     "acc": 1.0,
+     "n": 20
+    },
+    "age_group": {
+     "acc": 0.899,
+     "n": 89
+    },
+    "bio_received": {
+     "acc": 0.876,
+     "n": 89
+    },
+    "breed": {
+     "acc": 0.899,
+     "n": 89
+    },
+    "foster_name": {
+     "acc": 0.928,
+     "n": 69
+    },
+    "intake_date": {
+     "acc": 0.899,
+     "n": 89
+    },
+    "photos_received": {
+     "acc": 0.899,
+     "n": 89
+    },
+    "posted": {
+     "acc": 0.899,
+     "n": 89
+    },
+    "sex": {
+     "acc": 0.899,
+     "n": 89
+    },
+    "size": {
+     "acc": 0.899,
+     "n": 89
+    },
+    "spay_neuter_date": {
+     "acc": 1.0,
+     "n": 49
+    },
+    "status": {
+     "acc": 0.978,
+     "n": 89
+    }
+   }
+  },
+  "fosters": {
+   "gt_people_who_fostered": 98,
+   "found": 98,
+   "rows_in_db": 105,
+   "vacation_marked_away": "1/4",
+   "moved_marked_departed": "0/1"
+  },
+  "foster_applications": {
+   "gt": 40,
+   "found": 40,
+   "status_correct": 33,
+   "rows_in_db": 40
+  },
+  "events": {
+   "gt": [
+    "2026-09-05",
+    "2026-09-19",
+    "2026-10-03",
+    "2026-10-17"
+   ],
+   "found": [
+    "2026-09-05",
+    "2026-09-19",
+    "2026-10-03",
+    "2026-10-17"
+   ],
+   "all_present": true
+  },
+  "event_rsvps": {
+   "gt_confirmed": 56,
+   "found_matching": 56,
+   "rows_in_db": 85
+  }
+ },
+ "coverage": {
+  "processed_ok": 953,
+  "failed": 0,
+  "emails_with_ops": 852,
+  "emails_catchalled": 102,
+  "both": 1,
+  "anomaly_emails": 0,
+  "catchall_rows": 102
+ },
+ "notes": []
+}

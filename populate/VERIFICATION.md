@@ -64,3 +64,18 @@ per the tie rule (cheaper, faster). Record: `out/verify_medium.json`,
 - Status labels are as-of-last-email; queries about "now" should prefer
   dated fields where present (the schema was designed accordingly).
 - Single run, single seed corpus; numbers are for this fixture.
+
+## v2 — after the week-1 extension injection (2026-10-12)
+
+953 emails processed (831 seed + 121 injected + 1 live test), zero
+failures. Against the as-of-Oct-16 ground truth: dogs **89/90** (Monsoon
+remains the one name-only miss), status **97.8%**, vet dates and adoption
+fields **100%**, fosters **98/98**, applications 40/40 found, events 4/4,
+RSVPs 56/56. Per-email answer keys during injection: **60/60 fully
+matched** (15 acceptance + 45 batch). Disclosures: (1) two extension
+dogs ("Sferic", "Tuff") appear in medical emails dated before their
+generated intake week — a generator causality slip; the extractor
+correctly created rows from the emails, so they score as "ahead of
+truth," not inventions; (2) the verifier's application-status map lacks
+the new "received" outcome, so 7 correct rows show unscored; (3) the
+away/departed status-label lag persists (dates correct, 4/4).
