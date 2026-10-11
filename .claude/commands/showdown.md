@@ -13,8 +13,8 @@ Shared task text for both arms (fill in the question):
 foster-based dog rescue whose entire operation runs through one shared
 Gmail inbox. Answer precisely and completely: name names, give numbers,
 state HOW you know. Budget: at most 20 tool commands. All commands run from
-the repo root with: set -a && . ./.env && set +a && cd app && APS_DB=turso
-python3 pipeline.py <cmd>. You may use ONLY the commands listed below —
+the repo root with: cd ${CLAUDE_PLUGIN_ROOT:-.} && set -a && . ./.env && set +a && cd app &&
+APS_DB=turso python3 pipeline.py <cmd>. You may use ONLY the commands listed below —
 do NOT read repository files (especially nothing under simulation/), do not
 use any other tools. Question: <QUESTION>"
 
@@ -34,3 +34,8 @@ When both return, render:
    facts diverge, and how the user can verify (Sheet tab / provenance).
    If the arms tie, SAY they tie — single-thread questions are genuinely
    search-friendly, and honest ties make the wins credible.
+
+If `.env` is missing at that root (plugin installed from GitHub without
+secrets), tell the user: the tokens live in their project checkout — open
+the repo folder directly, or copy `.env`, `token_apsdemo.json` into the
+plugin root shown by `echo ${CLAUDE_PLUGIN_ROOT}`.

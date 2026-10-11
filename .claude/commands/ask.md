@@ -10,7 +10,7 @@ libSQL; built automatically from the inbox). Steps:
 1. Read `discovery/schema.json` for tables/columns/keys. (Only this file —
    never anything under simulation/.)
 2. Compose one or more read-only SQL queries. Execute each with:
-   `set -a && . ./.env && set +a && cd app && APS_DB=turso python3 pipeline.py sql "<QUERY>"`
+   `cd ${CLAUDE_PLUGIN_ROOT:-.} && set -a && . ./.env && set +a && cd app && APS_DB=turso python3 pipeline.py sql "<QUERY>"`
 3. Show the user each SQL query and a compact view of the rows, then answer
    the question in plain language — names and numbers, not vibes. Every row
    carries provenance (source_email_id, updated_at): offer to pull the
@@ -29,3 +29,8 @@ Good example questions (the classes where tables beat search): who's free
 right now; who hasn't RSVPed for the next event; dogs ready to post but not
 posted; adoptions last month + average days intake->adoption; where is a
 specific dog after multiple moves.
+
+If `.env` is missing at that root (plugin installed from GitHub without
+secrets), tell the user: the tokens live in their project checkout — open
+the repo folder directly, or copy `.env`, `token_apsdemo.json` into the
+plugin root shown by `echo ${CLAUDE_PLUGIN_ROOT}`.
