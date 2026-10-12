@@ -22,7 +22,7 @@ same commit.
 - Secrets live at repo root, all gitignored (`.env`, `*credentials*.json`,
   `token*.json`, Turso token). Never echo or commit them. Token files may
   be legitimately absent (distributed via submission portal) — fail with a
-  pointer to DEMO.md, not a traceback.
+  pointer to README.md, not a traceback.
 
 ## Git
 

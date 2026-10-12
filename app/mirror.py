@@ -30,7 +30,7 @@ def sheet_id():
             if line.startswith("SHEET_ID="):
                 sid = line.split("=", 1)[1].strip()
     if not sid:
-        raise RuntimeError("SHEET_ID not set (see DEMO.md)")
+        raise RuntimeError("SHEET_ID not set (see README.md)")
     return sid
 
 

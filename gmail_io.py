@@ -28,7 +28,7 @@ ACCOUNTS = {
 def _creds(account):
     token_path = Path(ACCOUNTS[account])
     if not token_path.exists():
-        raise RuntimeError(f"{token_path} missing — run the auth flow for '{account}' first (see DEMO.md)")
+        raise RuntimeError(f"{token_path} missing — run the auth flow for '{account}' first (see README.md)")
     creds = Credentials.from_authorized_user_file(str(token_path))
     if creds.expired and creds.refresh_token:
         creds.refresh(Request())

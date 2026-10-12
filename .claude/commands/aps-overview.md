@@ -54,4 +54,4 @@ head-to-head; exhibits in the repo).
 5. `/aps-showdown "any small dogs available right now?"` — the head-to-head:
    same model with and without the tables, side by side.
 
-Full reference, access tiers, evidence map, and honest caveats: DEMO.md.
+Full reference, access tiers, evidence map, and honest caveats: README.md.

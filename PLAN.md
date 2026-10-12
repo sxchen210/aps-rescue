@@ -127,7 +127,7 @@ D. Package pool: rendered text + spec answer keys + deterministic
   `simulation/` only to pick the next scenario email and to grade AFTER
   extraction (live scorecard: applied ops vs the scenario spec's facts).
   The ingest path imports nothing under `simulation/`; Haiku never sees
-  specs or ground truth. DEMO.md pre-empts the "answers were in the repo"
+  specs or ground truth. README.md pre-empts the "answers were in the repo"
   question by pointing at this separation + the discovery transcripts.
 - **Thought-process narrative** (terminal + Activity tab), five beats per
   email: the email that arrived → trimmed Haiku thinking excerpt → the ops
@@ -180,7 +180,7 @@ D. Package pool: rendered text + spec answer keys + deterministic
   except the question: `/aps-simulate-email` (fire next pool scenario),
   `/aps-ingest` (catch-up: processes anything that arrived, incl. emails
   interviewers send directly), `/aps-ask "…"`, `/aps-showdown "…"`, `/aps-status`.
-  DEMO.md + a recorded GIF as the no-setup
+  README.md + a recorded GIF as the no-setup
   fallback.
 
 ## Phase 5 — Hygiene (no unattended automation — by decision)
@@ -198,6 +198,6 @@ Turso token scoped to the demo DB; a "reset the demo world" note.
 - [x] Sheets API enabled; token re-authed with spreadsheets scope; mirror
       sheet created + SHEET_ID in .env; first refresh live
 - [x] Turso push reviewed and executed (1,187 rows verified)
-- [ ] Portal bundle: `token_apsdemo.json` + Turso token + DEMO.md pointer
+- [ ] Portal bundle: `token_apsdemo.json` + Turso token + README.md pointer
 - [ ] Add interviewer delegates to the APS Gmail when known
 - [ ] Set token revocation date after the interview window

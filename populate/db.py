@@ -95,10 +95,10 @@ def connect(path=None):
             return TursoDB()
         snap = HERE / "out" / "state_v2.sqlite"
         if not snap.exists():
-            raise RuntimeError(f"{snap} missing — re-clone or see DEMO.md")
+            raise RuntimeError(f"{snap} missing — re-clone or see README.md")
         print(f"[db] Turso credentials missing — falling back to the shipped "
               f"read-only snapshot ({snap.name}); live/shared state needs the "
-              f"portal .env (see DEMO.md)")
+              f"portal .env (see README.md)")
         return LocalDB(str(snap), readonly=True)
     return LocalDB(path or str(HERE / "out" / "state.sqlite"))
 
