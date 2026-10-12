@@ -1,0 +1,60 @@
+{
+ "seed": 20261012,
+ "note": "NEVER show this file to the judge",
+ "map": [
+  {
+   "package_q": 1,
+   "qid": "q1",
+   "response_1": "A",
+   "response_2": "B"
+  },
+  {
+   "package_q": 2,
+   "qid": "q2",
+   "response_1": "A",
+   "response_2": "B"
+  },
+  {
+   "package_q": 3,
+   "qid": "q3",
+   "response_1": "A",
+   "response_2": "B"
+  },
+  {
+   "package_q": 4,
+   "qid": "q4",
+   "response_1": "B",
+   "response_2": "A"
+  },
+  {
+   "package_q": 5,
+   "qid": "q5",
+   "response_1": "B",
+   "response_2": "A"
+  },
+  {
+   "package_q": 6,
+   "qid": "q6",
+   "response_1": "B",
+   "response_2": "A"
+  },
+  {
+   "package_q": 7,
+   "qid": "q7",
+   "response_1": "B",
+   "response_2": "A"
+  },
+  {
+   "package_q": 8,
+   "qid": "q8",
+   "response_1": "A",
+   "response_2": "B"
+  },
+  {
+   "package_q": 9,
+   "qid": "q9",
+   "response_1": "B",
+   "response_2": "A"
+  }
+ ]
+}

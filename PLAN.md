@@ -148,7 +148,9 @@ D. Package pool: rendered text + spec answer keys + deterministic
   conflict, match the sender's brevity and sign-off.
 - **Validated (read-only QA comparison, 9 pre-registered questions × both
   arms, same model/budget — `app/out/QA_COMPARE_REPORT.md`):** B 3 · tie 6 ·
-  A 0. Clear win on derived roster state (~2.5× recall, equal precision,
+  A 0 (author-graded; a blinded third-party re-grade package is built —
+  `app/validation/third_party/`, counterbalanced, arms anonymized — and its
+  tally will be reported as-is once run). Clear win on derived roster state (~2.5× recall, equal precision,
   emergent map-then-verify + self-flagged DB errors); ties where the org's
   own mail caches answers and on entity-name sagas (search reconstructs
   those — demo centerpieces must be derived/drift questions, not named-dog
