@@ -5,12 +5,14 @@ as the extractor emitted them, except booleans, which are canonicalized to
 '1'/'0' at apply time) plus harness-owned system tables (catchall,
 ingest_log). Applies envelope ops with the locked semantics: normalized
 canonical-key lookup decides create-vs-update; per-field merge; unknown
-fields dropped and logged; provenance (source_email_id, updated_at) stamped
-on every write.
+fields dropped and logged; explicit "clear" list nulls stated-gone fields
+(never canonical keys; nulls in "set" still mean unknown and are dropped);
+provenance (source_email_id, updated_at) stamped on every write.
 
 Backends: local SQLite (default; populate runs locally first) and Turso over
 plain HTTP (same interface) selected by APS_DB=turso.
 """
+import hashlib
 import json
 import os
 import re
@@ -116,6 +118,39 @@ def create_tables(db, schema):
                "anomalies TEXT, error TEXT)")
 
 
+def check_schema_integrity(db, schema=None):
+    """Refuse to ingest over a drifted or hand-edited schema.
+
+    The prototype's schema is FROZEN after populate: there is no migration
+    path by design. Two guards, both detection-not-prevention: (1) hash —
+    schema.json must match the digest the discovery harness emitted beside
+    it; (2) parity — every table's live columns must equal the schema's
+    columns plus the system-stamped ones. Production would need signed
+    schema artifacts and migrations run only by the harness.
+    """
+    raw = SCHEMA_PATH.read_bytes()
+    digest_path = SCHEMA_PATH.parent / "schema.sha256"
+    if not digest_path.exists():
+        raise RuntimeError(f"{digest_path} missing — schema integrity "
+                           "cannot be verified (see README.md)")
+    if hashlib.sha256(raw).hexdigest() != digest_path.read_text().strip():
+        raise RuntimeError(
+            "schema.json does not match the digest the discovery harness "
+            "emitted — hand-edits are not a sanctioned path; re-run the "
+            "harness (discovery.py --refine) instead")
+    schema = schema or load_schema()
+    for name, t in schema["tables"].items():
+        have = {r["name"] for r in
+                db.execute(f"SELECT name FROM pragma_table_info('{name}')")}
+        want = set(t["columns"]) | {"id", "source_email_id", "updated_at"}
+        if have and have != want:
+            raise RuntimeError(
+                f"schema/DB drift on table {name!r} (missing "
+                f"{sorted(want - have)}, extra {sorted(have - want)}) — the "
+                "prototype's schema is frozen and has no migration path; "
+                "restore the committed schema or rebuild the table state")
+
+
 def processed_ids(db):
     return {r["gmail_id"] for r in db.execute("SELECT gmail_id FROM ingest_log WHERE ok = 1")}
 
@@ -163,17 +198,41 @@ def apply_op(db, schema, op, email_id, email_ts):
         return json.dumps(v) if isinstance(v, (list, dict)) else v
     fields = {k: _canon(v)
               for k, v in fields.items() if v is not None and str(v).strip() != ""}
-    if not fields:
+    # "clear": fields whose recorded value the email states no longer holds
+    # (nulls/empties in "set" stay dropped — omission remains the unknown
+    # channel; clearing is explicit). Canonical keys are never cleared.
+    clears = op.get("clear") or []
+    if not isinstance(clears, list):
+        anomalies.append(f"clear is not a list in {table} op")
+        clears = []
+    kept = []
+    for c in map(str, clears):
+        if c not in valid:
+            anomalies.append(f"dropped unknown clear {table}.{c}")
+        elif c in keys:
+            anomalies.append(f"refused clear of canonical key {table}.{c}")
+        elif c in fields:
+            anomalies.append(f"clear ignored for {table}.{c} (also set)")
+        else:
+            kept.append(c)
+    clears = kept
+    if not fields and not clears:
         return "skipped_empty", anomalies
     row = find_row(db, table, keys, match)
+    if row is None and clears and set(fields) <= set(match):
+        # a pure cancellation must not conjure a row for an unknown entity
+        return "skipped_clear_no_row", anomalies + [f"clear on nonexistent {table} row"]
     fields["source_email_id"] = email_id
     fields["updated_at"] = email_ts
     if row is None:
+        if clears:
+            anomalies.append(f"clear ignored on create: {table}.{', '.join(clears)}")
         cols = ", ".join(f'"{c}"' for c in fields)
         ph = ", ".join("?" for _ in fields)
         db.execute(f'INSERT INTO "{table}" ({cols}) VALUES ({ph})', list(fields.values()))
         return "create", anomalies
-    sets = ", ".join(f'"{c}" = ?' for c in fields)
+    assign = {**fields, **{c: None for c in clears}}
+    sets = ", ".join(f'"{c}" = ?' for c in assign)
     db.execute(f'UPDATE "{table}" SET {sets} WHERE id = ?',
-               list(fields.values()) + [row["id"]])
+               list(assign.values()) + [row["id"]])
     return "update", anomalies

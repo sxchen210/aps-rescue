@@ -99,7 +99,20 @@ email the address and run `/aps-ingest` to watch your message become rows.)
   two dogs appear in mail slightly before their intake week (generator
   slip); away/departed status labels can lag their — correctly extracted —
   dates. Hand-fixing any of this would break the "built automatically"
-  claim; finding it took one query each, which is rather the point.
+  claim; finding it took one query each, which is rather the point. One
+  more: a fallen-through adoption left a stale appointment date and
+  adopter name on Moraine's row — when that email was ingested, the ops
+  contract had no way to remove a value. The contract has since gained an
+  explicit `clear` verb; Moraine's row stays as ingested, the before-case.
+- **Two apply-layer limits, known and left in:** a delayed email processed
+  after newer mail can overwrite newer state — batches apply in date
+  order, but there is no per-field temporal guard (the dated-fields rule
+  softens this: queries prefer stated dates over status labels). And the
+  discovered schema is frozen: adding a field after populate has no
+  migration path — ingest checks the schema against its discovery-emitted
+  digest and the live tables, and refuses drift rather than migrating.
+  Production would need signed schema artifacts and harness-run
+  migrations.
 - **Scale note:** the corpus is ~950 emails and the search arm already hit
   its budget ceiling there; the reference inbox this simulation is modeled
   on holds 117,000+. We did not test at that volume — the expectation that

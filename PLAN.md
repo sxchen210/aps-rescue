@@ -62,10 +62,12 @@ plus 7 catchall tags), `instructions.md` (Haiku playbook, worked examples),
 
 **The envelope contract** (embedded in the mission; what extraction emits
 and Phase 3 consumes): `{"ops": [{"table", "match": {canonical keys},
-"set": {field: value}, "note"?: ≤1 line}], "catchall"?: {"tag"}}` — plus
-the dated-fields rule (stated dates, never the email's own timestamp),
-omit-never-guess, and create-vs-update decided by the harness, not the
-model.
+"set": {field: value}, "clear"?: [field, ...], "note"?: ≤1 line}],
+"catchall"?: {"tag"}}` — plus the dated-fields rule (stated dates, never
+the email's own timestamp), omit-never-guess (nulls/empties in `set` are
+dropped; explicit `clear` is the only removal channel, for stated-gone
+facts — never canonical keys, and a pure cancellation never creates a
+row), and create-vs-update decided by the harness, not the model.
 
 **Process rules (standing):** structural sanity gate between discovery and
 populate; degenerate output or operator feedback → re-run the harness
@@ -178,6 +180,19 @@ D. Package pool: rendered text + spec answer keys + deterministic
   carried mixed 'True'/'1' spellings from the Turso str() write path and
   was normalized (verify re-run: identical). `status` and the mirror no
   longer crash when `.env` is absent.
+- **Review round 2 (2026-10-12, decisions recorded):** (1) the envelope
+  gains `"clear"` — cancellations/fall-throughs could previously never
+  remove a value (live exhibit: Moraine's stale appointment + adopter,
+  left unedited as the before-case). Harness support landed + unit-tested;
+  instructions updated via Fable refine (sanctioned path); cancellation
+  scenarios with `clears_includes` keys to join the pool. (2) Schema is
+  FROZEN for the prototype — no migration path **by decision**; ingest now
+  verifies schema.sha256 (emitted by the discovery harness) and schema/DB
+  column parity, refusing drift cleanly instead of failing mid-apply.
+  (3) Out-of-order apply is recognized and deliberately NOT guarded: a
+  delayed older email can overwrite newer state across batches; the
+  dated-fields rule mitigates downstream; documented in README. (4)
+  Provenance stays row-level (accepted limit, documented).
 - Plugin commands are thin wrappers over `app/` and take no arguments
   except the question: `/aps-simulate-email` (fire next pool scenario),
   `/aps-ingest` (catch-up: processes anything that arrived, incl. emails

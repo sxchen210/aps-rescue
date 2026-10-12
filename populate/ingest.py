@@ -113,6 +113,7 @@ def main():
     schema = dblib.load_schema()
     db = dblib.connect(args.db)
     dblib.create_tables(db, schema)
+    dblib.check_schema_integrity(db, schema)
     done = dblib.processed_ids(db)
 
     instructions = (HERE.parent / "discovery" / "instructions.md").read_text()

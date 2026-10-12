@@ -7,6 +7,7 @@ DISCOVERY_NOTES.md); the full tool transcript goes to discovery_log.jsonl.
 
 Usage: set -a && . ./.env && set +a && python3 discovery.py
 """
+import hashlib
 import json
 import sys
 import time
@@ -30,6 +31,7 @@ ENVELOPE = """{
     {"table": "<table name>",
      "match": { <the table's canonical key fields and values> },
      "set": { <field>: <value>, ... },
+     "clear": [ <field>, ... ],   // OPTIONAL: fields whose recorded value no longer holds
      "note": "<OPTIONAL, one short line max>"}
   ],
   "catchall": {"tag": "<short-slug>"}   // only when the email fits no workflow
@@ -81,6 +83,12 @@ sent date. Emails routinely announce future events and reference past ones.
    - Omit what the email does not state — never guess or fill defaults. \
 Setting only one field is fine. Emitting zero ops with a catchall tag is \
 the correct output for noise.
+   - CANCELLATION RULE: when an email states that a previously recorded \
+fact no longer holds (an appointment canceled, an adoption fallen through, \
+a placement withdrawn), put those field NAMES in "clear" — never overwrite \
+a value with placeholder text and never leave a stale value standing. \
+"clear" is only for facts stated to be gone; unknowns are simply omitted, \
+and canonical key fields are never cleared.
    - Whether an op creates a new row or updates an existing one is decided \
 by the system via canonical-key lookup — the extractor never decides this.
    - Include 4-6 worked examples in the instructions: typical emails of \
@@ -199,7 +207,13 @@ def main():
             "then call submit_artifacts ONCE with the COMPLETE updated artifact set "
             "(full documents, not diffs). All original contract rules still apply."
         )
-        log = open(HERE / "discovery_log_refine.jsonl", "w")
+        # never clobber an earlier refine's committed transcript
+        log_path = HERE / "discovery_log_refine.jsonl"
+        n = 2
+        while log_path.exists():
+            log_path = HERE / f"discovery_log_refine{n}.jsonl"
+            n += 1
+        log = open(log_path, "w")
         messages = [{"role": "user", "content": opener}]
     else:
         log = open(HERE / "discovery_log.jsonl", "w")
@@ -291,7 +305,12 @@ def main():
                                                "Call submit_artifacts again with ALL three fields complete."})
                     continue
                 schema = tu.input["schema"]
-                (HERE / "schema.json").write_text(json.dumps(schema, indent=2, ensure_ascii=False))
+                sj = json.dumps(schema, indent=2, ensure_ascii=False)
+                (HERE / "schema.json").write_text(sj)
+                # integrity anchor: the pipeline refuses a schema.json whose
+                # bytes this harness did not emit (hand-edits, outside writes)
+                (HERE / "schema.sha256").write_text(
+                    hashlib.sha256(sj.encode()).hexdigest() + "\n")
                 (HERE / "instructions.md").write_text(tu.input["instructions_md"])
                 (HERE / "DISCOVERY_NOTES.md").write_text(tu.input["notes_md"])
                 results.append({"type": "tool_result", "tool_use_id": tu.id,

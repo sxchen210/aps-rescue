@@ -99,6 +99,7 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
     done = dblib.processed_ids(db)
     schema = dblib.load_schema()
     dblib.create_tables(db, schema)
+    dblib.check_schema_integrity(db, schema)
 
     todo_ids = [m for m in _list_all_ids(svc) if m["id"] not in done]
     if not todo_ids:
@@ -164,7 +165,8 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
                 anomalies += an
                 if action in ("create", "update"):
                     applied.append({"action": action, "table": op.get("table"),
-                                    "match": op.get("match"), "set": op.get("set")})
+                                    "match": op.get("match"), "set": op.get("set"),
+                                    "clear": op.get("clear") or []})
             tag = (env.get("catchall") or {}).get("tag")
             if not applied and not tag:
                 tag, anomalies = "other", anomalies + ["defaulted to catchall:other"]
@@ -178,7 +180,9 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
                     usage[0], usage[1], usage[2], len(applied), tag,
                     "; ".join(anomalies) or None, err])
         dec = "\n".join(f"{a['action'].upper()} {a['table']} · match {a['match']} · set "
-                        f"{json.dumps(a['set'], ensure_ascii=False)[:180]}" for a in applied) \
+                        f"{json.dumps(a['set'], ensure_ascii=False)[:180]}"
+                        + (f" · clear {a['clear']}" if a["clear"] else "")
+                        for a in applied) \
               or f"(no table ops) catchall tag: {tag}"
         on_event("decision", dec)
         results.append({"email": m, "applied": applied, "catchall": tag, "error": err})
@@ -320,9 +324,11 @@ def simulate_send_and_process(custom=None, pool=None, on_event=print_event,
                 for a in r["applied"]]
         exp = sc["expected_ops"]
         hits = sum(1 for e in exp if any(
-            a["table"] == e["table"] and all(
-                dblib.norm_key(a["match"].get(k, "")) == dblib.norm_key(v)
-                for k, v in e["match"].items()) for a in mine))
+            a["table"] == e["table"]
+            and all(dblib.norm_key(a["match"].get(k, "")) == dblib.norm_key(v)
+                    for k, v in e["match"].items())
+            and all(c in (a.get("clear") or []) for c in e.get("clears_includes", []))
+            for a in mine))
         score = f"scorecard: {hits}/{len(exp)} expected ops landed"
         on_event("info", score)
 
@@ -359,6 +365,14 @@ def main():
         except RuntimeError as e:  # missing token etc. — pointer, not traceback
             print(f"ERROR: {e}")
         return
+    try:
+        _run_db_cmd(args)
+    except RuntimeError as e:  # schema drift, missing creds — pointer, not traceback
+        print(f"ERROR: {e}")
+        sys.exit(1)
+
+
+def _run_db_cmd(args):
     db = dblib.connect()
     if args.cmd == "status":
         for t in list(dblib.load_schema()["tables"]) + ["catchall", "ingest_log"]:
