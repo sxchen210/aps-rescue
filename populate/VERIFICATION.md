@@ -25,6 +25,11 @@ the entire three-month table population.
 
 ## Reading the imperfect numbers honestly
 
+- **Status is policy-scored, not exact-match** — the verifier's STATUS_OK
+  map accepts `pending_adoption` for ground-truth `adopted` and
+  `needs_foster`/`in_foster` for `intake`. The policy, why it exists, and
+  the strict-exact numbers are spelled out in the v2 section below; it
+  applies to this run's 97.4% as well.
 - **The ~88.5% cluster** (sex, age, size, breed, intake_date, photos/posted
   booleans ≈ 69/78): the 9 misses are all **pre-corpus dogs** — placed before
   the mailbox window, so their intake rosters, photos, and bios were never in
@@ -69,13 +74,42 @@ per the tie rule (cheaper, faster). Record: `out/verify_medium.json`,
 
 953 emails processed (831 seed + 121 injected + 1 live test), zero
 failures. Against the as-of-Oct-16 ground truth: dogs **89/90** (Monsoon
-remains the one name-only miss), status **97.8%**, vet dates and adoption
-fields **100%**, fosters **98/98**, applications 40/40 found, events 4/4,
-RSVPs 56/56. Per-email answer keys during injection: **60/60 fully
-matched** (15 acceptance + 45 batch). Disclosures: (1) two extension
+remains the one name-only miss), status **97.8% under the policy stated
+below** (strict-exact **82.0%**), vet dates and adoption fields **100%**,
+fosters **98/98**, applications 40/40 found, events 4/4, RSVPs 56/56.
+Per-email answer keys during injection: **60/60 fully matched** (15
+acceptance + 45 batch).
+
+**The status scoring policy.** The verifier (STATUS_OK in `verify.py`)
+accepts `pending_adoption` where ground truth says `adopted`, and
+`needs_foster`/`in_foster` where it says `intake`. In v2 that acceptance
+covers exactly **14 of 89 dogs** — adoptions the simulator knows completed
+but whose confirmations were never emailed; the DB holds the last
+evidenced state, which for those 14 is `pending_adoption`. So the two
+numbers measure different things: **97.8%** is agreement with what the
+mailbox could know; **82.0%** (73/89 strict-exact) is agreement with
+current operational state, unconfirmed outcomes counted as wrong. (The 2
+dogs wrong under both policies have empty status — plain misses.) Other
+v2 per-field numbers: current foster **92.8%** (n=69), bio flag
+**87.6%**, photos flag 89.9%, posted 89.9% — a mix of facts absent from
+the corpus (pre-corpus dogs) and genuine extraction gaps. In short:
+extraction is near-perfect on facts the mail stated; where the mail went
+silent, the tables hold the last evidenced state, and those gaps are
+itemized above.
+
+Disclosures: (1) two extension
 dogs ("Sferic", "Tuff") appear in medical emails dated before their
 generated intake week — a generator causality slip; the extractor
 correctly created rows from the emails, so they score as "ahead of
 truth," not inventions; (2) the verifier's application-status map lacks
 the new "received" outcome, so 7 correct rows show unscored; (3) the
-away/departed status-label lag persists (dates correct, 4/4).
+away/departed status-label lag persists (dates correct, 4/4); (4) boolean
+serialization was normalized post-hoc (2026-10-11): the Turso HTTP write
+path stringified Python booleans, leaving `'True'` and `'1'` mixed in the
+same columns (49 values across 5 columns in the snapshot; 50 live) — a
+harness artifact that silently splits WHERE clauses. Spellings were
+normalized to `'1'`/`'0'` store-wide (live + snapshot), the write path now
+canonicalizes at apply time, and this verification was re-run after the
+change: byte-identical report. This is the only post-hoc mutation ever
+applied to the machine-built store, and it is serialization-only — no
+fact, row, or extraction judgment was touched.

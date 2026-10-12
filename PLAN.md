@@ -79,7 +79,9 @@ fosters are free right now?"); refine mode is this prototype's stand-in.*
 All 831 emails ingested serially by Haiku at effort medium (A/B vs high:
 tie; medium per rule): zero parse failures, zero anomalies, zero invented
 entities, $0.36 total (~$0.0004/email). Scores vs ground truth: dogs 78/79
-(status 97.4%, vet dates 49/49, adoption appts 20/20), fosters 90/90,
+(status 97.4% under the stated equivalence policy — strict-exact and
+per-field numbers in VERIFICATION.md; vet dates 49/49, adoption appts
+20/20), fosters 90/90,
 applications 33/33 w/ correct lifecycle, events 3/3, RSVPs 56/56, coverage
 arithmetic exact. Misses decompose to pre-corpus facts (unknowable from
 email) + one name-only dog + status-label lag on future-dated absences
@@ -164,6 +166,16 @@ D. Package pool: rendered text + spec answer keys + deterministic
   per-call cost tracking for the long-term table-economics question).
   Degraded no-token tier: `/aps-ask` against a shipped read-only SQLite
   snapshot.
+- **Hardening (2026-10-11, post-review):** `app/tools.py` no longer
+  constructs a DB at import (lazy, via `connect()`), so the no-token
+  snapshot fallback actually engages — and the fallback opens the snapshot
+  read-only. The SQL guard is now real: one SELECT/WITH statement,
+  write/DDL verbs rejected anywhere in the statement (a prefix check
+  passes `WITH … UPDATE`), string literals/comments stripped before
+  scanning. Booleans are canonicalized to '1'/'0' at apply time; the store
+  carried mixed 'True'/'1' spellings from the Turso str() write path and
+  was normalized (verify re-run: identical). `status` and the mirror no
+  longer crash when `.env` is absent.
 - Plugin commands are thin wrappers over `app/` and take no arguments
   except the question: `/aps-simulate-email` (fire next pool scenario),
   `/aps-ingest` (catch-up: processes anything that arrived, incl. emails

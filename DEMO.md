@@ -65,23 +65,48 @@ email the address and run `/aps-ingest` to watch your message become rows.)
 
 - **The showdown's connector arm is an emulation** of search-and-read inbox
   access — steelmanned (same model, equal budget, diligence-maximizing
-  prompt, full traces committed). The claim it supports is architectural:
-  retrieval alone cannot enumerate absences, aggregate hundreds of threads,
-  or notice silently superseded conclusions. Screenshots of the actual
-  Gmail connector answering the same questions are in the exhibits folder.
+  prompt, full traces committed), with its own limits: its search tool
+  returns at most ~15–20 threads per query with no pagination, and both
+  arms run under a fixed tool budget. What the results show: maintaining
+  structured state improved completeness on the tested operational
+  questions within that interaction budget (3 wins / 6 ties / 0 losses on
+  the pre-registered QA set; the roster question in
+  `app/out/showdown_exhibit_1.md`). Retrieval tied on single-thread
+  lookups and entity-name sagas, and the ties are reported as ties.
+  Screenshots of the actual Gmail connector answering the same questions
+  are in the exhibits folder.
 - **Blindness:** schema discovery and all ingestion see only email —
   never the simulator's internals or ground truth (which exist solely for
   post-hoc scoring; the discovery transcripts prove the schema was earned).
+- **Provenance is row-level, last-writer:** each row stores the id of the
+  most recent email that changed it (`source_email_id`, `updated_at`) —
+  not per-field history. Update a dog's photos and the row now points at
+  the photo email, not at whichever email set its foster or vet date.
+  `ingest_log` records which emails were applied, but not per-field
+  attribution.
+- **Verification is policy-scored:** the headline status figure accepts
+  `pending_adoption` where ground truth says `adopted` but no confirmation
+  email ever arrived — 14 of 89 dogs in v2; strict-exact status is 82.0%.
+  Per-field accuracy varies (current foster 92.8%, bio flag 87.6%).
+  Extraction is near-perfect on facts the mail stated; facts the mail
+  never confirmed stay at their last evidenced state. Policy and full
+  per-field breakdown: `populate/VERIFICATION.md`.
 - **Known quirks, left in deliberately** (the DB is machine-built and
-  unedited): one dog exists only in RSVP mentions and has no row (Monsoon);
+  unedited — with one disclosed exception: boolean *spellings* were
+  normalized to `'1'`/`'0'` store-wide after a harness serialization bug
+  left `'True'` and `'1'` mixed in the same columns; facts untouched,
+  verification re-run identical — see VERIFICATION.md): one dog exists
+  only in RSVP mentions and has no row (Monsoon);
   one row's foster was mis-extracted as a coordinator ("Shasta" → "Dana");
   two dogs appear in mail slightly before their intake week (generator
   slip); away/departed status labels can lag their — correctly extracted —
   dates. Hand-fixing any of this would break the "built automatically"
   claim; finding it took one query each, which is rather the point.
 - **Scale note:** the corpus is ~950 emails and the search arm already hit
-  its budget ceiling; the reference inbox this simulation is modeled on
-  holds 117,000+. Search degrades with volume; `SELECT` does not.
+  its budget ceiling there; the reference inbox this simulation is modeled
+  on holds 117,000+. We did not test at that volume — the expectation that
+  the gap widens (a `SELECT` does not reread the mailbox; search-and-read
+  must) is argument, not measurement.
 
 ## 90-second recording shot list (for the walkthrough video)
 
@@ -92,7 +117,7 @@ email the address and run `/aps-ingest` to watch your message become rows.)
 3. `/aps-ask "which dogs are ready to post right now?"` — SQL + rows +
    answer.
 4. `/aps-showdown` finale — the two answers side by side; end on the
-   provenance click-through (Sheet cell → source email).
+   provenance click-through (Sheet row → the email that last touched it).
 
 ## Teardown
 

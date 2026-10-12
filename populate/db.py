@@ -1,7 +1,8 @@
 """DB layer for the populate phase.
 
 Creates tables from discovery/schema.json (all TEXT affinity; values stored
-as the extractor emitted them) plus harness-owned system tables (catchall,
+as the extractor emitted them, except booleans, which are canonicalized to
+'1'/'0' at apply time) plus harness-owned system tables (catchall,
 ingest_log). Applies envelope ops with the locked semantics: normalized
 canonical-key lookup decides create-vs-update; per-field merge; unknown
 fields dropped and logged; provenance (source_email_id, updated_at) stamped
@@ -31,8 +32,11 @@ def norm_key(value):
 
 
 class LocalDB:
-    def __init__(self, path):
-        self.conn = sqlite3.connect(path)
+    def __init__(self, path, readonly=False):
+        if readonly:
+            self.conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        else:
+            self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
 
     def execute(self, sql, args=()):
@@ -90,10 +94,12 @@ def connect(path=None):
         if os.environ.get("TURSO_DATABASE_URL") and os.environ.get("TURSO_AUTH_TOKEN"):
             return TursoDB()
         snap = HERE / "out" / "state_v2.sqlite"
+        if not snap.exists():
+            raise RuntimeError(f"{snap} missing — re-clone or see DEMO.md")
         print(f"[db] Turso credentials missing — falling back to the shipped "
               f"read-only snapshot ({snap.name}); live/shared state needs the "
               f"portal .env (see DEMO.md)")
-        return LocalDB(str(snap))
+        return LocalDB(str(snap), readonly=True)
     return LocalDB(path or str(HERE / "out" / "state.sqlite"))
 
 
@@ -146,7 +152,16 @@ def apply_op(db, schema, op, email_id, email_ts):
         fields.pop(k)
     if not all(k in match and str(match[k]).strip() for k in keys):
         return "skipped_incomplete_key", anomalies + [f"incomplete canonical key for {table}"]
-    fields = {k: (json.dumps(v) if isinstance(v, (list, dict)) else v)
+    def _canon(v):
+        # Booleans reach the store from two serializers (JSON true/false from
+        # the extractor, Python bools via str() on the Turso HTTP path) —
+        # canonicalize to '1'/'0' so one column never holds mixed spellings.
+        if isinstance(v, bool):
+            return "1" if v else "0"
+        if isinstance(v, str) and v.strip().casefold() in ("true", "false"):
+            return "1" if v.strip().casefold() == "true" else "0"
+        return json.dumps(v) if isinstance(v, (list, dict)) else v
+    fields = {k: _canon(v)
               for k, v in fields.items() if v is not None and str(v).strip() != ""}
     if not fields:
         return "skipped_empty", anomalies

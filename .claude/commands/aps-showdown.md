@@ -24,7 +24,8 @@ use any other tools. Question: <QUESTION>"
 - Arm B (tables) — Arm A's commands PLUS `sql "<SELECT …>"`, and paste the
   table/column list from discovery/schema.json into its prompt (read that
   file yourself; the subagent must not browse the repo). Tell it the DB was
-  built automatically from this same mailbox and may contain errors.
+  built automatically from this same mailbox and may contain errors, and
+  that boolean-ish columns store '1'/'0' as TEXT (compare with = '1').
 
 When both return, render:
 1. The question.

@@ -13,14 +13,15 @@ libSQL; built automatically from the inbox). Steps:
    `cd ${CLAUDE_PLUGIN_ROOT:-.} && set -a && . ./.env && set +a && cd app && APS_DB=turso python3 pipeline.py sql "<QUERY>"`
 3. Show the user each SQL query and a compact view of the rows, then answer
    the question in plain language — names and numbers, not vibes. Every row
-   carries provenance (source_email_id, updated_at): offer to pull the
-   source email for any claim via
+   carries row-level provenance (source_email_id, updated_at — the last
+   email that touched that ROW, not per-field history): offer to pull it via
    `python3 pipeline.py gmail-search "rfc822msgid:<...>"` or a subject search.
 4. Derived definitions to use: a foster is FREE when status='active', today
    is outside [away_start_date, away_end_date], and no dogs row points at
    them via foster_name or coverage_foster. A dog is READY TO POST when
-   photos_received and bio_received are true, it is fixed (spay_neuter_date
-   set or known fixed), and posted is not true.
+   photos_received = '1' and bio_received = '1', it is fixed
+   (spay_neuter_date set or known fixed), and posted is not '1'
+   (booleans are stored as '1'/'0' TEXT).
 5. If the tables genuinely can't answer, say so and name what's missing —
    don't guess. Note that the DB may contain extraction errors; cross-check
    email when a single fact is load-bearing.

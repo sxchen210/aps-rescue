@@ -24,8 +24,8 @@ META_TABS = {"Activity": ["time", "event"],
 
 def sheet_id():
     sid = os.environ.get("SHEET_ID")
-    if not sid:
-        env = Path(__file__).resolve().parent.parent / ".env"
+    env = Path(__file__).resolve().parent.parent / ".env"
+    if not sid and env.exists():
         for line in env.read_text().splitlines():
             if line.startswith("SHEET_ID="):
                 sid = line.split("=", 1)[1].strip()

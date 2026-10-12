@@ -348,16 +348,18 @@ def main():
     ap.add_argument("--custom-subject")
     ap.add_argument("--custom-body")
     args = ap.parse_args()
+    if args.cmd in ("sql", "gmail-search", "gmail-thread"):
+        name, inp = {
+            "sql": ("sql_query", {"sql": args.arg or ""}),
+            "gmail-search": ("gmail_search", {"query": args.arg or "", "limit": 15}),
+            "gmail-thread": ("gmail_get_thread", {"thread_id": args.arg or ""}),
+        }[args.cmd]
+        try:
+            print(run_tool(name, inp))
+        except RuntimeError as e:  # missing token etc. — pointer, not traceback
+            print(f"ERROR: {e}")
+        return
     db = dblib.connect()
-    if args.cmd == "sql":
-        print(run_tool("sql_query", {"sql": args.arg or ""}))
-        return
-    if args.cmd == "gmail-search":
-        print(run_tool("gmail_search", {"query": args.arg or "", "limit": 15}))
-        return
-    if args.cmd == "gmail-thread":
-        print(run_tool("gmail_get_thread", {"thread_id": args.arg or ""}))
-        return
     if args.cmd == "status":
         for t in list(dblib.load_schema()["tables"]) + ["catchall", "ingest_log"]:
             n = db.execute(f'SELECT COUNT(*) AS c FROM "{t}"')[0]["c"]
@@ -368,8 +370,9 @@ def main():
         n_pool = sum(1 for l in DEFAULT_POOL.read_text().splitlines() if l.strip())
         print(f"scenario pool: {n_pool - n_fired} of {n_pool} remaining")
         sid = os.environ.get("SHEET_ID", "")
-        if not sid:
-            for line in (HERE.parent / ".env").read_text().splitlines():
+        envf = HERE.parent / ".env"
+        if not sid and envf.exists():
+            for line in envf.read_text().splitlines():
                 if line.startswith("SHEET_ID="):
                     sid = line.split("=", 1)[1].strip()
         if sid:

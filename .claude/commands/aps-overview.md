@@ -19,8 +19,8 @@ property managers, small nonprofits — quietly encodes who/what/when state
 that today lives in scrollback and in one coordinator's head. The product
 gives such a team living tables built from their own mail: no CRM setup, no
 data entry, schema shaped by plain-language onboarding questions ("Will you
-need to find which fosters are free right now?"), every cell traceable to
-the email that set it.
+need to find which fosters are free right now?"), every row stamped with
+the email that last changed it.
 
 **This prototype** narrows that to one proof of concept. We set up a real
 shared Gmail inbox that mirrors the activity of a local animal rescue's
@@ -30,7 +30,10 @@ applications, returns, noise. Then the pipeline ran exactly as the product
 would: **Fable** went through the inbox and suggested the schema (blind —
 its full exploration transcript is committed), and **Haiku 5.5** ingested
 every email to build the state the database is in today, at ~$0.0004 per
-email, verified 97%+ against the simulation's ground truth. The demo shows
+email — scored field-by-field against the simulation's ground truth:
+near-perfect on facts the mail actually stated (dated fields 100%), with
+the gaps — facts no email ever confirmed — measured and itemized in
+`populate/VERIFICATION.md`. The demo shows
 that point in time — all mail so far processed — and then two things live:
 NEW emails being processed as they arrive, and the strength a database
 gives when answering questions: operational asks ("who's free?", "what's
