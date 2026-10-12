@@ -150,9 +150,15 @@ D. Package pool: rendered text + spec answer keys + deterministic
   conflict, match the sender's brevity and sign-off.
 - **Validated (read-only QA comparison, 9 pre-registered questions × both
   arms, same model/budget — `app/out/QA_COMPARE_REPORT.md`):** B 3 · tie 6 ·
-  A 0 (author-graded; a blinded third-party re-grade package is built —
-  `app/validation/third_party/`, counterbalanced, arms anonymized — and its
-  tally will be reported as-is once run). Clear win on derived roster state (~2.5× recall, equal precision,
+  A 0 (author-graded). Blinded third-party re-grade (GPT-6, 2026-10-12,
+  counterbalanced, answers-vs-key): **B 1 · tie 6 · A 1 · 1
+  unadjudicated** — all ties + the q1 centerpiece confirmed; q3
+  unadjudicated (the pre-disclosed GT annotation error was in the shipped
+  key); q4 flipped to A on B's confidently-asserted DB-inherited errors
+  (the "No question where table access hurt" line is retracted in the QA
+  report's addendum). Both tallies reported side by side, never averaged:
+  `app/validation/third_party/RESULTS.md`. Open: corrected-key q3
+  re-grade; second judge. Clear win on derived roster state (~2.5× recall, equal precision,
   emergent map-then-verify + self-flagged DB errors); ties where the org's
   own mail caches answers and on entity-name sagas (search reconstructs
   those — demo centerpieces must be derived/drift questions, not named-dog

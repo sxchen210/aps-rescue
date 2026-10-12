@@ -21,7 +21,9 @@ in `qa_expectations.json` (committed before the run).
 | 8 | summarize Hana's last email | A | tie |
 | 9 | Hoarfrost ear, verbatim | A | tie |
 
-**B 3 · tie 6 · A 0.** No question where table access hurt; several where
+**B 3 · tie 6 · A 0** (self-graded; a blinded third-party re-grade returned
+B 1 · tie 6 · A 1 · 1 unadjudicated — see the addendum at the end and
+`app/validation/third_party/RESULTS.md`). No question where table access hurt; several where
 it was decisive. Three of five pre-registered B-wins did NOT materialize as
 predicted — documented below, because the misses teach more than the hits.
 
@@ -92,3 +94,20 @@ it alone." Same budget, ~2.5× the recall, equal precision, self-auditing.
    Search degrades with corpus size; `SELECT` does not.
 4. Both arms were competent and honest throughout — the comparison shows a
    capability delta on specific question classes, not a broken baseline.
+
+## Addendum (2026-10-12): blinded third-party re-grade
+
+A GPT-6 judge re-graded all nine questions blind (final answers only, arms
+anonymized as Response 1/2, order counterbalanced, graded against the
+pre-registered keys): **B 1 · tie 6 · A 1 · 1 unadjudicated.** All six
+ties above are confirmed, and q1 — the centerpiece — is confirmed as a
+clear B win on the same coverage grounds. q3 went unadjudicated because
+the pre-registered key carries the ground-truth annotation error disclosed
+under defect 1 above ("9 incl. Moraine" beside a list without her). q4
+flipped to A: B confidently asserted the DB's two missing bio flags
+(Col, Slate) as fact, and confident false claims outweighed A's omission
+under the judge's rubric. That flip means this report's line "No question
+where table access hurt" is wrong as stated: on q4, inheriting the DB's
+errors cost B the question — the ~97%-not-100% caveat above, realized.
+Full results, caveats, and the judge transcript:
+`app/validation/third_party/`.

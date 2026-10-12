@@ -69,10 +69,18 @@ email the address and run `/aps-ingest` to watch your message become rows.)
   returns at most ~15–20 threads per query with no pagination, and both
   arms run under a fixed tool budget. What the results show: maintaining
   structured state improved completeness on the tested operational
-  questions within that interaction budget (3 wins / 6 ties / 0 losses on
-  the pre-registered QA set; the roster question in
+  questions within that interaction budget (self-graded 3 wins / 6 ties /
+  0 losses on the pre-registered QA set; the roster question in
   `app/out/showdown_exhibit_1.md`). Retrieval tied on single-thread
-  lookups and entity-name sagas, and the ties are reported as ties.
+  lookups and entity-name sagas, and the ties are reported as ties. An
+  independent blinded re-grade (GPT-6 judging final answers against the
+  keys, arms anonymized, order counterbalanced) returned **1 win / 6 ties
+  / 1 loss / 1 unadjudicated**: all six ties and the roster win confirmed;
+  one question unadjudicated because its pre-registered key carried a
+  disclosed ground-truth annotation error; one flipped to the search arm
+  where the tables answer asserted two DB-inherited errors confidently and
+  search merely omitted. Both gradings, the judge transcript, and the
+  audit: `app/validation/third_party/`.
 - **Blindness:** schema discovery and all ingestion see only email —
   never the simulator's internals or ground truth (which exist solely for
   post-hoc scoring; the discovery transcripts prove the schema was earned).
