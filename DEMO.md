@@ -73,8 +73,6 @@ email the address and run `/aps-ingest` to watch your message become rows.)
   the pre-registered QA set; the roster question in
   `app/out/showdown_exhibit_1.md`). Retrieval tied on single-thread
   lookups and entity-name sagas, and the ties are reported as ties.
-  Screenshots of the actual Gmail connector answering the same questions
-  are in the exhibits folder.
 - **Blindness:** schema discovery and all ingestion see only email —
   never the simulator's internals or ground truth (which exist solely for
   post-hoc scoring; the discovery transcripts prove the schema was earned).
@@ -108,7 +106,7 @@ email the address and run `/aps-ingest` to watch your message become rows.)
   the gap widens (a `SELECT` does not reread the mailbox; search-and-read
   must) is argument, not measurement.
 
-## 90-second recording shot list (for the walkthrough video)
+## The 90-second path (drive these four in order)
 
 1. `/aps-status` — counts + Sheet opens in a tab.
 2. `/aps-simulate-email` — hold on beats 3 and 4 (ops envelope; draft
