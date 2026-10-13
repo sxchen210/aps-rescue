@@ -320,8 +320,8 @@ function recordBeat(ev, data) {
 const BEAT = {
   arrived: "1 · An email arrives in the inbox",
   thinking: "2 · Haiku's reasoning",
-  decision: "3 · The ops envelope it emitted (its notes are its own words)",
-  draft: "4 · Reply decision",
+  decision: "3 · The ops envelope Haiku emitted (its notes are its own words)",
+  draft: "4 · Reply decision (Opus 5.5, a different model, with Gmail + SQL tools)",
   changed: "5 · What changed",
 };
 
@@ -442,7 +442,7 @@ function renderBeat(ev, data, scroll = true) {
   } else if (ev === "done") {
     const s = data ? JSON.parse(data) : null;
     const drafts = (s?.drafts || []).map((d) =>
-      `<div class="panel"><h3>The draft it wrote (saved to Gmail Drafts, never sent)</h3>
+      `<div class="panel"><h3>The draft Opus wrote (saved to Gmail Drafts, never sent)</h3>
        <pre class="mailbody">${esc(d.body || "")}</pre></div>`).join("");
     box.insertAdjacentHTML("beforeend", `${drafts}
       <div class="panel"><h3>Done</h3><div class="small">
