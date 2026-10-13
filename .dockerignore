@@ -1,0 +1,13 @@
+.git
+web
+__pycache__
+**/__pycache__
+*.log
+.env
+token.json
+token_apsdemo.json
+*credentials*.json
+.github
+app/out
+app/validation
+discovery/discovery_log*.jsonl

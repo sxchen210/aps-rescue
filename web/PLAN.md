@@ -85,7 +85,7 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
 4. Deploy to GitHub Pages; smoke both data modes; add the URL to the
    portal-note draft (not the public README yet); root PLAN pointer.
 
-**W2 — the button (after W1 review)**
+**W2 — the button — DONE (2026-10-13)**
 1. Backend: login gate + `/api/simulate` (SSE), global lock, rate limit,
    pool-remaining counter; `drafts_log` harness table so the UI can show
    the draft it just wrote; gmail_io token-refresh write-back made

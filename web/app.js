@@ -297,8 +297,143 @@ async function rowsOf(t) {
 function subnav(active, ns) {
   const chips = tables().map((t) =>
     `<a class="chip ${active === t ? "on" : ""}" href="#/pm/${t}">${esc(t)}<span class="n">${ns[t] ?? ""}</span></a>`);
+  chips.push(`<a class="chip ${active === "watch" ? "on" : ""}" href="#/pm/watch">watch it work<span class="n">live</span></a>`);
   chips.push(`<a class="chip ${active === "activity" ? "on" : ""}" href="#/pm/activity">activity<span class="n">live</span></a>`);
   return `<div class="subnav">${chips.join("")}</div>`;
+}
+
+/* --- watch it work: fire a scenario through the gated backend --- */
+
+const BACKEND = (window.APS_CONFIG || {}).backendUrl || "";
+const BEAT = {
+  arrived: "1 · An email arrives in the inbox",
+  thinking: "2 · Haiku's reasoning (excerpt)",
+  decision: "3 · The ops envelope it emitted",
+  draft: "4 · Reply decision",
+  changed: "5 · What changed",
+};
+
+async function viewWatch() {
+  const ns = await counts().catch(() => ({}));
+  const session = localStorage.getItem("aps_session") || "";
+  if (!session) {
+    $("#main").innerHTML = `
+      ${subnav("watch", ns)}
+      <p class="tdesc">This view sends a real email into the live inbox and
+        streams the pipeline processing it, beat by beat. Actions are gated:
+        enter the demo password from the portal note. (Viewing everything
+        else needs no password.)</p>
+      <div class="toolbar">
+        <input type="password" id="pw" placeholder="demo password">
+        <button id="go">Unlock</button>
+        <span id="pwmsg" class="muted"></span>
+      </div>`;
+    $("#go").onclick = async () => {
+      const r = await fetch(BACKEND + "/api/login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: $("#pw").value }),
+      });
+      if (!r.ok) { $("#pwmsg").textContent = `no (${r.status})`; return; }
+      localStorage.setItem("aps_session", (await r.json()).token);
+      viewWatch();
+    };
+    return;
+  }
+
+  let remaining = "?";
+  try {
+    remaining = (await fetch(BACKEND + "/api/status").then((r) => r.json())).pool_remaining;
+  } catch { /* backend unreachable; button will surface it */ }
+
+  $("#main").innerHTML = `
+    ${subnav("watch", ns)}
+    <p class="tdesc">The pool holds pre-written scenario emails from the same
+      simulated universe, each with a hidden answer key. Pressing the button
+      inserts the next one into the real Gmail inbox; the blind extractor
+      processes it live and you watch every beat, then the tables update.
+      One at a time, rate-limited.</p>
+    <div class="toolbar">
+      <button id="fire">Deliver the next email</button>
+      <span class="muted">${esc(String(remaining))} scenarios remaining</span>
+    </div>
+    <div id="beats"></div>`;
+
+  $("#fire").onclick = async () => {
+    const btn = $("#fire");
+    btn.disabled = true;
+    btn.textContent = "delivering…";
+    $("#beats").innerHTML = "";
+    try {
+      const resp = await fetch(BACKEND + "/api/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json",
+                   Authorization: `Bearer ${localStorage.getItem("aps_session")}` },
+        body: "{}",
+      });
+      if (resp.status === 401) { localStorage.removeItem("aps_session"); viewWatch(); return; }
+      if (!resp.ok) {
+        $("#beats").innerHTML = `<p class="placeholder">${esc((await r_text(resp)))}</p>`;
+        return;
+      }
+      await readSSE(resp, (ev, data) => renderBeat(ev, data));
+      cache.clear();  // table views refetch fresh state
+    } catch (e) {
+      $("#beats").insertAdjacentHTML("beforeend",
+        `<p class="placeholder">stream failed: ${esc(e.message)}</p>`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Deliver the next email";
+    }
+  };
+}
+
+async function r_text(resp) {
+  try { return JSON.stringify(await resp.json()); } catch { return `HTTP ${resp.status}`; }
+}
+
+async function readSSE(resp, onEvent) {
+  const reader = resp.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n\n")) >= 0) {
+      const block = buf.slice(0, i); buf = buf.slice(i + 2);
+      const ev = (block.match(/^event: (.*)$/m) || [])[1];
+      const dataLine = (block.match(/^data: (.*)$/m) || [])[1];
+      if (ev && dataLine !== undefined) onEvent(ev, JSON.parse(dataLine));
+    }
+  }
+}
+
+function renderBeat(ev, data) {
+  const box = $("#beats");
+  if (ev === "info") {
+    box.insertAdjacentHTML("beforeend", `<p class="muted">${esc(data)}</p>`);
+  } else if (ev === "thinking") {
+    box.insertAdjacentHTML("beforeend", `<div class="panel">
+      <h3>${esc(BEAT.thinking)}</h3><p class="fable-quote">${esc(data)}</p></div>`);
+  } else if (ev === "done") {
+    const s = data ? JSON.parse(data) : null;
+    const drafts = (s?.drafts || []).map((d) =>
+      `<div class="panel"><h3>The draft it wrote (saved to Gmail Drafts, never sent)</h3>
+       <pre class="mailbody">${esc(d.body || "")}</pre></div>`).join("");
+    box.insertAdjacentHTML("beforeend", `${drafts}
+      <div class="panel"><h3>Done</h3><div class="small">
+      ${s?.score ? esc(s.score) + ". " : ""}The tables above now reflect this
+      email; open the affected table or the
+      <a href="#/pm/activity">activity feed</a> to see it landed.</div></div>`);
+  } else if (ev === "error") {
+    box.insertAdjacentHTML("beforeend",
+      `<p class="placeholder">engine error: ${esc(data)}</p>`);
+  } else {
+    box.insertAdjacentHTML("beforeend", `<div class="panel">
+      <h3>${esc(BEAT[ev] || ev)}</h3><pre class="mailbody">${esc(data)}</pre></div>`);
+  }
+  box.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
 }
 
 async function viewTable(t) {
@@ -497,6 +632,7 @@ async function route() {
     if (tab === "sim") return await viewSimulate();
     if (tab === "disc") return await viewDiscovery(parseInt(parts[1] || "0", 10));
     if (tab !== "pm") return viewPlaceholder(tab);
+    if (parts[1] === "watch") return await viewWatch();
     if (parts[1] === "activity") return await viewActivity();
     const t = parts[1] && SCHEMA.tables[parts[1]] ? parts[1] : tables()[0];
     if (parts[2] === "k" && parts[3]) return await viewRecord(t, decodeURIComponent(parts[3]), true);
