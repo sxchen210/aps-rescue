@@ -306,16 +306,12 @@ function subnav(active, ns) {
 async function viewTable(t) {
   const ns = await counts();
   const all = await rowsOf(t);
-  const st = (tstate[t] ||= { q: "", sort: null, dir: 1, filters: {} });
+  const st = (tstate[t] ||= { sort: null, dir: 1, filters: {} });
   const def = tdef(t);
   const columns = cols(t).concat(["updated_at"]);
   const enumCols = cols(t).filter((c) => def.columns[c].type === "enum");
 
   let rows = all;
-  if (st.q) {
-    const q = st.q.toLowerCase();
-    rows = rows.filter((r) => Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(q)));
-  }
   for (const [c, v] of Object.entries(st.filters)) {
     if (v) rows = rows.filter((r) => r[c] === v);
   }
@@ -357,7 +353,6 @@ async function viewTable(t) {
     ${subnav(t, ns)}
     <p class="tdesc">${esc(def.description || "")}</p>
     <div class="toolbar">
-      <input type="search" id="q" placeholder="filter rows…" value="${esc(st.q)}">
       ${filterSel}
       <span class="muted">${rows.length} of ${all.length} rows · click a header to sort ·
         hover a header for the discovered description</span>
@@ -366,7 +361,6 @@ async function viewTable(t) {
       <thead><tr>${head}</tr></thead><tbody>${body}</tbody>
     </table></div>`;
 
-  $("#q").oninput = (e) => { st.q = e.target.value; viewTable(t); };
   document.querySelectorAll(".toolbar select").forEach((s) => {
     s.onchange = () => { st.filters[s.dataset.f] = s.value; viewTable(t); };
   });

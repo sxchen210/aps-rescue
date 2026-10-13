@@ -93,10 +93,6 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 .chip.on { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 .chip .n { color: var(--ink-3); margin-left: 4px; }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 10px; align-items: center; }
-.toolbar input[type="search"] {
-  padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px;
-  background: var(--surface-1); color: var(--ink-1); min-width: 220px;
-}
 .tdesc { color: var(--ink-2); font-size: 14.5px; margin: 0 0 10px; }
 .tdesc.strong { font-weight: 600; color: var(--ink-1); }
 
