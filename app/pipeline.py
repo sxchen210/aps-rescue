@@ -312,7 +312,13 @@ def simulate_send_and_process(custom=None, pool=None, on_event=print_event,
             on_event("info", "pool exhausted — every scenario already fired")
             return None
     import datetime as dt
-    date_hdr = format_datetime(dt.datetime.now().astimezone())
+    # Pool scenarios carry the simulated world's own timeline (the seeded
+    # history runs to 2026-10-16; the pool continues from 10-17), so a
+    # fired scenario is inserted with its AUTHORED timestamp — otherwise
+    # new arrivals would be dated before mail already in the inbox.
+    # Custom emails are genuinely from now.
+    date_hdr = format_datetime(dt.datetime.fromisoformat(sc["ts"])
+                               if sc.get("ts") else dt.datetime.now().astimezone())
     gmail_io.insert_message("aps", from_addr=sc["from"], to=SHARED,
                             subject=sc["subject"], body=sc["body"], date=date_hdr,
                             message_id=sc["message_id"],

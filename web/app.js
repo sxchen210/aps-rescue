@@ -351,7 +351,10 @@ async function viewWatch() {
       simulated universe, each with a hidden answer key. Pressing the button
       inserts the next one into the real Gmail inbox; the blind extractor
       processes it live and you watch every beat, then the tables update.
-      One at a time, rate-limited.</p>
+      One at a time, rate-limited. Scenario emails carry the simulated
+      world's own dates (its history runs to 2026-10-16 and the pool
+      continues from 10-17), so a delivered email's date reflects the world
+      clock, not today.</p>
     <div class="toolbar">
       <button id="fire">Deliver the next email</button>
       <span class="muted">${esc(String(remaining))} scenarios remaining</span>

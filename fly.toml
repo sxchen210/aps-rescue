@@ -2,6 +2,9 @@
 app = "aps-rescue-demo"
 primary_region = "sjc"
 
+[env]
+  TZ = "America/Los_Angeles"
+
 [build]
 
 [http_service]
