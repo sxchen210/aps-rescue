@@ -130,10 +130,6 @@ function renderTabs(active) {
 }
 
 const PLACEHOLDER = {
-  sim: `How the ~1,000-email universe was simulated (deterministic generator,
-        leak-checked against the real inbox it mirrors, ground truth kept only
-        for grading). This tab is coming; the design lives in
-        <a href="https://github.com/sxchen210/aps-rescue/blob/main/simulation/SIMULATION_DESIGN.md">SIMULATION_DESIGN.md</a>.`,
   h2h: `The head-to-head (the same model answering the same questions with and
         without these tables, self-graded and blind re-graded by a third party)
         is coming; the committed exhibits live in
@@ -144,6 +140,82 @@ const PLACEHOLDER = {
 
 function viewPlaceholder(id) {
   $("#main").innerHTML = `<p class="placeholder">${PLACEHOLDER[id]}</p>`;
+}
+
+/* --- Simulate: how the universe was made --- */
+
+let SIM = null;
+
+async function viewSimulate() {
+  if (!SIM) SIM = await fetch("data/sim.json").then((r) => r.json());
+  const f = SIM.facts;
+  const tiles = [
+    [f.seed_emails.toLocaleString(), "seed emails, six simulated weeks"],
+    [f.week1_emails, "more injected as a verified seventh week"],
+    [f.pool_total, "scenarios pooled, ready to fire live"],
+    [f.dogs, "dogs in the ground truth"],
+    [f.households, "foster households"],
+    [f.applications, "applications"],
+    [f.pattern_cards, "email pattern cards"],
+  ].map(([v, l]) =>
+    `<div class="stat"><div class="v">${esc(String(v))}</div><div class="l">${esc(l)}</div></div>`).join("");
+
+  $("#main").innerHTML = `
+    <p class="tdesc">Every email in this inbox is synthetic. A real rescue's
+      foster inbox was consulted read-only to keep the simulation honest, and
+      a strict boundary (below) guarantees nothing real crossed over.
+      Simulation buys two properties a real inbox cannot offer: <b>ground
+      truth</b> (the emails derive from a simulated world, so the true state
+      of every dog, foster, and appointment is known at every instant, and
+      the tables the models build can be verified rather than eyeballed) and
+      <b>a closed world</b> (all coordination happens over email, so every
+      fact is traceable to inbox evidence). Full design:
+      <a href="https://github.com/sxchen210/aps-rescue/blob/main/simulation/SIMULATION_DESIGN.md">SIMULATION_DESIGN.md</a>.</p>
+    <p class="tdesc strong">The architecture rule: the LLM never decides what
+      exists. It only voices it.</p>
+    <div class="panel"><h3>Layer 1: the universe (pure Python, seeded)</h3>
+      <div class="small"><code>universe.py</code> runs state machines over
+      dogs, households, applications, and the calendar: shelter pull, intake,
+      foster placement, spay/neuter days, photos, bio, posting, events,
+      applications, adoptions, returns, vacations, coverage handoffs.
+      It emits timestamped events plus ground-truth state at every instant.
+      Deterministic and replayable from one seed, and endless: the world was
+      extended once already (the verified seventh week plus the firing pool),
+      and can be extended again any time.</div></div>
+    <div class="panel"><h3>Layer 2: thread derivation (structure cards)</h3>
+      <div class="small">Each event type maps to an email pattern in
+      <code>patterns/*.md</code>: who writes first, the turn order, which
+      facts move, timing jitter, group thread vs 1:1, reply quoting. The
+      cards were distilled by observing the real reference inbox and contain
+      structure only, never content.</div></div>
+    <div class="panel"><h3>Layer 3: voice rendering (the only LLM step)</h3>
+      <div class="small"><code>render.py</code> writes each email from a
+      persona card, the matching structure card, the event's facts (must-say,
+      must-not-contradict), and the thread tail. Every persona is bound at
+      creation to a model-and-effort mix (terse mobile writers on a small
+      model, polished correspondents on a strong one), so individuals stay
+      consistent while the corpus varies, and style never correlates with
+      workflow type.</div></div>
+    <div class="panel"><h3>The leak boundary</h3>
+      <div class="small">Before anything is seeded, <code>leakcheck.py</code>
+      pulls the reference inbox's entities (names, addresses, dog names,
+      venues) and long n-grams into memory only, scans the entire synthetic
+      corpus for any entity hit or any shared phrase of about eight words,
+      and fails the build on a single hit. Nothing harvested is written to
+      disk. Dog names are deliberately disjoint by theme. Every corpus batch
+      has passed at 0 hard hits; the latest additions passed at 0 hard, 0
+      soft.</div></div>
+    <div class="panel"><h3>Ground truth is for grading only</h3>
+      <div class="small">The simulator's true state is the verification
+      asset behind the numbers in the header strip. Neither
+      <a href="#/disc">schema discovery</a> nor the extractor ever sees it;
+      they see only the mailbox. It is consulted after the fact, to score
+      what they built.</div></div>
+    <p class="tdesc">Seeding: the rendered corpus is inserted into the real
+      Gmail inbox chronologically with historical Date headers and real
+      thread structure, so the mailbox reads as a lived-in operation rather
+      than a dump. The world at a glance:</p>
+    <div class="stats">${tiles}</div>`;
 }
 
 /* --- Discovery: the committed transcript, replayed --- */
@@ -440,6 +512,7 @@ async function route() {
   const tab = parts[0] || "pm";
   renderTabs(tab);
   try {
+    if (tab === "sim") return await viewSimulate();
     if (tab === "disc") return await viewDiscovery(parseInt(parts[1] || "0", 10));
     if (tab !== "pm") return viewPlaceholder(tab);
     if (parts[1] === "activity") return await viewActivity();

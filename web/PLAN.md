@@ -95,7 +95,9 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
 
 **W3 — story tabs**: Discovery replay timeline — DONE (three chapters
 from the committed transcripts, get_thread ids resolved to the subjects
-Fable read, running cost, finale usage panel). Head-to-head page
+Fable read, running cost, finale usage panel). Simulate tab — DONE (the
+three-layer architecture, leak boundary, ground-truth-for-grading-only,
+fact tiles computed from committed files in sim.json). Head-to-head page
 (exhibits build + render) remains. Ask/compose: decide then.
 
 **W4 — consolidation**: Sheet demotion/removal, README tier inversion

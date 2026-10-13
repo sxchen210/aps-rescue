@@ -1,0 +1,12 @@
+{
+ "generated_by": "scripts/build_web_assets.py",
+ "facts": {
+  "seed_emails": 831,
+  "week1_emails": 121,
+  "pool_total": 107,
+  "dogs": 111,
+  "households": 200,
+  "applications": 49,
+  "pattern_cards": 11
+ }
+}

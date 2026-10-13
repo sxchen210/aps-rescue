@@ -123,6 +123,27 @@ def discovery_replay():
     return chapters
 
 
+def sim_facts():
+    """Counts for the Simulate tab, computed from committed files."""
+    def nlines(p):
+        return sum(1 for l in (ROOT / p).read_text().splitlines() if l.strip())
+    gt = json.loads((ROOT / "simulation" / "out" / "extension" /
+                     "ground_truth_full.json").read_text())
+    facts = {
+        "seed_emails": nlines("simulation/out/corpus.jsonl"),
+        "week1_emails": nlines("simulation/out/extension/corpus_week1.jsonl"),
+        "pool_total": nlines("simulation/out/extension/pool.jsonl"),
+        "dogs": len(gt["dogs"]),
+        "households": len(gt["households"]),
+        "applications": len(gt["applications"]),
+        "pattern_cards": len(list((ROOT / "simulation" / "patterns").glob("*.md"))),
+    }
+    (OUT / "sim.json").write_text(json.dumps(
+        {"generated_by": "scripts/build_web_assets.py", "facts": facts},
+        indent=1))
+    return facts
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     schema_raw = (ROOT / "discovery" / "schema.json").read_text()
@@ -165,11 +186,14 @@ def main():
         {"generated_by": "scripts/build_web_assets.py",
          "stats": stats}, indent=1, ensure_ascii=False))
     ch = discovery_replay()
+    sf = sim_facts()
     print(f"wrote {OUT/'schema.json'} ({len(schema_raw):,}B), stats.json "
           f"({len(stats)} stats; strict status {s_hit}/{s_n}), "
           f"discovery_replay.json ({len(ch)} chapters, "
           f"{sum(len(c['rounds']) for c in ch)} rounds, "
-          f"{sum(c['tool_calls'] for c in ch)} tool calls)")
+          f"{sum(c['tool_calls'] for c in ch)} tool calls), "
+          f"sim.json ({sf['seed_emails']}+{sf['week1_emails']} emails, "
+          f"{sf['pool_total']} pooled)")
 
 
 if __name__ == "__main__":
