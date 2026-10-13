@@ -7,8 +7,9 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
 
 ## Decided
 
-- **Five tabs, pipeline-ordered:** Simulate · Discovery · **Populate &
-  Maintain** (default view on load) · Head-to-head · Adapt.
+- **Four tabs, pipeline-ordered:** Simulate · Discovery · **Populate &
+  Maintain** (default view on load) · Head-to-head. (Adapt was dropped
+  2026-10-13; its material stays in the repo docs.)
 - Tabs ship as minimal placeholders until their phase lands (accepted;
   filled step by step).
 - Discovery tab will be a **replay** of the committed

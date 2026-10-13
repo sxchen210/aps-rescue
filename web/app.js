@@ -121,7 +121,7 @@ function fmtCell(table, col, v, linkKeys = true) {
 
 const TABS = [
   ["sim", "Simulate"], ["disc", "Discovery"], ["pm", "Populate & Maintain"],
-  ["h2h", "Head-to-head"], ["adapt", "Adapt"],
+  ["h2h", "Head-to-head"],
 ];
 
 function renderTabs(active) {
@@ -134,8 +134,6 @@ const PLACEHOLDER = {
         without these tables, self-graded and blind re-graded by a third party)
         is coming; the committed exhibits live in
         <a href="https://github.com/sxchen210/aps-rescue/tree/main/app/validation/third_party">app/validation/</a>.`,
-  adapt: `How the schema adapts when the world outgrows it (the cancellation /
-        clear-verb story). This tab is coming.`,
 };
 
 function viewPlaceholder(id) {
