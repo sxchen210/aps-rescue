@@ -38,7 +38,7 @@ function setConn(state, msg) {
   if (state) { b.hidden = true; }
   else {
     b.hidden = false;
-    b.innerHTML = `Live database unreachable — ${esc(msg || "check the connection")}. `;
+    b.innerHTML = `Live database unreachable: ${esc(msg || "check the connection")}. `;
     const btn = el(`<button>Retry</button>`);
     btn.onclick = () => { cache.clear(); route(); };
     b.appendChild(btn);
@@ -132,14 +132,14 @@ function renderTabs(active) {
 const PLACEHOLDER = {
   sim: `How the ~1,000-email universe was simulated (deterministic generator,
         leak-checked against the real inbox it mirrors, ground truth kept only
-        for grading) — this tab is coming; the design lives in
+        for grading). This tab is coming; the design lives in
         <a href="https://github.com/sxchen210/aps-rescue/blob/main/simulation/SIMULATION_DESIGN.md">SIMULATION_DESIGN.md</a>.`,
-  h2h: `The head-to-head — the same model answering the same questions with and
-        without these tables, self-graded and blind re-graded by a third party —
+  h2h: `The head-to-head (the same model answering the same questions with and
+        without these tables, self-graded and blind re-graded by a third party)
         is coming; the committed exhibits live in
         <a href="https://github.com/sxchen210/aps-rescue/tree/main/app/validation/third_party">app/validation/</a>.`,
   adapt: `How the schema adapts when the world outgrows it (the cancellation /
-        clear-verb story) — this tab is coming.`,
+        clear-verb story). This tab is coming.`,
 };
 
 function viewPlaceholder(id) {
@@ -176,32 +176,32 @@ async function viewDiscovery(idx) {
   const u = ch.final.usage || {};
   $("#main").innerHTML = `
     <p class="tdesc">Blind by construction: the model was connected to the
-      mailbox with four tools — <code>inbox_stats</code>,
-      <code>list_threads</code>, <code>get_thread</code>, <code>search</code>
-      — and nothing else. No simulator internals, no ground truth, no hints.
+      mailbox with four tools (<code>inbox_stats</code>,
+      <code>list_threads</code>, <code>get_thread</code>, <code>search</code>)
+      and nothing else. No simulator internals, no ground truth, no hints.
       What follows is the committed transcript
       (<a href="https://github.com/sxchen210/aps-rescue/tree/main/discovery">discovery/</a>),
       not a re-enactment; the running total on the left is live API cost.</p>
     <p class="tdesc strong">Two files to keep straight:
       <a href="https://github.com/sxchen210/aps-rescue/blob/main/discovery/discovery.py"><code>discovery.py</code></a>
-      is OUR side — the mission prompt given to the strong model (Fable),
+      is OUR side: the mission prompt given to the strong model (Fable),
       its four tools, and the ops-envelope contract it must design within.
       <a href="https://github.com/sxchen210/aps-rescue/blob/main/discovery/instructions.md"><code>instructions.md</code></a>
-      is what FABLE wrote in return — the extraction playbook the cheap
+      is what FABLE wrote in return: the extraction playbook the cheap
       model (Haiku) follows, alone and from scratch, on every email that
       maintains the <a href="#/pm">Populate &amp; Maintain</a> tables.</p>
     <div class="subnav">${chips}</div>
-    <p class="muted">${ch.intro} — ${ch.rounds.length} rounds,
+    <p class="muted">${ch.intro} In all: ${ch.rounds.length} rounds,
       ${ch.tool_calls} tool calls, $${ch.final.cost.toFixed(2)}.</p>
     <div class="timeline">${rows}</div>
     <div class="panel" style="margin-top:14px">
       <h3>Artifacts accepted</h3>
-      <div class="small">All three artifacts submitted and saved —
+      <div class="small">All three artifacts submitted and saved:
         ${(u.out || 0).toLocaleString()} tokens written,
         ${(u.cache_read || 0).toLocaleString()} read from cache,
         $${ch.final.cost.toFixed(2)} total. The structural sanity gate
         passed, and the schema it designed renders everything in
-        <a href="#/pm">Populate &amp; Maintain</a> — this page included,
+        <a href="#/pm">Populate &amp; Maintain</a>, this page included,
         since the app is generated from <code>schema.json</code>.</div>
     </div>`;
 }
@@ -353,11 +353,11 @@ async function viewRecord(t, id, byKey) {
       <div><dl class="fields">${fields}</dl>${relHtml}</div>
       <div>
         <div class="panel">
-          <h3>Provenance — row-level, last writer</h3>
+          <h3>Provenance: row-level, last writer</h3>
           <div class="small">
             This row was last changed by email <code>${esc(gid)}</code>
             at ${esc(row.updated_at || "—")}. Earlier writes to other fields
-            came from earlier emails (not tracked per field — a known limit).
+            came from earlier emails (not tracked per field; a known limit).
           </div>
           <div class="small" style="margin-top:8px">
             <a href="https://mail.google.com/mail/u/0/#all/${encodeURIComponent(gid)}"
@@ -367,7 +367,7 @@ async function viewRecord(t, id, byKey) {
         </div>
         <div class="panel"><h3>About this page</h3>
           <div class="small muted">Rendered entirely from the discovered
-          <code>schema.json</code> — fields, descriptions, badges, and the
+          <code>schema.json</code>: fields, descriptions, badges, and the
           related tables above are all schema-derived, not hand-built.</div>
         </div>
       </div>
@@ -415,8 +415,8 @@ function renderActivity({ log, meta }, ns) {
   }).join("");
   $("#main").innerHTML = `
     ${subnav("activity", ns)}
-    <p class="tdesc">Every email the extractor has processed, newest first —
-      refreshes every 8s. Fire a scenario from the Claude Code plugin
+    <p class="tdesc">Every email the extractor has processed, newest first,
+      refreshing every 8s. Fire a scenario from the Claude Code plugin
       (<code>/aps-simulate-email</code>) and watch it land here.</p>
     <div class="feed">${rows}</div>`;
 }
@@ -448,7 +448,7 @@ async function route() {
     if (parts[2]) return await viewRecord(t, parts[2], false);
     return await viewTable(t);
   } catch (e) {
-    $("#main").innerHTML = `<p class="placeholder">Could not load this view —
+    $("#main").innerHTML = `<p class="placeholder">Could not load this view:
       ${esc(e.message)}. ${connOK === false ? "The live database is unreachable." : ""}</p>`;
   }
 }
@@ -464,7 +464,7 @@ async function boot() {
     for (const k of tdef(t).canonical_keys) KEY_OWNER[k] ||= t;
   }
   $("#stats").innerHTML = STATS.stats.map((s) =>
-    `<div class="stat" title="${esc(s.detail)} — source: ${esc(s.source)}">
+    `<div class="stat" title="${esc(s.detail)} · source: ${esc(s.source)}">
        <div class="v">${esc(s.value)}</div><div class="l">${esc(s.label)}</div></div>`).join("");
   window.addEventListener("hashchange", route);
   if (!location.hash) location.hash = "#/pm";

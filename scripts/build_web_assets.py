@@ -48,13 +48,13 @@ def strict_status():
 CHAPTERS = [
     ("discovery_log.jsonl", "The discovery run",
      "Connected to the mailbox cold, with four tools and no other context, "
-     "the strong model read until it understood the operation — then "
+     "the strong model read until it understood the operation, then "
      "designed the schema and wrote the extraction playbook."),
-    ("discovery_log_refine.jsonl", "Refine 1 — fosters become first-class",
+    ("discovery_log_refine.jsonl", "Refine 1: fosters become first-class",
      "Operator feedback: “which fosters are free right now?” must "
      "be answerable. The model re-verified the away/decline/moving evidence "
      "and promoted the foster roster to its own table."),
-    ("discovery_log_refine2.jsonl", "Refine 2 — the clear verb",
+    ("discovery_log_refine2.jsonl", "Refine 2: the clear verb",
      "The world produced cancellations the ops contract couldn't express "
      "(a fallen-through adoption left stale fields standing). The envelope "
      "gained an explicit clear list; the model re-read the real "
@@ -150,7 +150,7 @@ def main():
         {"label": "status accuracy",
          "value": pct(f["status"]["acc"]),
          "detail": f"policy-scored; strict-exact {pct(s_hit / s_n)} "
-                   f"({s_hit}/{s_n}) — unconfirmed outcomes counted wrong",
+                   f"({s_hit}/{s_n}); unconfirmed outcomes counted wrong",
          "source": "populate/VERIFICATION.md (policy stated there)"},
         {"label": "dated fields",
          "value": pct(f["spay_neuter_date"]["acc"]),

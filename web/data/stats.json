@@ -22,7 +22,7 @@
   {
    "label": "status accuracy",
    "value": "97.8%",
-   "detail": "policy-scored; strict-exact 82.0% (73/89) — unconfirmed outcomes counted wrong",
+   "detail": "policy-scored; strict-exact 82.0% (73/89); unconfirmed outcomes counted wrong",
    "source": "populate/VERIFICATION.md (policy stated there)"
   },
   {

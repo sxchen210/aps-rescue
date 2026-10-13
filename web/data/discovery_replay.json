@@ -3,7 +3,7 @@
  "chapters": [
   {
    "title": "The discovery run",
-   "intro": "Connected to the mailbox cold, with four tools and no other context, the strong model read until it understood the operation — then designed the schema and wrote the extraction playbook.",
+   "intro": "Connected to the mailbox cold, with four tools and no other context, the strong model read until it understood the operation, then designed the schema and wrote the extraction playbook.",
    "rounds": [
     {
      "round": 1,
@@ -528,7 +528,7 @@
    }
   },
   {
-   "title": "Refine 1 — fosters become first-class",
+   "title": "Refine 1: fosters become first-class",
    "intro": "Operator feedback: “which fosters are free right now?” must be answerable. The model re-verified the away/decline/moving evidence and promoted the foster roster to its own table.",
    "rounds": [
     {
@@ -636,7 +636,7 @@
    }
   },
   {
-   "title": "Refine 2 — the clear verb",
+   "title": "Refine 2: the clear verb",
    "intro": "The world produced cancellations the ops contract couldn't express (a fallen-through adoption left stale fields standing). The envelope gained an explicit clear list; the model re-read the real fall-through thread and made it the playbook's worked example.",
    "rounds": [
     {
