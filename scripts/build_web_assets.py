@@ -123,6 +123,24 @@ def discovery_replay():
     return chapters
 
 
+# Demo-strength order for the live head-to-head dropdown: derived roster
+# state and negative space first, single-thread lookups (honest ties) last.
+H2H_ORDER = ["q1", "q4", "q3", "q2", "q5", "q6", "q7", "q8", "q9"]
+
+
+def h2h_questions():
+    """Question list for the live head-to-head: ids + text ONLY (the
+    pre-registered keys and predictions stay out of the web payload).
+    The backend loads this same file and accepts only these ids."""
+    exp = {e["id"]: e["question"]
+           for e in json.loads((ROOT / "app" / "out" / "qa_expectations.json").read_text())}
+    qs = [{"id": i, "question": exp[i]} for i in H2H_ORDER]
+    (OUT / "h2h_questions.json").write_text(json.dumps(
+        {"generated_by": "scripts/build_web_assets.py", "questions": qs}, indent=1,
+        ensure_ascii=False))
+    return qs
+
+
 def sim_facts():
     """Counts for the Simulate tab, computed from committed files."""
     def nlines(p):
@@ -187,6 +205,8 @@ def main():
          "stats": stats}, indent=1, ensure_ascii=False))
     ch = discovery_replay()
     sf = sim_facts()
+    h2h = h2h_questions()
+    assert len(h2h) == 9
     print(f"wrote {OUT/'schema.json'} ({len(schema_raw):,}B), stats.json "
           f"({len(stats)} stats; strict status {s_hit}/{s_n}), "
           f"discovery_replay.json ({len(ch)} chapters, "

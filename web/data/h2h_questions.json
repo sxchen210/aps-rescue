@@ -1,0 +1,41 @@
+{
+ "generated_by": "scripts/build_web_assets.py",
+ "questions": [
+  {
+   "id": "q1",
+   "question": "Which of our fosters (people who have fostered for us before) are currently free — not fostering a dog right now and not away?"
+  },
+  {
+   "id": "q4",
+   "question": "Which dogs are ready to post right now (photos + bio in, spay/neuter done) but not yet posted?"
+  },
+  {
+   "id": "q3",
+   "question": "How many dogs were adopted in September 2026, and what was their average number of days from intake to adoption?"
+  },
+  {
+   "id": "q2",
+   "question": "Which fosters with posted (adoptable) dogs never RSVPed to the October 3 adoption event?"
+  },
+  {
+   "id": "q5",
+   "question": "Who has Moraine right now — what's her current situation?"
+  },
+  {
+   "id": "q6",
+   "question": "What did the Crestview clinic say when we sent them Scree's records about the cloudy eye?"
+  },
+  {
+   "id": "q7",
+   "question": "What are the drop-off and pickup logistics options for a spay/neuter day?"
+  },
+  {
+   "id": "q8",
+   "question": "Summarize the most recent email Hana Faraday sent us."
+  },
+  {
+   "id": "q9",
+   "question": "What exactly did the foster report about Hoarfrost's ear, in their own words?"
+  }
+ ]
+}

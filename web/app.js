@@ -129,15 +129,32 @@ function renderTabs(active) {
     `<a href="#/${id}" class="${id === active ? "on" : ""}">${label}</a>`).join("");
 }
 
-const PLACEHOLDER = {
-  h2h: `The head-to-head (the same model answering the same questions with and
-        without these tables, self-graded and blind re-graded by a third party)
-        is coming; the committed exhibits live in
-        <a href="https://github.com/sxchen210/aps-rescue/tree/main/app/validation/third_party">app/validation/</a>.`,
-};
-
 function viewPlaceholder(id) {
-  $("#main").innerHTML = `<p class="placeholder">${PLACEHOLDER[id]}</p>`;
+  $("#main").innerHTML = `<p class="placeholder">Nothing here.</p>`;
+}
+
+/* shared password gate for backend-powered views */
+function sessionGate(subnavHtml, intro, rerender) {
+  if (localStorage.getItem("aps_session")) return true;
+  $("#main").innerHTML = `
+    ${subnavHtml}
+    <p class="tdesc">${intro} Actions are gated: enter the demo password
+      from the portal note. (Viewing everything else needs no password.)</p>
+    <div class="toolbar">
+      <input type="password" id="pw" placeholder="demo password">
+      <button id="go">Unlock</button>
+      <span id="pwmsg" class="muted"></span>
+    </div>`;
+  $("#go").onclick = async () => {
+    const r = await fetch(BACKEND + "/api/login", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: $("#pw").value }),
+    });
+    if (!r.ok) { $("#pwmsg").textContent = `no (${r.status})`; return; }
+    localStorage.setItem("aps_session", (await r.json()).token);
+    rerender();
+  };
+  return false;
 }
 
 /* --- Simulate: how the universe was made --- */
@@ -304,7 +321,8 @@ function subnav(active, ns) {
 
 /* --- watch it work: fire a scenario through the gated backend --- */
 
-const BACKEND = (window.APS_CONFIG || {}).backendUrl || "";
+const BACKEND = localStorage.getItem("aps_backend_url")
+  || (window.APS_CONFIG || {}).backendUrl || "";
 
 /* the last delivery's beats survive tab switches (and reloads, via
    sessionStorage) until the next delivery replaces them */
@@ -327,30 +345,9 @@ const BEAT = {
 
 async function viewWatch() {
   const ns = await counts().catch(() => ({}));
-  const session = localStorage.getItem("aps_session") || "";
-  if (!session) {
-    $("#main").innerHTML = `
-      ${subnav("watch", ns)}
-      <p class="tdesc">This view sends a real email into the live inbox and
-        streams the pipeline processing it, beat by beat. Actions are gated:
-        enter the demo password from the portal note. (Viewing everything
-        else needs no password.)</p>
-      <div class="toolbar">
-        <input type="password" id="pw" placeholder="demo password">
-        <button id="go">Unlock</button>
-        <span id="pwmsg" class="muted"></span>
-      </div>`;
-    $("#go").onclick = async () => {
-      const r = await fetch(BACKEND + "/api/login", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: $("#pw").value }),
-      });
-      if (!r.ok) { $("#pwmsg").textContent = `no (${r.status})`; return; }
-      localStorage.setItem("aps_session", (await r.json()).token);
-      viewWatch();
-    };
-    return;
-  }
+  if (!sessionGate(subnav("watch", ns),
+      `This view sends a real email into the live inbox and streams the
+       pipeline processing it, beat by beat.`, viewWatch)) return;
 
   let remaining = "?";
   try {
@@ -643,6 +640,136 @@ async function viewActivity() {
   }, 15000);
 }
 
+/* --- head-to-head: the same model, with and without the tables, live --- */
+
+let H2H_QS = null;
+let H2H_LAST = (() => {
+  try { return JSON.parse(sessionStorage.getItem("aps_last_h2h") || "null"); }
+  catch { return null; }
+})();
+
+const ARM_TITLE = {
+  a: "Search-only · Opus 5.5 with Gmail tools",
+  b: "Tables · Opus 5.5 with Gmail + read-only SQL",
+};
+
+async function viewH2H() {
+  if (!H2H_QS) {
+    H2H_QS = (await fetch("data/h2h_questions.json").then((r) => r.json())).questions;
+  }
+  if (!sessionGate("",
+      `Two agents answer the same question live: the same model, the same
+       budget, the only difference is that one can query the tables this
+       inbox built. No grading is shown; watch what each one does.`,
+      viewH2H)) return;
+
+  const opts = H2H_QS.map((q, i) =>
+    `<option value="${esc(q.id)}" ${i === 0 ? "selected" : ""}>${esc(q.question)}</option>`).join("");
+  $("#main").innerHTML = `
+    <p class="tdesc">Pick a question and run it. Both agents start at the
+      same moment with the same tool budget; the left one can only search
+      and read the mailbox, the right one can also query the live tables.
+      Their summarized thinking, every tool call, and both answers stream
+      in as they happen. These are live model runs, not replays; the
+      committed, independently re-graded comparison lives in the
+      <a href="https://github.com/sxchen210/aps-rescue/tree/main/app/validation/third_party">repository</a>.</p>
+    <div class="toolbar">
+      <select id="h2hq">${opts}</select>
+      <button id="h2hrun">Run both arms</button>
+      <span id="h2hmsg" class="muted"></span>
+    </div>
+    <div class="h2h-grid">
+      ${["a", "b"].map((arm) => `
+        <div class="h2h-col">
+          <div class="h2h-head">${ARM_TITLE[arm]}
+            <span class="muted" id="${arm}-stat"></span></div>
+          <div class="h2h-win" id="${arm}-win"></div>
+        </div>`).join("")}
+    </div>`;
+
+  if (H2H_LAST) {
+    $("#h2hq").value = H2H_LAST.qid;
+    $("#h2hmsg").textContent = "previous run, replayed";
+    for (const [ev, d] of H2H_LAST.events) renderH2H(ev, d, false);
+  }
+
+  const timers = {};
+  $("#h2hrun").onclick = async () => {
+    const btn = $("#h2hrun");
+    const qid = $("#h2hq").value;
+    btn.disabled = true;
+    btn.textContent = "running…";
+    $("#h2hmsg").textContent = "";
+    $("#a-win").innerHTML = ""; $("#b-win").innerHTML = "";
+    H2H_LAST = { qid, events: [] };
+    try { sessionStorage.removeItem("aps_last_h2h"); } catch { /* fine */ }
+    const t0 = Date.now();
+    for (const arm of ["a", "b"]) {
+      timers[arm] = setInterval(() => {
+        const el = $(`#${arm}-stat`);
+        if (el) el.textContent = ` ${Math.round((Date.now() - t0) / 1000)}s`;
+      }, 1000);
+    }
+    const stopTimer = (arm) => { clearInterval(timers[arm]); };
+    try {
+      const resp = await fetch(BACKEND + "/api/showdown", {
+        method: "POST",
+        headers: { "Content-Type": "application/json",
+                   Authorization: `Bearer ${localStorage.getItem("aps_session")}` },
+        body: JSON.stringify({ qid }),
+      });
+      if (resp.status === 401) { localStorage.removeItem("aps_session"); viewH2H(); return; }
+      if (!resp.ok) { $("#h2hmsg").textContent = await r_text(resp); return; }
+      await readSSE(resp, (ev, data) => {
+        H2H_LAST.events.push([ev, data]);
+        try { sessionStorage.setItem("aps_last_h2h", JSON.stringify(H2H_LAST)); } catch { /* fine */ }
+        if (ev.endsWith("_done")) stopTimer(ev[0]);
+        renderH2H(ev, data, true);
+      });
+    } catch (e) {
+      $("#h2hmsg").textContent = `stream failed: ${e.message}`;
+    } finally {
+      stopTimer("a"); stopTimer("b");
+      btn.disabled = false;
+      btn.textContent = "Run both arms";
+    }
+  };
+}
+
+function renderH2H(ev, data, scroll) {
+  const arm = ev[0];
+  const kind = ev.slice(2);
+  const win = $(`#${arm}-win`);
+  if (!win) return;
+  if (kind === "thinking") {
+    win.insertAdjacentHTML("beforeend", `<p class="fable-quote">${esc(data)}</p>`);
+  } else if (kind === "note") {
+    win.insertAdjacentHTML("beforeend", `<p class="muted small-note">${esc(data)}</p>`);
+  } else if (kind === "tool") {
+    if (data.startsWith("sql_query:")) {
+      win.insertAdjacentHTML("beforeend",
+        `<pre class="sqlchip">${esc(data.slice(10).trim())}</pre>`);
+    } else {
+      win.insertAdjacentHTML("beforeend",
+        `<div><span class="toolchip">${esc(data)}</span></div>`);
+    }
+  } else if (kind === "result") {
+    win.insertAdjacentHTML("beforeend",
+      `<details class="h2h-res"><summary>result</summary><pre class="mailbody">${esc(data)}</pre></details>`);
+  } else if (kind === "answer") {
+    win.insertAdjacentHTML("beforeend",
+      `<div class="panel"><h3>Final answer</h3><pre class="mailbody">${esc(data)}</pre></div>`);
+  } else if (kind === "done") {
+    let s = {};
+    try { s = JSON.parse(data); } catch { /* fine */ }
+    const stat = $(`#${arm}-stat`);
+    if (stat) stat.textContent = s.error
+      ? ` failed: ${s.error}`
+      : ` done · ${s.tool_calls} tool calls · ${s.seconds}s`;
+  }
+  if (scroll) win.scrollTop = win.scrollHeight;
+}
+
 /* ---------- router + boot ---------- */
 
 /* renders serialize: a fast later navigation can't be overwritten by a
@@ -660,6 +787,7 @@ async function _route() {
   try {
     if (tab === "sim") return await viewSimulate();
     if (tab === "disc") return await viewDiscovery(parseInt(parts[1] || "0", 10));
+    if (tab === "h2h") return await viewH2H();
     if (tab !== "pm") return viewPlaceholder(tab);
     if (parts[1] === "watch") return await viewWatch();
     if (parts[1] === "activity") return await viewActivity();

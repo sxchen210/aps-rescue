@@ -98,8 +98,14 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
 from the committed transcripts, get_thread ids resolved to the subjects
 Fable read, running cost, finale usage panel). Simulate tab — DONE (the
 three-layer architecture, leak boundary, ground-truth-for-grading-only,
-fact tiles computed from committed files in sim.json). Head-to-head page
-(exhibits build + render) remains. Ask/compose: decide then.
+fact tiles computed from committed files in sim.json). Head-to-head tab — DONE
+(2026-10-13, redesigned per the user: LIVE two-arm runs instead of a
+static exhibit player. Dropdown of the nine pre-registered questions
+only — the backend enforces the allowlist by id, so the gated endpoint
+can never run free text; two side-by-side windows stream each arm's
+summarized thinking, every tool call with the SQL rendered prominently,
+and both final answers; no on-page grading, the presenter narrates; last
+run persists across tab switches). Ask/compose: decide later.
 
 **W4 — consolidation**: Sheet demotion/removal, README tier inversion
 (hosted link = Tier 1, plugin = Tier 2, delegation = Tier 3), teardown
