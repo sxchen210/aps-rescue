@@ -103,6 +103,6 @@ All credentials are demo-scoped, temporary, and revocable in one click
 (Gmail token in the Google account's security page; Turso token in its
 dashboard; the Anthropic key in the API console — it is usage-capped and
 will be deprecated when the demo window closes). To reset
-the world: clear the inbox, re-run `simulation/aps_insert.py` (seed) and
-`app/week1_inject.py` (extension), re-push Turso via
-`populate/push_turso.py --force`, refresh the mirror.
+the world: clear the inbox, re-run `scripts/aps_insert.py` (seed) and
+`scripts/week1_inject.py` (extension), re-push Turso via
+`scripts/push_turso.py --force`, refresh the mirror.

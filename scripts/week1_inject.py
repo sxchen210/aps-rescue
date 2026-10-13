@@ -24,6 +24,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE.parent / "populate"))
+sys.path.insert(0, str(HERE.parent / "app"))
 import gmail_io
 import db as dblib
 import pipeline
@@ -136,7 +137,7 @@ def main():
     perfect = sum(1 for s in full if s["score"].split("/")[0] == s["score"].split("/")[1])
     print(f"\ninjected {n} | scored {len(full)} | fully-matched {perfect} | "
           f"errors {sum(1 for s in scorecards if s['err'])}")
-    (HERE / "out" / "week1_scorecards.jsonl").open("a").write(
+    (HERE.parent / "app" / "out" / "week1_scorecards.jsonl").open("a").write(
         "\n".join(json.dumps(s) for s in scorecards) + "\n")
 
 

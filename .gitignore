@@ -15,3 +15,5 @@ venv/
 
 # Generated universe/corpus artifacts (reproducible from seed; corpus committed separately when final)
 out/
+*_run.log
+*_batch.log

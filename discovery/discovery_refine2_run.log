@@ -1,3 +1,0 @@
-round 1: 2 tool calls | $0.26 cumulative
-round 2: 1 tool calls | $1.82 cumulative
-DONE submitted=True | in 19,801 out 23,007 cache_read 2,179 | est $1.82

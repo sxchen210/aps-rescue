@@ -11,7 +11,7 @@ import sqlite3
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "populate"))
 import db as dblib
 
 HERE = Path(__file__).resolve().parent
@@ -19,7 +19,8 @@ HERE = Path(__file__).resolve().parent
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--local", default=str(HERE / "out" / "state.sqlite"))
+    ap.add_argument("--local",
+                    default=str(HERE.parent / "populate" / "out" / "state.sqlite"))
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
 

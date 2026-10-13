@@ -16,7 +16,8 @@ Usage: python3 add_cancellation_scenarios.py
 import json
 from pathlib import Path
 
-POOL = Path(__file__).resolve().parent / "out" / "extension" / "pool.jsonl"
+POOL = (Path(__file__).resolve().parent.parent / "simulation" / "out" /
+        "extension" / "pool.jsonl")
 
 
 def sc(id_, ts, thread, from_, subject, body, type_, expected):

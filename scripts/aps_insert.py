@@ -20,6 +20,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root: gmail_io
 import gmail_io
 
+SIM_OUT = Path(__file__).resolve().parent.parent / "simulation" / "out"
+
 UNREAD_AFTER = "2026-10-07"
 
 
@@ -30,7 +32,7 @@ def mid_for(row):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--corpus", default="out/corpus.jsonl")
+    ap.add_argument("--corpus", default=str(SIM_OUT / "corpus.jsonl"))
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
 
@@ -39,7 +41,7 @@ def main():
     if args.limit:
         rows = rows[:args.limit]
 
-    state_path = Path("out/seeded_ids.json")
+    state_path = SIM_OUT / "seeded_ids.json"
     state = json.loads(state_path.read_text()) if state_path.exists() else {"msgs": {}, "threads": {}}
     chain = {}  # thread -> list of message-ids (rebuilt every run for headers)
 

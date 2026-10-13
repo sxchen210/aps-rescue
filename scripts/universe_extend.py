@@ -20,13 +20,15 @@ expected_ops for the live scorecard.
 import datetime as dt
 import json
 import random
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "simulation"))
 from personas import (ORG, SHARED, STAFF, FIRST, LAST, FOSTER_VOICES,
                       RENDERER_MIX, FREEMAIL, VENUE, SAFEHOUSE, CLINIC,
                       CLINIC_CITY, SHELTER, PHOTOGRAPHER)
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent / "simulation"
 GT = json.loads((HERE / "out" / "universe" / "ground_truth.json").read_text())
 
 SEED = 20261012

@@ -66,7 +66,7 @@ transiently into memory; scan the synthetic corpus for entity hits and any
 shared long phrase (~8+ words); fail the build on any hit; discard the
 reference data. Nothing from the real inbox is written to disk.
 
-**Seeding** (`aps_insert.py`): insert the corpus chronologically into the APS
+**Seeding** (`scripts/aps_insert.py`): insert the corpus chronologically into the APS
 inbox via the Gmail API (`messages.insert`, `internalDateSource=dateHeader` so
 historical timestamps display correctly). Idempotent — inserted message IDs
 are tracked so re-runs don't duplicate. Drafts produced later by the system go
@@ -98,7 +98,7 @@ registers. Working rules:
 | `universe.py` | world simulator → `events.jsonl` + ground truth |
 | `render.py` | event → email text via persona/structure cards (API: cheap model bulk, strong model exemplars) |
 | `leakcheck.py` | entity + n-gram boundary scan |
-| `aps_insert.py` | idempotent chronological seeding of the APS inbox |
+| `scripts/aps_insert.py` (repo root) | idempotent chronological seeding of the APS inbox |
 
 ## Cost model
 
