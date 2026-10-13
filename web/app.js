@@ -628,7 +628,7 @@ function renderActivity({ log, meta }, ns) {
   $("#main").innerHTML = `
     ${subnav("activity", ns)}
     <p class="tdesc">Every email the extractor has processed, newest first;
-      refreshes every 8s.</p>
+      refreshes every 15s.</p>
     <div class="feed">${rows}</div>`;
 }
 
@@ -640,7 +640,7 @@ async function viewActivity() {
       cache.delete("counts");
       renderActivity(await fetchActivity(), await counts());
     } catch { /* banner already shown by data layer */ }
-  }, 8000);
+  }, 15000);
 }
 
 /* ---------- router + boot ---------- */
