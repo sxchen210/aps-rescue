@@ -93,8 +93,10 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
    until a valid session), five beats streaming, then changed-row
    highlight in Tables.
 
-**W3 — story tabs**: Head-to-head page (exhibits build + render);
-Discovery replay timeline. Ask/compose: decide then.
+**W3 — story tabs**: Discovery replay timeline — DONE (three chapters
+from the committed transcripts, get_thread ids resolved to the subjects
+Fable read, running cost, finale usage panel). Head-to-head page
+(exhibits build + render) remains. Ask/compose: decide then.
 
 **W4 — consolidation**: Sheet demotion/removal, README tier inversion
 (hosted link = Tier 1, plugin = Tier 2, delegation = Tier 3), teardown

@@ -1,0 +1,682 @@
+{
+ "generated_by": "scripts/build_web_assets.py",
+ "chapters": [
+  {
+   "title": "The discovery run",
+   "intro": "Connected to the mailbox cold, with four tools and no other context, the strong model read until it understood the operation — then designed the schema and wrote the extraction playbook.",
+   "rounds": [
+    {
+     "round": 1,
+     "cost": 0.04,
+     "text": "",
+     "tools": [
+      {
+       "name": "inbox_stats",
+       "arg": "mailbox overview"
+      },
+      {
+       "name": "list_threads",
+       "arg": "page 1"
+      }
+     ]
+    },
+    {
+     "round": 2,
+     "cost": 0.1,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 2"
+      },
+      {
+       "name": "list_threads",
+       "arg": "page 3"
+      }
+     ]
+    },
+    {
+     "round": 3,
+     "cost": 0.2,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 4"
+      },
+      {
+       "name": "list_threads",
+       "arg": "page 5"
+      }
+     ]
+    },
+    {
+     "round": 4,
+     "cost": 0.31,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 6"
+      },
+      {
+       "name": "list_threads",
+       "arg": "page 7"
+      }
+     ]
+    },
+    {
+     "round": 5,
+     "cost": 0.34,
+     "text": "Hit a rate limit; let me slow down and retry.",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 6"
+      }
+     ]
+    },
+    {
+     "round": 6,
+     "cost": 0.37,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "APS Rescue_10/7 Wednesday_Livermore_Spay/Neuter Appts"
+      }
+     ]
+    },
+    {
+     "round": 7,
+     "cost": 0.39,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "APS Rescue_10/7 Wednesday_Livermore_Spay/Neuter Appts"
+      }
+     ]
+    },
+    {
+     "round": 8,
+     "cost": 0.57,
+     "text": "This is clearly a dog rescue/foster operation. Now let me read representative threads of each workflow.",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "APS Rescue_10/8_Shelter pull from San Benito County Animal Services"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Foster match: Rime?"
+      }
+     ]
+    },
+    {
+     "round": 9,
+     "cost": 0.64,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Adoption appointment for Lassen!"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Thank you for your foster application, Hugo Ueda"
+      }
+     ]
+    },
+    {
+     "round": 10,
+     "cost": 0.7,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Thank you for your foster application, Jasper Nakamura"
+      },
+      {
+       "name": "get_thread",
+       "arg": "I'm so sorry — we can't keep Moraine"
+      }
+     ]
+    },
+    {
+     "round": 11,
+     "cost": 0.78,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Moraine is coming back — any chance you'd take her?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Struggling with Nettle — I'm so sorry"
+      }
+     ]
+    },
+    {
+     "round": 12,
+     "cost": 0.85,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Second chance for Nettle?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Posting roundup — week of 10/5"
+      }
+     ]
+    },
+    {
+     "round": 13,
+     "cost": 0.92,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Photos of Nettle"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Cyclone update!"
+      }
+     ]
+    },
+    {
+     "round": 14,
+     "cost": 1.0,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Records for Scree"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Crag pickup today?"
+      }
+     ]
+    },
+    {
+     "round": 15,
+     "cost": 1.07,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "**Response Needed!** Save the date: October 3 event at Bark & Barrel"
+      }
+     ]
+    },
+    {
+     "round": 16,
+     "cost": 1.23,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Two more pups than homes — can anyone squeeze one in?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Planning ahead: spay/neuter and getting your pups posted!"
+      }
+     ]
+    },
+    {
+     "round": 17,
+     "cost": 1.32,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Found dog near the library"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Hoarfrost - scratching one ear a lot"
+      }
+     ]
+    },
+    {
+     "round": 18,
+     "cost": 1.39,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 6"
+      }
+     ]
+    },
+    {
+     "round": 19,
+     "cost": 1.48,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 7"
+      }
+     ]
+    },
+    {
+     "round": 20,
+     "cost": 1.58,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 8"
+      }
+     ]
+    },
+    {
+     "round": 21,
+     "cost": 1.67,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 9"
+      }
+     ]
+    },
+    {
+     "round": 22,
+     "cost": 1.77,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 10"
+      }
+     ]
+    },
+    {
+     "round": 23,
+     "cost": 1.87,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 11"
+      }
+     ]
+    },
+    {
+     "round": 24,
+     "cost": 1.97,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 12"
+      }
+     ]
+    },
+    {
+     "round": 25,
+     "cost": 2.04,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 12"
+      }
+     ]
+    },
+    {
+     "round": 26,
+     "cost": 2.1,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 12"
+      }
+     ]
+    },
+    {
+     "round": 27,
+     "cost": 2.17,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 12"
+      }
+     ]
+    },
+    {
+     "round": 28,
+     "cost": 2.27,
+     "text": "",
+     "tools": [
+      {
+       "name": "list_threads",
+       "arg": "page 13"
+      }
+     ]
+    },
+    {
+     "round": 29,
+     "cost": 2.4,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Out of town — coverage for Ridge?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Is Granite posted yet?"
+      }
+     ]
+    },
+    {
+     "round": 30,
+     "cost": 2.51,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Longer-term home for Isobar?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "We're moving — Isobar needs a new foster by 9/22"
+      }
+     ]
+    },
+    {
+     "round": 31,
+     "cost": 2.64,
+     "text": "",
+     "tools": [
+      {
+       "name": "search",
+       "arg": "“reschedule OR cancelled OR cancel OR postpone”"
+      },
+      {
+       "name": "search",
+       "arg": "“adopted”"
+      }
+     ]
+    },
+    {
+     "round": 32,
+     "cost": 2.72,
+     "text": "",
+     "tools": [
+      {
+       "name": "search",
+       "arg": "“subject:\"Adoption appointment\"”"
+      }
+     ]
+    },
+    {
+     "round": 33,
+     "cost": 2.81,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Adoption appointment for Moraine!"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Foster match: Virga?"
+      }
+     ]
+    },
+    {
+     "round": 34,
+     "cost": 2.92,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Donation"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Thank you for your foster application, Zainab Cervantes"
+      }
+     ]
+    },
+    {
+     "round": 35,
+     "cost": 3.03,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Thank you for your foster application, Freya Nakamura"
+      }
+     ]
+    },
+    {
+     "round": 36,
+     "cost": 3.16,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Photos of Marram"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Fwd: **Response Needed!** Save the date: October 3 event at Bark & Barrel"
+      }
+     ]
+    },
+    {
+     "round": 37,
+     "cost": 3.28,
+     "text": "",
+     "tools": [
+      {
+       "name": "search",
+       "arg": "“subject:correction”"
+      },
+      {
+       "name": "get_thread",
+       "arg": "APS Rescue_9/23 Wednesday_Livermore_Spay/Neuter Appts"
+      }
+     ]
+    },
+    {
+     "round": 38,
+     "cost": 3.92,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Is Talus posted yet?"
+      }
+     ]
+    },
+    {
+     "round": 39,
+     "cost": 6.34,
+     "text": "I have a complete picture of this mailbox. Submitting the three artifacts now.",
+     "tools": [
+      {
+       "name": "submit_artifacts",
+       "arg": "schema.json · instructions.md · DISCOVERY_NOTES.md"
+      }
+     ]
+    }
+   ],
+   "tool_calls": 59,
+   "final": {
+    "cost": 6.34,
+    "usage": {
+     "in": 169,
+     "out": 28194,
+     "cache_read": 1544274,
+     "cache_write": 169200
+    },
+    "submitted": true
+   }
+  },
+  {
+   "title": "Refine 1 — fosters become first-class",
+   "intro": "Operator feedback: “which fosters are free right now?” must be answerable. The model re-verified the away/decline/moving evidence and promoted the foster roster to its own table.",
+   "rounds": [
+    {
+     "round": 1,
+     "cost": 0.16,
+     "text": "I'll re-verify the foster-people evidence in the mailbox before revising the schema. Let me search for vacation/away/decline/moving threads and read them in full.",
+     "tools": [
+      {
+       "name": "search",
+       "arg": "“out of town OR vacation OR away”"
+      },
+      {
+       "name": "search",
+       "arg": "“moving”"
+      },
+      {
+       "name": "search",
+       "arg": "“coverage”"
+      }
+     ]
+    },
+    {
+     "round": 2,
+     "cost": 0.48,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Out of town — coverage for Ridge?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Out of town — coverage for Chicory?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Out of town — coverage for Doldrum?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "We're moving — Isobar needs a new foster by 9/22"
+      }
+     ]
+    },
+    {
+     "round": 3,
+     "cost": 0.59,
+     "text": "Now let me re-read the decline/offer threads and the overflow thread to see exactly how foster availability is expressed.",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Foster match: Virga?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Two more pups than homes — can anyone squeeze one in?"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Moraine is coming back — any chance you'd take her?"
+      }
+     ]
+    },
+    {
+     "round": 4,
+     "cost": 0.83,
+     "text": "",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "Struggling with Nettle — I'm so sorry"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Thank you for your foster application, Zainab Cervantes"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Longer-term home for Isobar?"
+      }
+     ]
+    },
+    {
+     "round": 5,
+     "cost": 2.31,
+     "text": "",
+     "tools": [
+      {
+       "name": "submit_artifacts",
+       "arg": "schema.json · instructions.md · DISCOVERY_NOTES.md"
+      }
+     ]
+    }
+   ],
+   "tool_calls": 14,
+   "final": {
+    "cost": 2.31,
+    "usage": {
+     "in": 13710,
+     "out": 30961,
+     "cache_read": 67274,
+     "cache_write": 27682
+    },
+    "submitted": true
+   }
+  },
+  {
+   "title": "Refine 2 — the clear verb",
+   "intro": "The world produced cancellations the ops contract couldn't express (a fallen-through adoption left stale fields standing). The envelope gained an explicit clear list; the model re-read the real fall-through thread and made it the playbook's worked example.",
+   "rounds": [
+    {
+     "round": 1,
+     "cost": 0.26,
+     "text": "I'll quickly re-verify the cancellation/fall-through evidence in the mailbox to ground the new worked example, then submit the revised artifacts.",
+     "tools": [
+      {
+       "name": "get_thread",
+       "arg": "I'm so sorry — we can't keep Moraine"
+      },
+      {
+       "name": "get_thread",
+       "arg": "Adoption appointment for Moraine!"
+      }
+     ]
+    },
+    {
+     "round": 2,
+     "cost": 1.82,
+     "text": "",
+     "tools": [
+      {
+       "name": "submit_artifacts",
+       "arg": "schema.json · instructions.md · DISCOVERY_NOTES.md"
+      }
+     ]
+    }
+   ],
+   "tool_calls": 3,
+   "final": {
+    "cost": 1.82,
+    "usage": {
+     "in": 19801,
+     "out": 23007,
+     "cache_read": 2179,
+     "cache_write": 23613
+    },
+    "submitted": true
+   }
+  }
+ ]
+}

@@ -1,11 +1,13 @@
 """Generate the web app's data files from committed evidence.
 
-Emits web/data/schema.json (verbatim copy of the discovery artifact) and
-web/data/stats.json (evidence-strip numbers). Nothing on the web page is
-hand-typed: every stat is either computed here from a committed artifact
-(verify_v2.json; strict status recomputed from the committed snapshot vs
-ground truth, same policy split as VERIFICATION.md) or a literal carrying
-its source pointer (the cost actuals, which exist only in prose).
+Emits web/data/schema.json (verbatim copy of the discovery artifact),
+web/data/stats.json (evidence-strip numbers), and
+web/data/discovery_replay.json (the committed discovery transcripts as a
+renderable timeline — get_thread ids resolved to the subjects Fable
+actually read, via the seeding state; presentation-only use of simulation
+files, the extractor never sees them). Nothing on the web page is
+hand-typed: every number is computed here from a committed artifact or is
+a literal carrying its source pointer.
 
 Usage: python3 scripts/build_web_assets.py   (deterministic; outputs committed)
 """
@@ -41,6 +43,84 @@ def strict_status():
         if (r.get("status") or "").strip() == g["status"]:
             hit += 1
     return hit, n
+
+
+CHAPTERS = [
+    ("discovery_log.jsonl", "The discovery run",
+     "Connected to the mailbox cold, with four tools and no other context, "
+     "the strong model read until it understood the operation — then "
+     "designed the schema and wrote the extraction playbook."),
+    ("discovery_log_refine.jsonl", "Refine 1 — fosters become first-class",
+     "Operator feedback: “which fosters are free right now?” must "
+     "be answerable. The model re-verified the away/decline/moving evidence "
+     "and promoted the foster roster to its own table."),
+    ("discovery_log_refine2.jsonl", "Refine 2 — the clear verb",
+     "The world produced cancellations the ops contract couldn't express "
+     "(a fallen-through adoption left stale fields standing). The envelope "
+     "gained an explicit clear list; the model re-read the real "
+     "fall-through thread and made it the playbook's worked example."),
+]
+
+
+def discovery_replay():
+    state = json.loads((ROOT / "simulation" / "out" / "seeded_ids.json").read_text())
+    tid_to_name = {v: k for k, v in state["threads"].items()}
+    name_to_subj = {}
+    for f in ("corpus.jsonl", "extension/corpus_week1.jsonl",
+              "extension/corpus_pool.jsonl"):
+        p = ROOT / "simulation" / "out" / f
+        if not p.exists():
+            continue
+        for line in p.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                name_to_subj.setdefault(r["thread"], r["subject"])
+
+    def arg_of(t):
+        name, inp = t["name"], t.get("input") or {}
+        if name == "inbox_stats":
+            return "mailbox overview"
+        if name == "list_threads":
+            return f"page {inp.get('page')}"
+        if name == "search":
+            q = inp.get("query", "")
+            return f"“{q}”"
+        if name == "get_thread":
+            tid = inp.get("thread_id", "")
+            subj = name_to_subj.get(tid_to_name.get(tid, ""), "")
+            return subj or f"thread {tid[:10]}…"
+        if name == "submit_artifacts":
+            return "schema.json · instructions.md · DISCOVERY_NOTES.md"
+        return ""
+
+    chapters = []
+    for fname, title, intro in CHAPTERS:
+        rows = [json.loads(l) for l in
+                (ROOT / "discovery" / fname).read_text().splitlines() if l.strip()]
+        final = next((r for r in rows if r.get("final")), {})
+        rounds, prev = [], 0.0
+        for r in rows:
+            if r.get("final"):
+                continue
+            rounds.append({
+                "round": r["round"],
+                "cost": r["cost_usd"],
+                "text": (r.get("text") or "").strip(),
+                "tools": [{"name": t["name"], "arg": arg_of(t)}
+                          for t in r.get("tools", [])],
+            })
+            prev = r["cost_usd"]
+        chapters.append({
+            "title": title, "intro": intro, "rounds": rounds,
+            "tool_calls": sum(len(r["tools"]) for r in rounds),
+            "final": {"cost": final.get("cost_usd", prev),
+                      "usage": final.get("usage", {}),
+                      "submitted": final.get("submitted", False)},
+        })
+    (OUT / "discovery_replay.json").write_text(json.dumps(
+        {"generated_by": "scripts/build_web_assets.py", "chapters": chapters},
+        indent=1, ensure_ascii=False))
+    return chapters
 
 
 def main():
@@ -84,8 +164,12 @@ def main():
     (OUT / "stats.json").write_text(json.dumps(
         {"generated_by": "scripts/build_web_assets.py",
          "stats": stats}, indent=1, ensure_ascii=False))
-    print(f"wrote {OUT/'schema.json'} ({len(schema_raw):,}B) and stats.json "
-          f"({len(stats)} stats; strict status {s_hit}/{s_n})")
+    ch = discovery_replay()
+    print(f"wrote {OUT/'schema.json'} ({len(schema_raw):,}B), stats.json "
+          f"({len(stats)} stats; strict status {s_hit}/{s_n}), "
+          f"discovery_replay.json ({len(ch)} chapters, "
+          f"{sum(len(c['rounds']) for c in ch)} rounds, "
+          f"{sum(c['tool_calls'] for c in ch)} tool calls)")
 
 
 if __name__ == "__main__":

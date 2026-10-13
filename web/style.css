@@ -150,6 +150,28 @@ a.key { font-weight: 600; }
   font-size: 12px; color: var(--ink-2); white-space: nowrap;
 }
 
+/* discovery replay timeline */
+.timeline { border-left: 2px solid var(--line); padding-left: 0; }
+.round-row { display: flex; gap: 14px; padding: 7px 0 7px 14px; align-items: baseline; }
+.round-no {
+  min-width: 74px; color: var(--ink-3); font-size: 12px;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.round-cost { margin-left: 8px; color: var(--ink-3); }
+.round-body { flex: 1; min-width: 0; }
+.fable-quote {
+  font-family: var(--serif); font-size: 15px; color: var(--ink-1);
+  margin: 2px 0 6px; max-width: 72ch;
+}
+.fable-quote::before { content: "“"; color: var(--accent); }
+.fable-quote::after { content: "”"; color: var(--accent); }
+.toolchip {
+  display: inline-block; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface-2); padding: 1px 8px; font-size: 12.5px;
+  color: var(--ink-2); margin: 2px 0;
+}
+.toolchip b { color: var(--ink-1); font-weight: 600; }
+
 .site-foot {
   max-width: 1200px; margin: 24px auto; padding: 12px 16px;
   color: var(--ink-3); font-size: 12.5px; border-top: 1px solid var(--line);

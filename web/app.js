@@ -134,10 +134,6 @@ const PLACEHOLDER = {
         leak-checked against the real inbox it mirrors, ground truth kept only
         for grading) — this tab is coming; the design lives in
         <a href="https://github.com/sxchen210/aps-rescue/blob/main/simulation/SIMULATION_DESIGN.md">SIMULATION_DESIGN.md</a>.`,
-  disc: `A replay of how the schema was earned — the strong model explored the
-        inbox blind for 39 rounds and designed everything this app renders —
-        is coming; the full transcripts are committed under
-        <a href="https://github.com/sxchen210/aps-rescue/tree/main/discovery">discovery/</a>.`,
   h2h: `The head-to-head — the same model answering the same questions with and
         without these tables, self-graded and blind re-graded by a third party —
         is coming; the committed exhibits live in
@@ -148,6 +144,58 @@ const PLACEHOLDER = {
 
 function viewPlaceholder(id) {
   $("#main").innerHTML = `<p class="placeholder">${PLACEHOLDER[id]}</p>`;
+}
+
+/* --- Discovery: the committed transcript, replayed --- */
+
+let REPLAY = null;
+
+async function viewDiscovery(idx) {
+  if (!REPLAY) {
+    REPLAY = await fetch("data/discovery_replay.json").then((r) => r.json());
+  }
+  const chapters = REPLAY.chapters;
+  const i = Math.min(Math.max(idx || 0, 0), chapters.length - 1);
+  const ch = chapters[i];
+
+  const chips = chapters.map((c, j) =>
+    `<a class="chip ${j === i ? "on" : ""}" href="#/disc/${j}">${esc(c.title)}
+     <span class="n">$${c.final.cost.toFixed(2)}</span></a>`).join("");
+
+  const rows = ch.rounds.map((r) => {
+    const quote = r.text
+      ? `<p class="fable-quote">${esc(r.text)}</p>` : "";
+    const tools = r.tools.map((t) =>
+      `<span class="toolchip"><b>${esc(t.name)}</b>${t.arg ? " " + esc(t.arg) : ""}</span>`).join(" ");
+    return `<div class="round-row">
+      <div class="round-no">r${r.round}<span class="round-cost">$${r.cost.toFixed(2)}</span></div>
+      <div class="round-body">${quote}${tools}</div>
+    </div>`;
+  }).join("");
+
+  const u = ch.final.usage || {};
+  $("#main").innerHTML = `
+    <p class="tdesc">Blind by construction: the model was connected to the
+      mailbox with four tools — <code>inbox_stats</code>,
+      <code>list_threads</code>, <code>get_thread</code>, <code>search</code>
+      — and nothing else. No simulator internals, no ground truth, no hints.
+      What follows is the committed transcript
+      (<a href="https://github.com/sxchen210/aps-rescue/tree/main/discovery">discovery/</a>),
+      not a re-enactment; the running total on the left is live API cost.</p>
+    <div class="subnav">${chips}</div>
+    <p class="muted">${ch.intro} — ${ch.rounds.length} rounds,
+      ${ch.tool_calls} tool calls, $${ch.final.cost.toFixed(2)}.</p>
+    <div class="timeline">${rows}</div>
+    <div class="panel" style="margin-top:14px">
+      <h3>Artifacts accepted</h3>
+      <div class="small">All three artifacts submitted and saved —
+        ${(u.out || 0).toLocaleString()} tokens written,
+        ${(u.cache_read || 0).toLocaleString()} read from cache,
+        $${ch.final.cost.toFixed(2)} total. The structural sanity gate
+        passed, and the schema it designed renders everything in
+        <a href="#/pm">Populate &amp; Maintain</a> — this page included,
+        since the app is generated from <code>schema.json</code>.</div>
+    </div>`;
 }
 
 /* --- Populate & Maintain: tables --- */
@@ -384,6 +432,7 @@ async function route() {
   const tab = parts[0] || "pm";
   renderTabs(tab);
   try {
+    if (tab === "disc") return await viewDiscovery(parseInt(parts[1] || "0", 10));
     if (tab !== "pm") return viewPlaceholder(tab);
     if (parts[1] === "activity") return await viewActivity();
     const t = parts[1] && SCHEMA.tables[parts[1]] ? parts[1] : tables()[0];
