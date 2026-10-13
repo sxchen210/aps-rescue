@@ -133,15 +133,15 @@ const PLACEHOLDER = {
   sim: `How the ~1,000-email universe was simulated (deterministic generator,
         leak-checked against the real inbox it mirrors, ground truth kept only
         for grading) — this tab is coming; the design lives in
-        <a href="https://github.com/sxchen210/claude_take_home/blob/main/simulation/SIMULATION_DESIGN.md">SIMULATION_DESIGN.md</a>.`,
+        <a href="https://github.com/sxchen210/aps-rescue/blob/main/simulation/SIMULATION_DESIGN.md">SIMULATION_DESIGN.md</a>.`,
   disc: `A replay of how the schema was earned — the strong model explored the
         inbox blind for 39 rounds and designed everything this app renders —
         is coming; the full transcripts are committed under
-        <a href="https://github.com/sxchen210/claude_take_home/tree/main/discovery">discovery/</a>.`,
+        <a href="https://github.com/sxchen210/aps-rescue/tree/main/discovery">discovery/</a>.`,
   h2h: `The head-to-head — the same model answering the same questions with and
         without these tables, self-graded and blind re-graded by a third party —
         is coming; the committed exhibits live in
-        <a href="https://github.com/sxchen210/claude_take_home/tree/main/app/validation/third_party">app/validation/</a>.`,
+        <a href="https://github.com/sxchen210/aps-rescue/tree/main/app/validation/third_party">app/validation/</a>.`,
   adapt: `How the schema adapts when the world outgrows it (the cancellation /
         clear-verb story) — this tab is coming.`,
 };
