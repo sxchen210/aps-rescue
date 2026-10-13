@@ -116,7 +116,7 @@ with reason → what changed.
   first); no-credential runs fall back to a committed read-only snapshot;
   missing tokens fail with pointers, not tracebacks.
 
-## 5 — Demo (plugin DONE; owner checklist below)
+## 5 — Demo (plugin DONE; web app IN PROGRESS; owner checklist below)
 
 Plugin commands are thin wrappers over `app/`: `/aps-overview` (premise,
 start here), `/aps-status`, `/aps-ask "…"`, `/aps-simulate-email`,
@@ -124,6 +124,14 @@ start here), `/aps-status`, `/aps-ask "…"`, `/aps-simulate-email`,
 (Sheet + committed evidence), drive (portal bundle), real mailbox
 (delegation). No unattended automation, by decision — mail waits for the
 next `/aps-ingest`.
+
+**Web app (the product surface — plan and phases in `web/PLAN.md`,
+authoritative for everything under `web/`):** a hosted, schema-driven,
+read-only SPA over Turso with five pipeline-ordered tabs (Populate &
+Maintain is the default view), built stepwise — static tables + activity
+feed first, then a password-gated backend for live simulate, then the
+head-to-head and discovery-replay story tabs, then Sheet
+demotion/removal and README tier inversion.
 
 **Validation record (committed):**
 - QA comparison, 9 pre-registered questions, same model/budget

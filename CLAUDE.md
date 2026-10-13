@@ -2,7 +2,8 @@
 
 Self-building structured data (entities/relationships/workflows as tables, not free-form text) over a shared Gmail inbox. **`PLAN.md` is authoritative**
 for architecture, phases, and locked semantics (ops envelope, apply rules,
-harness contract, guardrails) — read it before building. Any change to
+harness contract, guardrails) — read it before building; `web/PLAN.md`
+owns the demo web app. Any change to
 architecture or a standing decision updates PLAN.md and this file in the
 same commit.
 
