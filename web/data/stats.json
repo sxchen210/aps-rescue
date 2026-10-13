@@ -1,0 +1,41 @@
+{
+ "generated_by": "scripts/build_web_assets.py",
+ "stats": [
+  {
+   "label": "emails ingested",
+   "value": "953",
+   "detail": "0 failures; 102 catchalled",
+   "source": "populate/out/verify_v2.json"
+  },
+  {
+   "label": "dogs found",
+   "value": "89/90",
+   "detail": "vs simulator ground truth; 1 name-only miss",
+   "source": "populate/out/verify_v2.json"
+  },
+  {
+   "label": "fosters found",
+   "value": "98/98",
+   "detail": "every person who ever fostered",
+   "source": "populate/out/verify_v2.json"
+  },
+  {
+   "label": "status accuracy",
+   "value": "97.8%",
+   "detail": "policy-scored; strict-exact 82.0% (73/89) — unconfirmed outcomes counted wrong",
+   "source": "populate/VERIFICATION.md (policy stated there)"
+  },
+  {
+   "label": "dated fields",
+   "value": "100.0%",
+   "detail": "vet dates 49/49, adoption appts 20/20",
+   "source": "populate/out/verify_v2.json"
+  },
+  {
+   "label": "maintenance cost",
+   "value": "$0.0004/email",
+   "detail": "populate run $0.36 total; discovery (strong model) $8.65",
+   "source": "populate/VERIFICATION.md (cost actuals)"
+  }
+ ]
+}

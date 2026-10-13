@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>APS Rescue — self-building structured data</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▦</text></svg>">
+</head>
+<body>
+<header class="site-head">
+  <div class="masthead">
+    <h1>APS Rescue <span class="sub">— self-building structured data over a shared inbox</span></h1>
+    <span id="conn" class="conn" title="data source">…</span>
+  </div>
+  <p class="premise">A strong model discovered this schema from ~1,000 emails in a
+    real Gmail inbox, blind; a cheap model maintains every table below from each
+    new email for ~$0.0004. Everything here renders from
+    <code>schema.json</code> — nothing is hand-built per table.</p>
+  <div id="stats" class="stats" aria-label="verification evidence"></div>
+</header>
+
+<nav class="tabs" id="tabs" aria-label="pipeline stages"></nav>
+
+<div id="banner" class="banner" hidden></div>
+
+<main id="main"></main>
+
+<footer class="site-foot">
+  <span>Synthetic rescue · drafts only, never sends · verification &amp; evidence in the
+  <a href="https://github.com/sxchen210/claude_take_home" rel="noopener">repository</a></span>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
