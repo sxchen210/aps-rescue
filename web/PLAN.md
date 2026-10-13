@@ -43,21 +43,20 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
 - **No-build vanilla SPA**: `index.html` + `app.js` + `style.css`. No npm,
   no bundler — reviewers can read the whole front end; deploy = serve the
   folder. Hash routing (`#/pm/dogs`, `#/pm/dogs/17`, `#/h2h`, …).
-- **Data layer:** browser → Turso HTTP API (`/v2/pipeline`) with a
-  **read-only token**; on failure, automatic fallback to a committed
-  `snapshot.json`. A badge always shows the mode: ● live database / ○
-  committed snapshot. Works from a repo clone with zero network.
+- **Data layer: Turso only** (decided — no snapshot fallback). Browser →
+  Turso HTTP API (`/v2/pipeline`) with a **read-only token**. If the DB is
+  unreachable, the app shows an explicit "database unreachable" banner —
+  never stale or silent data. (The committed `state_v2.sqlite` remains the
+  CLI's no-token tier; the web app does not use it.)
 - **Schema-agnostic by construction:** app code hardcodes no table or
   column names — tabs, columns, tooltips (descriptions), enum filter
   chips, record links (canonical keys), and related-records all derive
   from `schema.json`. This is the generality proof, stated on-page.
 - **Generated data files, never hand-typed:**
   `scripts/build_web_assets.py` emits `web/data/schema.json` (copy of the
-  discovery artifact), `web/data/snapshot.json` (from
-  `populate/out/state_v2.sqlite`), `web/data/stats.json` (evidence-strip
-  numbers from the verification record), and later
-  `web/data/exhibits.json` + `web/data/discovery_replay.json`.
-  Deterministic; outputs committed.
+  discovery artifact) and `web/data/stats.json` (evidence-strip numbers
+  from the verification record); later `web/data/exhibits.json` +
+  `web/data/discovery_replay.json`. Deterministic; outputs committed.
 - **W2 backend:** FastAPI (`app/server.py`) wrapping the existing
   `pipeline.simulate_send_and_process` — the five-beat `on_event` callback
   maps 1:1 onto an SSE stream (arrived → Haiku thinking → ops envelope →
@@ -69,8 +68,8 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
 1. `build_web_assets.py` + mint a read-only Turso token (owner step) +
    CORS validation against Turso from a browser context.
 2. SPA shell: tab bar (placeholders for Simulate/Discovery/Adapt/H2H),
-   routing, data layer with live/snapshot fallback + mode badge, slim
-   header evidence strip.
+   routing, Turso data layer with an explicit unreachable-state banner,
+   slim header evidence strip.
 3. Populate & Maintain tab, sub-nav **Tables | Activity**:
    - Tables: schema-driven browser — client-side search, column sort,
      enum chips, booleans as ✓/—, NULL as faint dash, key cells link to
@@ -103,9 +102,10 @@ and shot-list updates, "time went here, deliberately" note.
 
 ## Done criteria
 
-- W1: all five discovered tables render correctly in BOTH modes; counts
-  match `pipeline.py status`; record/related/provenance views work;
-  activity feed updates live during a terminal-fired simulate; deployed
+- W1: all five discovered tables render from live Turso with counts
+  matching `pipeline.py status`; record/related/provenance views work;
+  activity feed updates live during a terminal-fired simulate; the
+  unreachable banner shows when the token/URL is wrong (tested); deployed
   URL loads cold in <2s; no hardcoded schema names anywhere in `app.js`.
 - W2: a stranger without the password cannot cause any state change
   (verified by attempt); two concurrent fires serialize; a full fire
