@@ -142,6 +142,7 @@ def main():
                 resp = client.messages.create(
                     model=MODEL, max_tokens=MAX_TOKENS,
                     output_config={"effort": args.effort},
+                    thinking={"type": "adaptive", "display": "summarized"},
                     system=[{"type": "text", "text": instructions,
                              "cache_control": {"type": "ephemeral"}}],
                     messages=[{"role": "user", "content": msg_text}])

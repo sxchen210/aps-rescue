@@ -167,6 +167,10 @@ demotion/removal and README tier inversion.
   gatekeeping; out-of-order apply documented, not guarded; provenance
   stays row-level.
 - 10-12 — blind third-party re-grade run and recorded as-is (stage 5).
+- 10-13 — extraction calls request `thinking: {adaptive, display:
+  summarized}` (per the Haiku 5.5 migration guide) so beat 2 can show the
+  model's summarized reasoning; display-only — model, effort, and
+  envelope behavior unchanged.
 
 ## Remaining (owner)
 

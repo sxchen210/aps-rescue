@@ -135,6 +135,10 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
             try:
                 resp = client.messages.create(
                     model=HAIKU, max_tokens=6000, output_config={"effort": effort},
+                    # Haiku 5.5 withholds thinking text unless summarized
+                    # display is requested (per its migration guide); this
+                    # changes only what is RETURNED, not what it does.
+                    thinking={"type": "adaptive", "display": "summarized"},
                     system=[{"type": "text", "text": INSTRUCTIONS,
                              "cache_control": {"type": "ephemeral"}}],
                     messages=[{"role": "user", "content": msg_text}])
@@ -154,14 +158,11 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
                 break
             except (ValueError, json.JSONDecodeError) as e:
                 err = f"parse: {e}"
-        # Haiku 5.5 does not return its reasoning text at effort-based
-        # settings (the thinking block carries only a signature) — say so
-        # rather than silently skipping the beat; relay it in full if a
-        # model ever does return it.
+        # Summarized thinking requested per the Haiku 5.5 migration guide;
+        # relayed in full. Trivial emails may skip thinking entirely.
         on_event("thinking", thinking or
-                 "(Haiku's internal reasoning is not returned by the API at "
-                 "this setting. Its entire visible output is the envelope "
-                 "below — including its own one-line notes per op.)")
+                 "(Haiku answered directly; no extended thinking was needed "
+                 "for this email.)")
 
         ts = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(m["_ts"]))
         applied, anomalies, tag = [], [], None
