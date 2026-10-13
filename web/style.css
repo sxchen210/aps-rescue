@@ -97,7 +97,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
   padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px;
   background: var(--surface-1); color: var(--ink-1); min-width: 220px;
 }
-.tdesc { color: var(--ink-2); font-size: 13px; margin: 0 0 8px; }
+.tdesc { color: var(--ink-2); font-size: 14.5px; margin: 0 0 10px; }
+.tdesc.strong { font-weight: 600; color: var(--ink-1); }
 
 .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
 table { border-collapse: collapse; width: 100%; font-size: 13.5px; }

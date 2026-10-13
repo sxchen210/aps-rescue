@@ -182,7 +182,7 @@ async function viewDiscovery(idx) {
       What follows is the committed transcript
       (<a href="https://github.com/sxchen210/aps-rescue/tree/main/discovery">discovery/</a>),
       not a re-enactment; the running total on the left is live API cost.</p>
-    <p class="tdesc">Two files to keep straight:
+    <p class="tdesc strong">Two files to keep straight:
       <a href="https://github.com/sxchen210/aps-rescue/blob/main/discovery/discovery.py"><code>discovery.py</code></a>
       is OUR side — the mission prompt given to the strong model (Fable),
       its four tools, and the ops-envelope contract it must design within.
