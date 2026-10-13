@@ -1,15 +1,16 @@
 # Self-building structured data over a shared inbox — plan
 
 A busy shared mailbox encodes real operational state — entities,
-relationships, workflows (who has which dog, what happens Saturday, who's
-waiting on what) — that today lives only as free-form text in scrollback.
-This prototype makes a strong model **discover** that structure, a cheap
-model **maintain** it continuously as tables, and the resulting state power
-answers and drafts that thread-search alone cannot produce.
+relationships, workflows — that today lives only as free-form text in
+scrollback. This prototype makes a strong model **discover** that
+structure, a cheap model **maintain** it continuously as tables, and the
+resulting state power answers and drafts that thread-search alone cannot
+produce. The pipeline, and this plan, run in five stages:
+**simulate → discover → populate → maintain → demo.**
 
-**Stage: APS Rescue** — a fictional dog rescue run entirely out of
-`animalprotectiveservices2026@gmail.com`. Every email is synthetic (see
-`simulation/SIMULATION_DESIGN.md`); a real rescue inbox was consulted
+**Stage world: APS Rescue** — a fictional dog rescue run entirely out of
+`animalprotectiveservices2026@gmail.com`. Every email is synthetic
+(`simulation/SIMULATION_DESIGN.md`); a real rescue inbox was consulted
 read-only for structure, behind a leak-checked boundary.
 
 ## Architecture
@@ -30,197 +31,138 @@ read-only for structure, behind a leak-checked boundary.
                         one tab per table + Drafts tab + activity log)
 ```
 
-Pull-based: nothing serves Gmail — Gmail serves us. Drafts are created, never
-sent. One shared hosted DB means every interviewer sees the same world and
-no one rebuilds state. Interviewers who want the real Gmail view get
-**delegated access** (tested) — no password sharing, no login-challenge risk.
+Pull-based: nothing serves Gmail — Gmail serves us. Drafts are created,
+never sent. One shared hosted DB means every interviewer sees the same
+world. Interviewers who want the real Gmail view get delegated access.
 
-## Phase 1 — Simulation (DONE — see `simulation/SIMULATION_DESIGN.md`)
+## 1 — Simulate (DONE — `simulation/SIMULATION_DESIGN.md`)
 
-831 seed emails over six simulated weeks (Aug 31 – Oct 9, 2026) live in the
-inbox with historical timestamps: 85 dogs (13 multi-home — "dog tetris"),
-~200 households, events/vet days/applications, a posting-readiness rule,
-~25% catchall noise. `simulation/out/ground_truth.json` holds true state at
-every instant (verification asset); 8 held-out scenarios
-(`simulation/out/universe/scenarios.jsonl`) are reserved for live injection.
+831 seed emails over six simulated weeks (Aug 31 – Oct 9, 2026), living in
+the real inbox with historical timestamps: 85 dogs (13 multi-home — "dog
+tetris"), ~200 households, events, vet days, applications, ~25% catchall
+noise. Deterministic generator; ground truth at every instant — used for
+post-hoc scoring ONLY, never visible to discovery or ingestion. The
+universe is endless: stage 4 extends it with a verified week of history
+plus a pool of pre-rendered scenarios to fire live.
 
-## Phase 2 — Schema discovery (DONE — artifacts in `discovery/`)
+## 2 — Discover (DONE — artifacts + full transcripts in `discovery/`)
 
-`discovery/discovery.py` ran the strong model agentically against the live
-inbox (four tools: `inbox_stats`, `list_threads`, `get_thread`, `search`),
-**blind by construction** — it can see only what those tools return, never
-`simulation/` or ground truth (which exists solely for Phase-3 scoring).
+The strong model (Fable) explored the live inbox agentically and **blind**
+— four Gmail tools, nothing else — and designed the schema plus the
+extraction playbook a small model follows: 39 rounds / $6.34, then two
+operator refines (fosters roster, $2.31; clear verb, $1.82). Result: **5
+tables** + 7 catchall tags, `instructions.md` with worked examples,
+evidence notes. Sanity gate PASS.
 
-**Result:** original run 39 rounds / $6.34 (paged the full index, cited
-thread evidence per workflow) + one operator-feedback revision via
-`--refine` (fosters roster requested; $2.31). Sanity gate PASS. Artifacts,
-all committed and never hand-edited: `schema.json` (**5 tables** — dogs 23
-cols w/ 6-state lifecycle, fosters 11 cols w/ active/away/departed +
-decline/return tracking, foster_applications 14, events 4, event_rsvps 5 —
-plus 7 catchall tags), `instructions.md` (Haiku playbook, worked examples),
-`DISCOVERY_NOTES.md` (evidence), `discovery_log*.jsonl` (full transcripts).
+**The contract it authored (locked):** extraction emits only the envelope
+`{"ops": [{"table", "match": {canonical keys}, "set": {field: value},
+"clear"?: [field, ...], "note"?: ≤1 line}], "catchall"?: {"tag"}}` — with
+the dated-fields rule (stated dates, never the email's own timestamp),
+omit-never-guess (nulls/empties in `set` are dropped), and `clear` as the
+only removal channel (facts stated gone; never canonical keys; a pure
+cancellation never creates a row).
 
-**The envelope contract** (embedded in the mission; what extraction emits
-and Phase 3 consumes): `{"ops": [{"table", "match": {canonical keys},
-"set": {field: value}, "clear"?: [field, ...], "note"?: ≤1 line}],
-"catchall"?: {"tag"}}` — plus the dated-fields rule (stated dates, never
-the email's own timestamp), omit-never-guess (nulls/empties in `set` are
-dropped; explicit `clear` is the only removal channel, for stated-gone
-facts — never canonical keys, and a pure cancellation never creates a
-row), and create-vs-update decided by the harness, not the model.
+**Process rule (standing):** artifacts are never hand-edited — revisions
+go through `discovery.py --refine` only, and the schema is **frozen**
+after populate (no migration path, by decision; the harness emits
+`schema.sha256`, and ingest refuses hash or schema/DB-parity drift). In
+the product, revisions would surface as layman onboarding questions;
+refine is this prototype's stand-in.
 
-**Process rules (standing):** structural sanity gate between discovery and
-populate; degenerate output or operator feedback → re-run the harness
-(`--refine`), never hand-edit artifacts. *Product note (context, not
-scope): real customers are non-technical — in the product, schema revisions
-surface as layman yes/no onboarding questions ("Will you need to find which
-fosters are free right now?"); refine mode is this prototype's stand-in.*
+## 3 — Populate (DONE — `populate/VERIFICATION.md`)
 
-## Phase 3 — Populate + verify + host (DONE — see `populate/VERIFICATION.md`)
+All 831 emails ingested **serially, chronologically** by blind Haiku 5.5
+(effort A/B medium-vs-high: tie → medium): zero parse failures, zero
+anomalies, zero invented entities, $0.36 (~$0.0004/email; discovery $8.65
+— the two-tier economics in one line).
 
-All 831 emails ingested serially by Haiku at effort medium (A/B vs high:
-tie; medium per rule): zero parse failures, zero anomalies, zero invented
-entities, $0.36 total (~$0.0004/email). Scores vs ground truth: dogs 78/79
-(status 97.4% under the stated equivalence policy — strict-exact and
-per-field numbers in VERIFICATION.md; vet dates 49/49, adoption appts
-20/20), fosters 90/90,
-applications 33/33 w/ correct lifecycle, events 3/3, RSVPs 56/56, coverage
-arithmetic exact. Misses decompose to pre-corpus facts (unknowable from
-email) + one name-only dog + status-label lag on future-dated absences
-(dates themselves 4/4). Discovery cost $8.65 vs populate $0.36 — the
-two-tier economics in one line. After the user's review, the verified
-state was pushed to Turso (`populate/push_turso.py`, 1,187 rows across 7
-tables incl. the ingest log, exact count match) and the **Sheets mirror is
-live** (`app/mirror.py`: table tabs + append-only Activity/Drafts, first
-full refresh served from the hosted DB).
+**Apply semantics (locked):** create-vs-update by normalized
+canonical-key lookup — the harness decides, never the model; per-field
+merge; unknown fields/clears dropped and logged; booleans canonicalized to
+'1'/'0'; provenance stamped row-level, last-writer (source_email_id,
+updated_at). Accepted limit: no per-field temporal guard — a delayed old
+email can overwrite newer state; dated fields mitigate.
 
-## Phase 4 — App layer + plugin (IN PROGRESS — mirror done; QA + draft showdowns validated)
+**Verified:** dogs 78/79, status 97.4% under the stated equivalence policy
+(strict-exact and per-field numbers in VERIFICATION.md), fosters 90/90,
+applications 33/33, coverage arithmetic exact. Then pushed to Turso (1,187
+rows, exact count match); Sheets mirror live.
 
-Validated so far: QA comparison (B 3 / tie 6 / A 0, below) and the draft
-showdown (`app/out/draft_transcripts.jsonl`, 4 pre-registered inbound
-emails): decisive on inventory enumeration — connector arm named 5
-available smalls, 0 correct; table arm 9/9 — modest edges on capacity and
-negative-space, tie control held, both arms caught a false premise.
+## 4 — Maintain (DONE — `app/`)
 
-**Execution order (agreed):**
-A. `app/pipeline.py`: `ingest_new()` + `simulate_send_and_process()` —
-   dedup → insert → blind ingest → apply → scorecard vs spec facts →
-   draft triage → mirror/Activity/Drafts; five-beat narrative; runs on
-   Turso.
-B. `simulation/universe_extend.py`: continuation from ground_truth (re-run
-   would scramble the verified 831). Week 1 (Oct 10–16, ~130, in+outbound)
-   = history to inject; Weeks 2–3 (Oct 17–30, **inbound-only**, ~150) =
-   firing pool (scripted staff replies excluded — live drafts take their
-   place). Old 8 held-outs fold in. Ground truth v2; render; leak check v2.
-C. Inject Week 1: first ~15 interactive with expected-ops verification
-   (acceptance suite), then batch-drip ~115; latest-inbound rule keeps
-   Drafts to the open tail; verify v2 (~960 emails); mirror refresh.
-D. Package pool: rendered text + spec answer keys + deterministic
-   Message-IDs, fired oldest-first. Extension is rerunnable any week —
-   the universe is endless (candidate post-submission cloud-tick job).
+The live loop every demo surface wraps: `pipeline.py ingest_new()`
+(catch-up by gmail id, oldest first) and `simulate_send_and_process()`
+(fire next pooled scenario or custom text → blind ingest → apply → live
+scorecard vs the scenario's answer key → draft triage → mirror), narrated
+in five beats: arrived → Haiku thinking → ops envelope → draft decision
+with reason → what changed.
 
-- **`app/` core:** `ingest_new(db, on_event)` (the ingest loop as a
-  function), `mirror.py` (full-rewrite Sheet refresh: one tab per table +
-  catchall + **Activity** log + **Drafts** tab; latest-run rows
-  highlighted), and `simulate_send_and_process(scenario|custom_text)` —
-  pick next un-injected scenario (Message-ID dedup) or custom text →
-  `messages.insert` → blind catch-up ingest → apply → mirror → draft.
-- **Blindness inside simulate (hard rule):** the function touches
-  `simulation/` only to pick the next scenario email and to grade AFTER
-  extraction (live scorecard: applied ops vs the scenario spec's facts).
-  The ingest path imports nothing under `simulation/`; Haiku never sees
-  specs or ground truth. README.md pre-empts the "answers were in the repo"
-  question by pointing at this separation + the discovery transcripts.
-- **Thought-process narrative** (terminal + Activity tab), five beats per
-  email: the email that arrived → trimmed Haiku thinking excerpt → the ops
-  envelope + create/update as resolved → the DRAFT DECISION → what changed
-  (cells, draft).
-- **Draft triage (two-stage):** mechanical never-draft filter first (mail
-  sent by the shared box, no-reply senders, machine catchall tags
-  promo/drive-share/donation-receipt, and anything that is not the latest
-  inbound message of its thread), then ONE Opus call returning
-  {should_reply, reason, draft?} — so judged no-replies (bare RSVPs) and
-  judged yes-replies to catchall (lost-dog redirect, volunteer ack) both
-  work, and the decision is displayed either way with its reason.
-- **Models:** extraction = `claude-haiku-5-5` (blind); `/aps-ask` (NL→SQL,
-  queries echoed) and reply drafts = **Opus 5.5** — via the interviewer's
-  own Claude session (subagents; no API key distributed) in the plugin,
-  via API in our testing. Draft guardrails: never narrate the database,
-  never re-ask for what the thread contains, thread beats table on
-  conflict, match the sender's brevity and sign-off.
-- **Validated (read-only QA comparison, 9 pre-registered questions × both
-  arms, same model/budget — `app/out/QA_COMPARE_REPORT.md`):** B 3 · tie 6 ·
-  A 0 (author-graded). Blinded third-party re-grade (GPT-6, 2026-10-12,
-  counterbalanced, answers-vs-key): **B 1 · tie 6 · A 1 · 1
-  unadjudicated** — all ties + the q1 centerpiece confirmed; q3
-  unadjudicated (the pre-disclosed GT annotation error was in the shipped
-  key); q4 flipped to A on B's confidently-asserted DB-inherited errors
-  (the "No question where table access hurt" line is retracted in the QA
-  report's addendum). Both tallies reported side by side, never averaged:
-  `app/validation/third_party/RESULTS.md`. Open: corrected-key q3
-  re-grade; second judge. Clear win on derived roster state (~2.5× recall, equal precision,
-  emergent map-then-verify + self-flagged DB errors); ties where the org's
-  own mail caches answers and on entity-name sagas (search reconstructs
-  those — demo centerpieces must be derived/drift questions, not named-dog
-  stories). Maintenance gaps propagate to B (observed, 2 dogs). Scale
-  argument: A capped out at 831 emails; the reference inbox is 117K.
-- **`/aps-ask` demo question classes** (where tables beat connector search):
-  negative space ("ready to post but not posted?", "who hasn't RSVPed?"),
-  aggregates, current-state-after-moves (tetris dogs, with provenance),
-  joins ("which fosters are free this weekend?"), dated lookups (next vet
-  list) — plus one honest single-thread tie shown for fairness.
-- **Credentials:** portal bundle = Gmail token (gmail.modify +
-  spreadsheets; one token serves mail + sheet) + Turso token + a
-  usage-capped revocable Anthropic API key (DECIDED: acceptable because
-  temporary/demo-only, deprecated after the window; benefit: metered
-  per-call cost tracking for the long-term table-economics question).
-  Degraded no-token tier: `/aps-ask` against a shipped read-only SQLite
-  snapshot.
-- **Hardening (2026-10-11, post-review):** `app/tools.py` no longer
-  constructs a DB at import (lazy, via `connect()`), so the no-token
-  snapshot fallback actually engages — and the fallback opens the snapshot
-  read-only. The SQL guard is now real: one SELECT/WITH statement,
-  write/DDL verbs rejected anywhere in the statement (a prefix check
-  passes `WITH … UPDATE`), string literals/comments stripped before
-  scanning. Booleans are canonicalized to '1'/'0' at apply time; the store
-  carried mixed 'True'/'1' spellings from the Turso str() write path and
-  was normalized (verify re-run: identical). `status` and the mirror no
-  longer crash when `.env` is absent.
-- **Review round 2 (2026-10-12, decisions recorded):** (1) the envelope
-  gains `"clear"` — cancellations/fall-throughs could previously never
-  remove a value (live exhibit: Moraine's stale appointment + adopter,
-  left unedited as the before-case). Harness support landed + unit-tested;
-  instructions updated via Fable refine (sanctioned path); cancellation
-  scenarios with `clears_includes` keys to join the pool. (2) Schema is
-  FROZEN for the prototype — no migration path **by decision**; ingest now
-  verifies schema.sha256 (emitted by the discovery harness) and schema/DB
-  column parity, refusing drift cleanly instead of failing mid-apply.
-  (3) Out-of-order apply is recognized and deliberately NOT guarded: a
-  delayed older email can overwrite newer state across batches; the
-  dated-fields rule mitigates downstream; documented in README. (4)
-  Provenance stays row-level (accepted limit, documented).
-- Plugin commands are thin wrappers over `app/` and take no arguments
-  except the question: `/aps-simulate-email` (fire next pool scenario),
-  `/aps-ingest` (catch-up: processes anything that arrived, incl. emails
-  interviewers send directly), `/aps-ask "…"`, `/aps-showdown "…"`, `/aps-status`.
-  README.md + a recorded GIF as the no-setup
-  fallback.
+- **Draft triage, two-stage:** mechanical never-draft filter (own
+  outbound, no-reply senders, machine catchall tags, not the latest
+  inbound of its thread), then ONE Opus call → {should_reply, reason,
+  draft?}; the decision is always shown with its reason. Guardrails: never
+  narrate the database, never re-ask what the thread contains, thread
+  beats table on conflict, match the sender's brevity.
+- **Models:** extraction `claude-haiku-5-5` effort medium, blind; drafts
+  and `/aps-ask` Opus 5.5 (session subagents in the plugin; API in our
+  testing).
+- **Extension, verified:** +121 week-1 emails injected with per-email
+  answer keys (60/60 fully matched) → verify v2 over 953 emails: dogs
+  89/90 (disclosures in VERIFICATION.md). Firing pool: ~106 inbound
+  scenarios incl. 4 cancellation tests for the clear verb (the Lassen
+  fall-through fired live: expected envelope exactly, scorecard 1/1).
+- **Guards:** agent SQL passes a real read-only guard (one SELECT/WITH
+  statement, write/DDL verbs rejected anywhere, literals/comments stripped
+  first); no-credential runs fall back to a committed read-only snapshot;
+  missing tokens fail with pointers, not tracebacks.
 
-## Phase 5 — Hygiene (no unattended automation — by decision)
+## 5 — Demo (plugin DONE; owner checklist below)
 
-No scheduled/daily processing: the demo is interviewer-driven, and mail
-sent while nobody runs the plugin simply waits for the next /aps-ingest.
-Remaining items: Gmail **delegation** for interviewers who want the real
-mailbox view (added per-person by address); stated token revocation date;
-Turso token scoped to the demo DB; a "reset the demo world" note.
+Plugin commands are thin wrappers over `app/`: `/aps-overview` (premise,
+start here), `/aps-status`, `/aps-ask "…"`, `/aps-simulate-email`,
+`/aps-ingest`, `/aps-showdown "…"`. Three access tiers in README.md: watch
+(Sheet + committed evidence), drive (portal bundle), real mailbox
+(delegation). No unattended automation, by decision — mail waits for the
+next `/aps-ingest`.
 
-## Owner setup checklist
+**Validation record (committed):**
+- QA comparison, 9 pre-registered questions, same model/budget
+  (`app/out/QA_COMPARE_REPORT.md`): self-graded **B 3 · tie 6 · A 0**.
+  Blinded third-party re-grade (GPT-6, counterbalanced, answers-vs-key):
+  **B 1 · tie 6 · A 1 · 1 unadjudicated** — all ties and the q1 roster
+  centerpiece confirmed; q3 unadjudicated (the shipped key carried the
+  pre-disclosed GT annotation error); q4 flipped to A on B's confidently
+  asserted DB-inherited errors ("no question where table access hurt" is
+  retracted in the report's addendum). Both tallies side by side, never
+  averaged: `app/validation/third_party/RESULTS.md`. Open: corrected-key
+  q3 re-grade; second judge.
+- Draft showdown (4 pre-registered inbound emails): decisive on inventory
+  enumeration — search arm 0/5 correct, tables arm 9/9; tie control held.
+- Live showdown exhibit: `app/out/showdown_exhibit_1.md`.
+- Question classes where tables win: negative space, aggregates,
+  current-state-after-moves, joins, dated lookups — plus one honest
+  single-thread tie shown for fairness.
+- Credentials: portal bundle = Gmail token + Turso token + a usage-capped
+  revocable Anthropic key (temporary, demo-only; metered per-call cost is
+  the instrumentation for the table-economics question).
 
-- [x] Turso account + database + token — done; `TURSO_DATABASE_URL` +
-      `TURSO_AUTH_TOKEN` in `.env`, connectivity verified
-- [x] Sheets API enabled; token re-authed with spreadsheets scope; mirror
-      sheet created + SHEET_ID in .env; first refresh live
-- [x] Turso push reviewed and executed (1,187 rows verified)
-- [ ] Portal bundle: `token_apsdemo.json` + Turso token + README.md pointer
-- [ ] Add interviewer delegates to the APS Gmail when known
+## Decisions log
+
+- 10-10 — serial ingestion only ("email date ≠ fact date" is a real danger).
+- 10-11 — ship the capped key in the bundle; no-token tier = committed
+  read-only snapshot fallback.
+- 10-11 — no cloud tick / unattended automation.
+- 10-11 — hardening: lazy DB + real SQL guard + boolean spellings
+  normalized store-wide (verify re-run identical).
+- 10-12 — review round 2: `clear` added to the envelope (Moraine's stale
+  row kept unedited as the before-exhibit); schema frozen with hash+parity
+  gatekeeping; out-of-order apply documented, not guarded; provenance
+  stays row-level.
+- 10-12 — blind third-party re-grade run and recorded as-is (stage 5).
+
+## Remaining (owner)
+
+- [ ] Portal bundle: `token_apsdemo.json` + `.env` (Turso creds, SHEET_ID,
+      capped Anthropic key) + README pointer
+- [ ] Add interviewer Gmail delegates when known
 - [ ] Set token revocation date after the interview window
