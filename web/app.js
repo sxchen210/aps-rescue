@@ -307,8 +307,8 @@ function subnav(active, ns) {
 const BACKEND = (window.APS_CONFIG || {}).backendUrl || "";
 const BEAT = {
   arrived: "1 · An email arrives in the inbox",
-  thinking: "2 · Haiku's reasoning (excerpt)",
-  decision: "3 · The ops envelope it emitted",
+  thinking: "2 · Haiku's reasoning",
+  decision: "3 · The ops envelope it emitted (its notes are its own words)",
   draft: "4 · Reply decision",
   changed: "5 · What changed",
 };

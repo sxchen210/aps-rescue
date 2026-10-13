@@ -154,8 +154,14 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
                 break
             except (ValueError, json.JSONDecodeError) as e:
                 err = f"parse: {e}"
-        if thinking:
-            on_event("thinking", thinking[:500] + ("…" if len(thinking) > 500 else ""))
+        # Haiku 5.5 does not return its reasoning text at effort-based
+        # settings (the thinking block carries only a signature) — say so
+        # rather than silently skipping the beat; relay it in full if a
+        # model ever does return it.
+        on_event("thinking", thinking or
+                 "(Haiku's internal reasoning is not returned by the API at "
+                 "this setting. Its entire visible output is the envelope "
+                 "below — including its own one-line notes per op.)")
 
         ts = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(m["_ts"]))
         applied, anomalies, tag = [], [], None
@@ -166,7 +172,8 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
                 if action in ("create", "update"):
                     applied.append({"action": action, "table": op.get("table"),
                                     "match": op.get("match"), "set": op.get("set"),
-                                    "clear": op.get("clear") or []})
+                                    "clear": op.get("clear") or [],
+                                    "note": op.get("note") or ""})
             tag = (env.get("catchall") or {}).get("tag")
             if not applied and not tag:
                 tag, anomalies = "other", anomalies + ["defaulted to catchall:other"]
@@ -182,6 +189,7 @@ def ingest_new(db, on_event=print_event, effort="medium", client=None):
         dec = "\n".join(f"{a['action'].upper()} {a['table']} · match {a['match']} · set "
                         f"{json.dumps(a['set'], ensure_ascii=False)[:180]}"
                         + (f" · clear {a['clear']}" if a["clear"] else "")
+                        + (f"\n   its note: “{a['note']}”" if a["note"] else "")
                         for a in applied) \
               or f"(no table ops) catchall tag: {tag}"
         on_event("decision", dec)
