@@ -426,11 +426,6 @@ async function viewRecord(t, id, byKey) {
             at ${esc(row.updated_at || "—")}. Earlier writes to other fields
             came from earlier emails (not tracked per field; a known limit).
           </div>
-          <div class="small" style="margin-top:8px">
-            <a href="https://mail.google.com/mail/u/0/#all/${encodeURIComponent(gid)}"
-               rel="noopener">open in Gmail</a> (needs delegate access) ·
-            <button id="copyq">copy gmail-search command</button>
-          </div>
         </div>
         <div class="panel"><h3>About this page</h3>
           <div class="small muted">Rendered entirely from the discovered
@@ -439,12 +434,6 @@ async function viewRecord(t, id, byKey) {
         </div>
       </div>
     </div>`;
-  const btn = $("#copyq");
-  if (btn) btn.onclick = () => {
-    navigator.clipboard.writeText(
-      `cd app && APS_DB=turso python3 pipeline.py gmail-thread ${gid}`);
-    btn.textContent = "copied";
-  };
 }
 
 /* --- activity feed --- */
