@@ -272,9 +272,10 @@ async function viewDiscovery(idx) {
         ${(u.out || 0).toLocaleString()} tokens written,
         ${(u.cache_read || 0).toLocaleString()} read from cache,
         $${ch.final.cost.toFixed(2)} total. The structural sanity gate
-        passed, and the schema it designed renders everything in
-        <a href="#/pm">Populate &amp; Maintain</a>, this page included,
-        since the app is generated from <code>schema.json</code>.</div>
+        passed, and the schema it designed drives all of
+        <a href="#/pm">Populate &amp; Maintain</a>: every tab, column,
+        description, and badge there is generated from
+        <code>schema.json</code>, nothing hand-built per table.</div>
     </div>`;
 }
 
