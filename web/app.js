@@ -627,9 +627,8 @@ function renderActivity({ log, meta }, ns) {
   }).join("");
   $("#main").innerHTML = `
     ${subnav("activity", ns)}
-    <p class="tdesc">Every email the extractor has processed, newest first,
-      refreshing every 8s. Fire a scenario from the Claude Code plugin
-      (<code>/aps-simulate-email</code>) and watch it land here.</p>
+    <p class="tdesc">Every email the extractor has processed, newest first;
+      refreshes every 8s.</p>
     <div class="feed">${rows}</div>`;
 }
 
