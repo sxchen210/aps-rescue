@@ -305,6 +305,18 @@ function subnav(active, ns) {
 /* --- watch it work: fire a scenario through the gated backend --- */
 
 const BACKEND = (window.APS_CONFIG || {}).backendUrl || "";
+
+/* the last delivery's beats survive tab switches (and reloads, via
+   sessionStorage) until the next delivery replaces them */
+let LAST_RUN = (() => {
+  try { return JSON.parse(sessionStorage.getItem("aps_last_run") || "[]"); }
+  catch { return []; }
+})();
+
+function recordBeat(ev, data) {
+  LAST_RUN.push([ev, data]);
+  try { sessionStorage.setItem("aps_last_run", JSON.stringify(LAST_RUN)); } catch { /* fine */ }
+}
 const BEAT = {
   arrived: "1 · An email arrives in the inbox",
   thinking: "2 · Haiku's reasoning",
@@ -361,11 +373,19 @@ async function viewWatch() {
     </div>
     <div id="beats"></div>`;
 
+  if (LAST_RUN.length) {
+    $("#beats").insertAdjacentHTML("beforeend",
+      `<p class="muted">The previous delivery, replayed:</p>`);
+    for (const [ev, d] of LAST_RUN) renderBeat(ev, d, false);
+  }
+
   $("#fire").onclick = async () => {
     const btn = $("#fire");
     btn.disabled = true;
     btn.textContent = "delivering…";
     $("#beats").innerHTML = "";
+    LAST_RUN = [];
+    try { sessionStorage.removeItem("aps_last_run"); } catch { /* fine */ }
     try {
       const resp = await fetch(BACKEND + "/api/simulate", {
         method: "POST",
@@ -378,7 +398,7 @@ async function viewWatch() {
         $("#beats").innerHTML = `<p class="placeholder">${esc((await r_text(resp)))}</p>`;
         return;
       }
-      await readSSE(resp, (ev, data) => renderBeat(ev, data));
+      await readSSE(resp, (ev, data) => { recordBeat(ev, data); renderBeat(ev, data); });
       cache.clear();  // table views refetch fresh state
     } catch (e) {
       $("#beats").insertAdjacentHTML("beforeend",
@@ -412,7 +432,7 @@ async function readSSE(resp, onEvent) {
   }
 }
 
-function renderBeat(ev, data) {
+function renderBeat(ev, data, scroll = true) {
   const box = $("#beats");
   if (ev === "info") {
     box.insertAdjacentHTML("beforeend", `<p class="muted">${esc(data)}</p>`);
@@ -436,7 +456,7 @@ function renderBeat(ev, data) {
     box.insertAdjacentHTML("beforeend", `<div class="panel">
       <h3>${esc(BEAT[ev] || ev)}</h3><pre class="mailbody">${esc(data)}</pre></div>`);
   }
-  box.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
+  if (scroll) box.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
 }
 
 async function viewTable(t) {
@@ -626,7 +646,14 @@ async function viewActivity() {
 
 /* ---------- router + boot ---------- */
 
-async function route() {
+/* renders serialize: a fast later navigation can't be overwritten by a
+   slower earlier one still awaiting its data */
+let _routeChain = Promise.resolve();
+function route() {
+  _routeChain = _routeChain.then(_route).catch(() => {});
+}
+
+async function _route() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; seenIds = null; }
   const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   const tab = parts[0] || "pm";
