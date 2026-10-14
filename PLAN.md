@@ -118,9 +118,11 @@ with reason → what changed.
 ## 5 — Demo (LIVE; owner checklist below)
 
 The demo surface is the hosted web app —
-**sxchen210.github.io/aps-rescue** — four pipeline-ordered tabs with
-Populate & Maintain as the default view:
+**sxchen210.github.io/aps-rescue** — five tabs with Overview as the
+default view:
 
+- **Overview:** the premise (the fictional rescue, channels narrowed to
+  one inbox, the prototype claim) and a guide to the other tabs.
 - **Simulate:** the three-layer world story (seeded state machines →
   structure cards → persona-voiced rendering), the leak boundary, and
   fact tiles computed from committed files.

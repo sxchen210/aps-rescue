@@ -141,12 +141,18 @@ a.key { font-weight: 600; }
 .crumbs { font-size: 13.5px; margin-bottom: 10px; }
 .record { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 20px; }
 @media (max-width: 800px) { .record { grid-template-columns: 1fr; } }
-.fields dt { color: var(--ink-2); font-size: 12px; margin-top: 10px; }
-.fields dd { margin: 0; }
+.fields {
+  display: grid; grid-template-columns: 190px minmax(0, 1fr);
+  gap: 4px 16px; align-items: baseline; margin: 0;
+  font-size: 13.5px;
+}
+.fields dt { color: var(--ink-2); margin: 0; }
+.fields dd { color: var(--ink-1); margin: 0; }
 .panel {
   border: 1px solid var(--line); border-radius: 8px;
   background: var(--surface-2); padding: 12px 14px; margin-bottom: 14px;
 }
+.record .panel .small { font-size: 13.5px; }
 .panel h3 {
   margin: 0 0 8px; font-size: 12px; color: var(--ink-2); font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.05em;

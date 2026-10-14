@@ -120,9 +120,45 @@ function fmtCell(table, col, v, linkKeys = true) {
 /* ---------- views ---------- */
 
 const TABS = [
-  ["sim", "Simulate"], ["disc", "Discovery"], ["pm", "Populate & Maintain"],
-  ["h2h", "Head-to-head"],
+  ["over", "Overview"], ["sim", "Simulate"], ["disc", "Discovery"],
+  ["pm", "Populate & Maintain"], ["h2h", "Head-to-head"],
 ];
+
+function viewOverview() {
+  $("#main").innerHTML = `
+    <p class="premise">Animal Protective Services is a fictional dog rescue,
+      built to mirror the day-to-day operations of a real local rescue.
+      Operations like these actually run across many channels (Gmail, text
+      threads, WhatsApp groups); for this demonstration, everything flows
+      through one shared Gmail inbox. That inbox is where the operational
+      state lives: who has which dog, which placements are confirmed versus
+      tentative, what falls apart when one foster backs out. Normally,
+      someone reconstructs all of that from scrollback before every
+      decision.</p>
+    <p class="premise">This site is a working prototype of the alternative:
+      connect a model to the inbox and let it build the understanding of the
+      operation. A frontier model discovered the schema from ~1,000 emails in
+      the real inbox, blind (no predefined schema, no custom extraction
+      rules); a cheap model has maintained every record since, from each new
+      email, at about $0.0004 per ingestion. Every table view renders from
+      the discovered <code>schema.json</code>; nothing is hand-built per
+      table.</p>
+    <div class="tabguide">
+      <div><a href="#/sim"><b>Simulate</b></a>: how the ~1,000-email world was
+        constructed. A seeded simulator voicing real-inbox patterns behind a
+        strict no-leak boundary, with ground truth kept only for grading.</div>
+      <div><a href="#/disc"><b>Discovery</b></a>: the frontier model exploring
+        the inbox cold and designing the schema, replayed from the committed
+        transcript, round by round with live costs.</div>
+      <div><a href="#/pm"><b>Populate &amp; Maintain</b></a>: a cheap model,
+        following the extraction playbook the frontier model wrote, built
+        these tables from every email and keeps them current; deliver the
+        next email and watch it process, live.</div>
+      <div><a href="#/h2h"><b>Head-to-head</b></a>: the same model answering
+        an operational question with and without the tables, live, side by
+        side.</div>
+    </div>`;
+}
 
 function renderTabs(active) {
   $("#tabs").innerHTML = TABS.map(([id, label]) =>
@@ -798,9 +834,10 @@ function route() {
 async function _route() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; seenIds = null; }
   const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
-  const tab = parts[0] || "pm";
+  const tab = parts[0] || "over";
   renderTabs(tab);
   try {
+    if (tab === "over") return viewOverview();
     if (tab === "sim") return await viewSimulate();
     if (tab === "disc") return await viewDiscovery(parseInt(parts[1] || "0", 10));
     if (tab === "h2h") return await viewH2H();
@@ -828,7 +865,7 @@ async function boot() {
     for (const k of tdef(t).canonical_keys) KEY_OWNER[k] ||= t;
   }
   window.addEventListener("hashchange", route);
-  if (!location.hash) location.hash = "#/pm";
+  if (!location.hash) location.hash = "#/over";
   route();
 }
 
