@@ -349,9 +349,9 @@ async function rowsOf(t) {
 
 function statsBlock() {
   return `
-    <p class="tdesc"><b>How good is the maintained state?</b> Scored after
-      the fact against the simulator's ground truth, which the pipeline
-      never sees:</p>
+    <p class="tdesc"><b>How Haiku populated the database, following the
+      instructions Fable wrote.</b> Scored after the fact against the
+      simulator's ground truth, which the pipeline never sees:</p>
     <div class="stats">${(STATS?.stats || []).map((s) => `
       <div class="stat" title="source: ${esc(s.source)}">
         <div class="v">${esc(s.value)}</div>
