@@ -79,9 +79,9 @@ authoritative plan for everything under `web/`; root PLAN.md points here.
      records (other tables whose columns name this table's canonical
      key); provenance block (`source_email_id`, `updated_at`, "row-level,
      last writer" label, open-in-Gmail best-effort link).
-   - Activity: `ingest_log` (+catchall join) newest-first, ~8s poll,
-     new-row highlight — the page visibly moves when anyone fires
-     `/aps-simulate-email` from Claude Code.
+   - Activity: `ingest_log` (+catchall join) newest-first, polled
+     (now 15s), new-row highlight — the page visibly moves whenever a
+     scenario fires.
 4. Deploy to GitHub Pages; smoke both data modes; add the URL to the
    portal-note draft (not the public README yet); root PLAN pointer.
 
@@ -107,9 +107,10 @@ summarized thinking, every tool call with the SQL rendered prominently,
 and both final answers; no on-page grading, the presenter narrates; last
 run persists across tab switches). Ask/compose: decide later.
 
-**W4 — consolidation**: Sheet demotion/removal, README tier inversion
-(hosted link = Tier 1, plugin = Tier 2, delegation = Tier 3), teardown
-and shot-list updates, "time went here, deliberately" note.
+**W4 — consolidation**: README tier inversion — DONE 2026-10-13 (hosted
+app = Tier 1, repo/portal bundle = Tier 2, delegation = Tier 3; teardown
+covers the Fly app). Remaining: Sheet demotion/removal decision; "time
+went here, deliberately" note.
 
 ## Done criteria
 

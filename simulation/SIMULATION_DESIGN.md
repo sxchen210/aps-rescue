@@ -72,9 +72,9 @@ historical timestamps display correctly). Idempotent — inserted message IDs
 are tracked so re-runs don't duplicate. Drafts produced later by the system go
 to the Drafts folder via `drafts.create`; nothing is ever auto-sent.
 
-**Demo surface (later phase):** the same functions wrapped as MCP tools in a
-Claude plugin — `simulate_email(scenario)` pops the next held-out event,
-renders it, inserts it; table state mirrors to a Google Sheet for visibility.
+**Demo surface (later phase):** the same functions exposed by the demo
+backend — delivering a held-out scenario pops the next pre-rendered event
+and inserts it; table state is served live by the web app.
 
 ## Reference-inbox protocol: consult → distill → discard
 

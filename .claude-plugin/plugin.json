@@ -1,7 +1,0 @@
-{
-  "name": "aps-rescue-demo",
-  "version": "0.1.0",
-  "description": "Self-building tables over a live Gmail inbox: fire scenario emails, watch Haiku maintain the database, query it in SQL, and run connector-vs-tables showdowns.",
-  "author": { "name": "Santo Chen" },
-  "commands": "./.claude/commands"
-}

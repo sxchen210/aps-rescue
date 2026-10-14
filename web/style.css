@@ -27,9 +27,9 @@ body {
 }
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
-code { background: var(--surface-2); padding: 0 4px; border-radius: 4px; font-size: 13px; }
+code { background: var(--surface-2); padding: 0 4px; border-radius: 4px; font-size: 0.9em; }
 
-.site-head { padding: 20px 16px 10px; max-width: 1200px; margin: 0 auto; }
+.site-head { padding: 20px 16px 10px; max-width: 1400px; margin: 0 auto; }
 .masthead { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 h1 { font-size: 24px; margin: 0; font-weight: 600; font-family: var(--serif); }
 h1 .sub { font-weight: 400; color: var(--ink-2); font-size: 15px; font-family: var(--sans); }
@@ -38,21 +38,30 @@ h1 .sub { font-weight: 400; color: var(--ink-2); font-size: 15px; font-family: v
 .conn.live { color: var(--ok); }
 .conn.down { color: var(--danger); }
 
-/* evidence strip: stat tiles — label, sans-semibold proportional value, detail on hover */
-.stats { display: flex; gap: 10px; flex-wrap: wrap; }
+/* the tab guide under the premise */
+.tabguide { display: grid; gap: 5px; font-size: 15px; color: var(--ink-2); margin-top: 4px; }
+.tabguide b { color: var(--ink-1); }
+.tabguide a { color: var(--ink-1); }
+
+/* evidence tiles (shown on Populate & Maintain, with visible explanations):
+   one row on desktop, each tile sharing the width equally */
+.stats { display: flex; gap: 10px; flex-wrap: nowrap; margin-bottom: 14px; }
+@media (max-width: 1000px) { .stats { flex-wrap: wrap; } }
 .stat {
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 8px 14px;
-  min-width: 120px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 .stat .v { font-size: 20px; font-weight: 600; }
 .stat .l { font-size: 12px; color: var(--ink-2); }
+.stat .d { font-size: 12px; color: var(--ink-3); margin-top: 3px; line-height: 1.4; }
 
 .tabs {
   display: flex; gap: 2px;
-  max-width: 1200px; margin: 10px auto 0;
+  max-width: 1400px; margin: 10px auto 0;
   padding: 0 16px;
   border-bottom: 1px solid var(--line);
   overflow-x: auto;
@@ -71,15 +80,15 @@ h1 .sub { font-weight: 400; color: var(--ink-2); font-size: 15px; font-family: v
 .tabs a:hover { text-decoration: none; color: var(--ink-1); }
 
 .banner {
-  max-width: 1200px; margin: 12px auto 0; padding: 10px 14px;
+  max-width: 1400px; margin: 12px auto 0; padding: 10px 14px;
   border: 1px solid var(--danger); border-radius: 8px;
   color: var(--danger); background: var(--surface-2);
   margin-left: 16px; margin-right: 16px;
 }
-@media (min-width: 1232px) { .banner { margin-left: auto; margin-right: auto; } }
+@media (min-width: 1432px) { .banner { margin-left: auto; margin-right: auto; } }
 .banner button { margin-left: 10px; }
 
-main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+main { max-width: 1400px; margin: 0 auto; padding: 16px; }
 .muted { color: var(--ink-3); }
 .placeholder { color: var(--ink-2); max-width: 70ch; padding: 24px 0; }
 
@@ -88,12 +97,23 @@ main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 .chip {
   border: 1px solid var(--line); border-radius: 999px;
   background: var(--surface-2); color: var(--ink-1);
-  padding: 4px 12px; font-size: 13px; cursor: pointer;
+  padding: 4px 12px; font-size: 13.5px; cursor: pointer;
 }
 .chip.on { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 .chip .n { color: var(--ink-3); margin-left: 4px; }
+/* the two live views stand apart from the table chips: pushed right,
+   semibold, with a pulsing live dot */
+.chip.push { margin-left: auto; }
+.chip.live { font-weight: 600; border-color: var(--ink-2); }
+.chip.live.on { border-color: var(--accent); }
+.chip .dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ok); margin-right: 7px;
+  animation: livepulse 2s ease-in-out infinite;
+}
+@keyframes livepulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 10px; align-items: center; }
-.tdesc { color: var(--ink-2); font-size: 14.5px; margin: 0 0 10px; }
+.tdesc { color: var(--ink-2); font-size: 15px; margin: 0 0 10px; }
 .tdesc.strong { font-weight: 600; color: var(--ink-1); }
 
 .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
@@ -118,7 +138,7 @@ a.key { font-weight: 600; }
 }
 
 /* record page */
-.crumbs { font-size: 13px; margin-bottom: 10px; }
+.crumbs { font-size: 13.5px; margin-bottom: 10px; }
 .record { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 20px; }
 @media (max-width: 800px) { .record { grid-template-columns: 1fr; } }
 .fields dt { color: var(--ink-2); font-size: 12px; margin-top: 10px; }
@@ -127,9 +147,15 @@ a.key { font-weight: 600; }
   border: 1px solid var(--line); border-radius: 8px;
   background: var(--surface-2); padding: 12px 14px; margin-bottom: 14px;
 }
-.panel h3 { margin: 0 0 8px; font-size: 13px; color: var(--ink-2); font-weight: 600; }
-.panel .small { font-size: 12.5px; }
-.related h3 { margin: 18px 0 6px; font-size: 14px; }
+.panel h3 {
+  margin: 0 0 8px; font-size: 12px; color: var(--ink-2); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.panel .small { font-size: 15px; color: var(--ink-2); }
+.related h3 {
+  margin: 18px 0 6px; font-size: 12px; color: var(--ink-2); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
 
 /* activity feed */
 .feed { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
@@ -148,7 +174,7 @@ a.key { font-weight: 600; }
 }
 
 .mailbody {
-  font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 13.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
   white-space: pre-wrap; word-break: break-word; margin: 0;
   color: var(--ink-1);
 }
@@ -160,23 +186,27 @@ a.key { font-weight: 600; }
 /* head-to-head: two live windows */
 .h2h-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media (max-width: 900px) { .h2h-grid { grid-template-columns: 1fr; } }
-.h2h-head { font-weight: 600; font-size: 13.5px; margin-bottom: 6px; }
+.h2h-head {
+  font-weight: 600; font-size: 12px; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2);
+}
+.h2h-head .muted { text-transform: none; letter-spacing: normal; }
 .h2h-win {
   border: 1px solid var(--line); border-radius: 8px;
   background: var(--surface-1); padding: 10px 12px;
   height: 62vh; overflow-y: auto;
 }
-.h2h-win .fable-quote { font-size: 14px; }
+.h2h-win .fable-quote { font-size: 13.5px; }
 .sqlchip {
   display: block; margin: 6px 0;
   border-left: 3px solid var(--accent); border-radius: 4px;
   background: var(--surface-2); padding: 6px 10px;
-  font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 13.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
   white-space: pre-wrap; word-break: break-word;
 }
-.h2h-res { margin: 2px 0 8px; font-size: 12.5px; }
-.h2h-res summary { color: var(--ink-3); cursor: pointer; }
-.small-note { font-size: 13px; margin: 4px 0; }
+.h2h-res { margin: 2px 0 8px; font-size: 13.5px; }
+.h2h-res summary { color: var(--ink-3); cursor: pointer; font-size: 12px; }
+.small-note { font-size: 15px; margin: 4px 0; }
 .toolbar select {
   padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px;
   background: var(--surface-1); color: var(--ink-1); max-width: 640px;
@@ -199,14 +229,14 @@ a.key { font-weight: 600; }
 .fable-quote::after { content: "”"; color: var(--accent); }
 .toolchip {
   display: inline-block; border: 1px solid var(--line); border-radius: 6px;
-  background: var(--surface-2); padding: 1px 8px; font-size: 12.5px;
+  background: var(--surface-2); padding: 1px 8px; font-size: 13.5px;
   color: var(--ink-2); margin: 2px 0;
 }
 .toolchip b { color: var(--ink-1); font-weight: 600; }
 
 .site-foot {
-  max-width: 1200px; margin: 24px auto; padding: 12px 16px;
-  color: var(--ink-3); font-size: 12.5px; border-top: 1px solid var(--line);
+  max-width: 1400px; margin: 24px auto; padding: 12px 16px;
+  color: var(--ink-3); font-size: 12px; border-top: 1px solid var(--line);
 }
 button {
   font: inherit; border: 1px solid var(--ink-2); border-radius: 999px;

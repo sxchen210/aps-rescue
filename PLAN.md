@@ -19,8 +19,8 @@ read-only for structure, behind a leak-checked boundary.
                          Gmail inbox (the fixture + live arrivals)
                           ^  messages.insert        |  fetch (API)
                           |  drafts.create          v
- interviewer's Claude ----+----->  ingest (Haiku, catch-up by gmail id)
- session (plugin)                        |
+ web app + gated ---------+----->  ingest (Haiku, catch-up by gmail id)
+ backend (Fly)                           |
                                          v
                        Turso (hosted libSQL = shared source of truth,
                         pre-seeded; same code runs on a local file for
@@ -104,8 +104,7 @@ with reason → what changed.
   narrate the database, never re-ask what the thread contains, thread
   beats table on conflict, match the sender's brevity.
 - **Models:** extraction `claude-haiku-5-5` effort medium, blind; drafts
-  and `/aps-ask` Opus 5.5 (session subagents in the plugin; API in our
-  testing).
+  and the head-to-head arms Opus 5.5 via the capped demo key.
 - **Extension, verified:** +121 week-1 emails injected with per-email
   answer keys (60/60 fully matched) → verify v2 over 953 emails: dogs
   89/90 (disclosures in VERIFICATION.md). Firing pool: ~106 inbound
@@ -116,22 +115,23 @@ with reason → what changed.
   first); no-credential runs fall back to a committed read-only snapshot;
   missing tokens fail with pointers, not tracebacks.
 
-## 5 — Demo (plugin DONE; web app IN PROGRESS; owner checklist below)
+## 5 — Demo (LIVE; owner checklist below)
 
-Plugin commands are thin wrappers over `app/`: `/aps-overview` (premise,
-start here), `/aps-status`, `/aps-ask "…"`, `/aps-simulate-email`,
-`/aps-ingest`, `/aps-showdown "…"`. Three access tiers in README.md: watch
-(Sheet + committed evidence), drive (portal bundle), real mailbox
-(delegation). No unattended automation, by decision — mail waits for the
-next `/aps-ingest`.
+The demo surface is the hosted web app —
+**sxchen210.github.io/aps-rescue** (plan and phases in `web/PLAN.md`,
+authoritative for everything under `web/`): four pipeline-ordered tabs
+(Populate & Maintain default) — live schema-driven tables + activity feed
+over Turso, the password-gated *Watch it work* (fires pool scenarios on
+the world's own clock, streams the five beats incl. Haiku's summarized
+reasoning and its per-op notes), the live *Head-to-head* (two concurrent
+Opus arms, allowlisted questions only, SQL streamed), and the Discovery
+replay. Backend: FastAPI on Fly (`aps-rescue-demo`, one machine, secrets
+in env only, password → HMAC sessions, global lock, rate limits).
 
-**Web app (the product surface — plan and phases in `web/PLAN.md`,
-authoritative for everything under `web/`):** a hosted, schema-driven,
-read-only SPA over Turso with five pipeline-ordered tabs (Populate &
-Maintain is the default view), built stepwise — static tables + activity
-feed first, then a password-gated backend for live simulate, then the
-head-to-head and discovery-replay story tabs, then Sheet
-demotion/removal and README tier inversion.
+The engine CLI in `app/pipeline.py` remains for owner operations. Three
+access tiers in README.md: hosted app · repo/portal bundle · Gmail
+delegation. No unattended automation, by decision — mail sent to the
+inbox waits for the next ingest.
 
 **Validation record (committed):**
 - QA comparison, 9 pre-registered questions, same model/budget
@@ -171,6 +171,8 @@ demotion/removal and README tier inversion.
   summarized}` (per the Haiku 5.5 migration guide) so beat 2 can show the
   model's summarized reasoning; display-only — model, effort, and
   envelope behavior unchanged.
+- 10-13 — the hosted web app is the demo surface and README's Tier 1;
+  the engine CLI stays for owner ops.
 
 ## Remaining (owner)
 

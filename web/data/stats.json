@@ -10,19 +10,19 @@
   {
    "label": "dogs found",
    "value": "89/90",
-   "detail": "vs simulator ground truth; 1 name-only miss",
+   "detail": "of the 90 dogs the ground truth says exist, 89 have rows; the one miss was only ever mentioned by name",
    "source": "populate/out/verify_v2.json"
   },
   {
-   "label": "fosters found",
+   "label": "fosters identified",
    "value": "98/98",
-   "detail": "every person who ever fostered",
+   "detail": "every person who ever fostered a dog has a roster row",
    "source": "populate/out/verify_v2.json"
   },
   {
    "label": "status accuracy",
    "value": "97.8%",
-   "detail": "policy-scored; strict-exact 82.0% (73/89); unconfirmed outcomes counted wrong",
+   "detail": "agreement with what the emails could know · 82.0% — exact match with the simulated world",
    "source": "populate/VERIFICATION.md (policy stated there)"
   },
   {

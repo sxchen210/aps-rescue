@@ -1,7 +1,7 @@
 """App core: simulate_send_and_process + catch-up ingestion + draft triage.
 
 The engine every surface wraps (interactive injections, batch drip, the
-plugin's /simulate-email, the cloud tick). Hard boundaries, per PLAN.md:
+web app's Watch-it-work button). Hard boundaries, per PLAN.md:
 the ingest path NEVER reads simulation/ — scenario files are touched only
 to pick what to send and to grade AFTER extraction; drafts are created,
 never sent.
@@ -414,7 +414,7 @@ def _run_db_cmd(args):
             mirror.refresh_tables(db)
     elif args.cmd == "simulate":
         custom = None
-        if args.custom_body:  # dev/testing only; the plugin command is zero-arg
+        if args.custom_body:  # dev/testing only
             custom = {"from": args.custom_from, "subject": args.custom_subject,
                       "body": args.custom_body}
         simulate_send_and_process(custom=custom, pool=args.pool)

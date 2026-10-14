@@ -311,11 +311,24 @@ async function rowsOf(t) {
     sql(`SELECT * FROM "${t}" ORDER BY id`));
 }
 
+function statsBlock() {
+  return `
+    <p class="tdesc"><b>How good is the maintained state?</b> Scored after
+      the fact against the simulator's ground truth, which the pipeline
+      never sees:</p>
+    <div class="stats">${(STATS?.stats || []).map((s) => `
+      <div class="stat" title="source: ${esc(s.source)}">
+        <div class="v">${esc(s.value)}</div>
+        <div class="l">${esc(s.label)}</div>
+        <div class="d">${esc(s.detail)}</div>
+      </div>`).join("")}</div>`;
+}
+
 function subnav(active, ns) {
   const chips = tables().map((t) =>
     `<a class="chip ${active === t ? "on" : ""}" href="#/pm/${t}">${esc(t)}<span class="n">${ns[t] ?? ""}</span></a>`);
-  chips.push(`<a class="chip ${active === "watch" ? "on" : ""}" href="#/pm/watch">watch it work<span class="n">live</span></a>`);
-  chips.push(`<a class="chip ${active === "activity" ? "on" : ""}" href="#/pm/activity">activity<span class="n">live</span></a>`);
+  chips.push(`<a class="chip live push ${active === "watch" ? "on" : ""}" href="#/pm/watch"><span class="dot"></span>watch it work</a>`);
+  chips.push(`<a class="chip live ${active === "activity" ? "on" : ""}" href="#/pm/activity"><span class="dot"></span>live activity</a>`);
   return `<div class="subnav">${chips.join("")}</div>`;
 }
 
@@ -345,7 +358,7 @@ const BEAT = {
 
 async function viewWatch() {
   const ns = await counts().catch(() => ({}));
-  if (!sessionGate(subnav("watch", ns),
+  if (!sessionGate(statsBlock() + subnav("watch", ns),
       `This view sends a real email into the live inbox and streams the
        pipeline processing it, beat by beat.`, viewWatch)) return;
 
@@ -355,6 +368,7 @@ async function viewWatch() {
   } catch { /* backend unreachable; button will surface it */ }
 
   $("#main").innerHTML = `
+    ${statsBlock()}
     ${subnav("watch", ns)}
     <p class="tdesc">The pool holds pre-written scenario emails from the same
       simulated universe, each with a hidden answer key. Pressing the button
@@ -503,6 +517,7 @@ async function viewTable(t) {
   }).join("")}</tr>`).join("");
 
   $("#main").innerHTML = `
+    ${statsBlock()}
     ${subnav(t, ns)}
     <p class="tdesc">${esc(def.description || "")}</p>
     <div class="toolbar">
@@ -623,6 +638,7 @@ function renderActivity({ log, meta }, ns) {
       <span class="what">${what} ${extra}</span></div>`;
   }).join("");
   $("#main").innerHTML = `
+    ${statsBlock()}
     ${subnav("activity", ns)}
     <p class="tdesc">Every email the extractor has processed, newest first;
       refreshes every 15s.</p>
@@ -811,9 +827,6 @@ async function boot() {
   for (const t of tables()) {
     for (const k of tdef(t).canonical_keys) KEY_OWNER[k] ||= t;
   }
-  $("#stats").innerHTML = STATS.stats.map((s) =>
-    `<div class="stat" title="${esc(s.detail)} · source: ${esc(s.source)}">
-       <div class="v">${esc(s.value)}</div><div class="l">${esc(s.label)}</div></div>`).join("");
   window.addEventListener("hashchange", route);
   if (!location.hash) location.hash = "#/pm";
   route();

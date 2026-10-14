@@ -180,16 +180,18 @@ def main():
          "detail": f"{cov['failed']} failures; {cov['emails_catchalled']} catchalled",
          "source": "populate/out/verify_v2.json"},
         {"label": "dogs found", "value": f"{dogs['found']}/{dogs['gt_dogs']}",
-         "detail": "vs simulator ground truth; 1 name-only miss",
+         "detail": f"of the {dogs['gt_dogs']} dogs the ground truth says "
+                   f"exist, {dogs['found']} have rows; the one miss was only "
+                   "ever mentioned by name",
          "source": "populate/out/verify_v2.json"},
-        {"label": "fosters found",
+        {"label": "fosters identified",
          "value": f"{v['tables']['fosters']['found']}/{v['tables']['fosters']['gt_people_who_fostered']}",
-         "detail": "every person who ever fostered",
+         "detail": "every person who ever fostered a dog has a roster row",
          "source": "populate/out/verify_v2.json"},
         {"label": "status accuracy",
          "value": pct(f["status"]["acc"]),
-         "detail": f"policy-scored; strict-exact {pct(s_hit / s_n)} "
-                   f"({s_hit}/{s_n}); unconfirmed outcomes counted wrong",
+         "detail": f"agreement with what the emails could know · "
+                   f"{pct(s_hit / s_n)} — exact match with the simulated world",
          "source": "populate/VERIFICATION.md (policy stated there)"},
         {"label": "dated fields",
          "value": pct(f["spay_neuter_date"]["acc"]),

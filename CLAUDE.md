@@ -36,10 +36,10 @@ for secret-like files before each commit.
 - Models: extraction `claude-haiku-5-5` at effort medium, BLIND — the
   ingest path (including inside simulate_send_and_process) never reads
   `simulation/` specs or ground truth; scenario-pick and post-hoc grading
-  are the only sanctioned uses. `/ask` and reply drafts are **Opus 5.5**
-  (session subagents in the plugin — no API key distributed; API in our
-  testing). Pin `output_config.effort`; no `temperature`. Semantics per
-  PLAN.md Phases 3-4.
+  are the only sanctioned uses. Reply drafts and the live head-to-head
+  arms are **Opus 5.5** via the capped demo API key (backend + scripts).
+  Pin `output_config.effort`; no `temperature`. Semantics per PLAN.md
+  stages 3-4.
 - DB: Turso is shared truth (`TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` in
   `.env`; plain HTTP API, no client lib), local SQLite file for dev.
   Google Sheets is a mirror, never a store.
