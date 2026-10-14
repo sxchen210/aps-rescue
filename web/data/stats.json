@@ -10,7 +10,7 @@
   {
    "label": "dogs found",
    "value": "89/90",
-   "detail": "of the 90 dogs the ground truth says exist, 89 have rows; the one miss was only ever mentioned by name",
+   "detail": "of the 90 dogs in the world when verification ran, 89 have rows; the one miss was only ever mentioned by name",
    "source": "populate/out/verify_v2.json"
   },
   {

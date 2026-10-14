@@ -28,7 +28,6 @@ sys.path.insert(0, str(HERE.parent / "app"))
 import gmail_io
 import db as dblib
 import pipeline
-import mirror
 
 EXT = HERE.parent / "simulation" / "out" / "extension"
 STATE_PATH = HERE.parent / "simulation" / "out" / "seeded_ids.json"
@@ -83,7 +82,6 @@ def main():
         print(f"tail triage: {done} candidates -> {sum(1 for _, x in results if x)} drafts")
         for s, x in results:
             print(("DRAFT " if x else "no    ") + s[:60])
-        mirror.refresh_tables(db)
         return
 
     on_event = pipeline.print_event if args.verbose else quiet_event

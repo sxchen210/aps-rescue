@@ -17,7 +17,7 @@ Endpoints:
                       endpoint never accepts free text, so the gated key
                       cannot be used as a general model proxy.
 
-Security model (see web/PLAN.md): every real credential (Gmail token,
+Security model (see PLAN.md, stage 5): every real credential (Gmail token,
 Anthropic key, Turso write token) lives only in this process's
 environment; the browser holds nothing but a short-lived HMAC session
 token. The portal password is checked server-side against a hash; one

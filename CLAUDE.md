@@ -2,8 +2,7 @@
 
 Self-building structured data (entities/relationships/workflows as tables, not free-form text) over a shared Gmail inbox. **`PLAN.md` is authoritative**
 for architecture, phases, and locked semantics (ops envelope, apply rules,
-harness contract, guardrails) — read it before building; `web/PLAN.md`
-owns the demo web app. Any change to
+harness contract, guardrails) — read it before building. Any change to
 architecture or a standing decision updates PLAN.md and this file in the
 same commit.
 
@@ -42,6 +41,5 @@ for secret-like files before each commit.
   stages 3-4.
 - DB: Turso is shared truth (`TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` in
   `.env`; plain HTTP API, no client lib), local SQLite file for dev.
-  Google Sheets is a mirror, never a store.
 - API key: `set -a && . ./.env && set +a`. Scripts run from any cwd
   (anchor paths to `Path(__file__)`); `python3 -m py_compile` touched files.

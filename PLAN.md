@@ -27,20 +27,20 @@ read-only for structure, behind a leak-checked boundary.
                         dev via one connection string)
                                          |
                                          v
-                       Google Sheets mirror (view link, no login:
-                        one tab per table + Drafts tab + activity log)
+                       web app (hosted; tables, provenance, live
+                        activity, gated live actions)
 ```
 
-Pull-based: nothing serves Gmail — Gmail serves us. Drafts are created,
-never sent. One shared hosted DB means every interviewer sees the same
-world. Interviewers who want the real Gmail view get delegated access.
 
 ## 1 — Simulate (DONE — `simulation/SIMULATION_DESIGN.md`)
 
 831 seed emails over six simulated weeks (Aug 31 – Oct 9, 2026), living in
-the real inbox with historical timestamps: 85 dogs (13 multi-home — "dog
+the real inbox with historical timestamps: 85 dogs in the seed window
+(79 scoreable + 6 held out for live injection; 13 multi-home — "dog
 tetris"), ~200 households, events, vet days, applications, ~25% catchall
-noise. Deterministic generator; ground truth at every instant — used for
+noise. The extension later grew the world to 90 dogs by Oct 16 (the
+verified point) and 111 across the full timeline incl. unfired 
+scenarios. Deterministic generator; ground truth at every instant — used for
 post-hoc scoring ONLY, never visible to discovery or ingestion. The
 universe is endless: stage 4 extends it with a verified week of history
 plus a pool of pre-rendered scenarios to fire live.
@@ -86,14 +86,14 @@ email can overwrite newer state; dated fields mitigate.
 **Verified:** dogs 78/79, status 97.4% under the stated equivalence policy
 (strict-exact and per-field numbers in VERIFICATION.md), fosters 90/90,
 applications 33/33, coverage arithmetic exact. Then pushed to Turso (1,187
-rows, exact count match); Sheets mirror live.
+rows, exact count match).
 
 ## 4 — Maintain (DONE — `app/`)
 
 The live loop every demo surface wraps: `pipeline.py ingest_new()`
 (catch-up by gmail id, oldest first) and `simulate_send_and_process()`
 (fire next pooled scenario or custom text → blind ingest → apply → live
-scorecard vs the scenario's answer key → draft triage → mirror), narrated
+scorecard vs the scenario's answer key → draft triage), narrated
 in five beats: arrived → Haiku thinking → ops envelope → draft decision
 with reason → what changed.
 
@@ -118,20 +118,50 @@ with reason → what changed.
 ## 5 — Demo (LIVE; owner checklist below)
 
 The demo surface is the hosted web app —
-**sxchen210.github.io/aps-rescue** (plan and phases in `web/PLAN.md`,
-authoritative for everything under `web/`): four pipeline-ordered tabs
-(Populate & Maintain default) — live schema-driven tables + activity feed
-over Turso, the password-gated *Watch it work* (fires pool scenarios on
-the world's own clock, streams the five beats incl. Haiku's summarized
-reasoning and its per-op notes), the live *Head-to-head* (two concurrent
-Opus arms, allowlisted questions only, SQL streamed), and the Discovery
-replay. Backend: FastAPI on Fly (`aps-rescue-demo`, one machine, secrets
-in env only, password → HMAC sessions, global lock, rate limits).
+**sxchen210.github.io/aps-rescue** — four pipeline-ordered tabs with
+Populate & Maintain as the default view:
 
-The engine CLI in `app/pipeline.py` remains for owner operations. Three
-access tiers in README.md: hosted app · repo/portal bundle · Gmail
-delegation. No unattended automation, by decision — mail sent to the
-inbox waits for the next ingest.
+- **Simulate:** the three-layer world story (seeded state machines →
+  structure cards → persona-voiced rendering), the leak boundary, and
+  fact tiles computed from committed files.
+- **Discovery:** the committed transcripts replayed — three chapters,
+  every `get_thread` resolved to the subject the model actually read,
+  running API cost, finale usage panel, and the two-files explainer
+  (our mission prompt vs the playbook Fable wrote for Haiku).
+- **Populate & Maintain:** schema-driven tables (tabs, columns, badges,
+  descriptions, and related-records all derived from `schema.json`;
+  nothing hand-built per table), record pages with row-level provenance,
+  evidence tiles scored against ground truth with visible explanations,
+  a live activity feed (processing order, 15s poll), and the
+  password-gated *Watch it work*: delivers the next pooled scenario on
+  the simulated world's own clock and streams the five beats — Haiku's
+  summarized reasoning, the envelope with its own per-op notes, the Opus
+  reply decision with reason, the draft text, the changed rows.
+- **Head-to-head:** two concurrent Opus arms on a chosen question
+  (allowlisted ids only, enforced server-side), summarized thinking and
+  every tool call streamed side by side with the SQL rendered
+  prominently; no grading UI — the presenter narrates.
+
+**Web architecture:** a no-build vanilla SPA (`web/`), every on-page
+number generated from committed evidence by
+`scripts/build_web_assets.py`. The browser reads Turso directly with a
+published, server-enforced read-only token; if the DB is unreachable the
+page says so, never falling back silently. Light mode only, warm paper
+palette, a four-step type scale with eyebrow section headers. Deployed
+by the GitHub Pages workflow on every push touching `web/`.
+
+**Backend:** FastAPI (`app/server.py`) on Fly (`aps-rescue-demo`,
+exactly one machine — the one-at-a-time lock is per-process; TZ pinned
+to America/Los_Angeles so stamps match the seeded history). All
+credentials live only in the container env (the Gmail token materialized
+at boot); the browser holds only a 24h HMAC session minted by the
+password check. Global lock, per-session rate limits, SSE with ping
+heartbeats; the last run persists client-side across tab switches.
+
+The engine CLI in `app/pipeline.py` remains for owner operations. README
+leads with the hosted app; the repo is the committed record. No
+unattended automation, by decision — mail sent to the inbox waits for
+the next ingest.
 
 **Validation record (committed):**
 - QA comparison, 9 pre-registered questions, same model/budget
@@ -142,17 +172,19 @@ inbox waits for the next ingest.
   pre-disclosed GT annotation error); q4 flipped to A on B's confidently
   asserted DB-inherited errors ("no question where table access hurt" is
   retracted in the report's addendum). Both tallies side by side, never
-  averaged: `app/validation/third_party/RESULTS.md`. Open: corrected-key
-  q3 re-grade; second judge.
+  averaged: `app/validation/third_party/RESULTS.md`.
 - Draft showdown (4 pre-registered inbound emails): decisive on inventory
   enumeration — search arm 0/5 correct, tables arm 9/9; tie control held.
 - Live showdown exhibit: `app/out/showdown_exhibit_1.md`.
 - Question classes where tables win: negative space, aggregates,
   current-state-after-moves, joins, dated lookups — plus one honest
   single-thread tie shown for fairness.
-- Credentials: portal bundle = Gmail token + Turso token + a usage-capped
-  revocable Anthropic key (temporary, demo-only; metered per-call cost is
-  the instrumentation for the table-economics question).
+- Credentials: nothing is distributed. The browser holds only the
+  published read-only Turso token; the Gmail token, Turso write token,
+  and the usage-capped revocable Anthropic key live only in the backend's
+  environment (metered per-call cost remains the instrumentation for the
+  table-economics question). Reviewers receive just the URL and the demo
+  password.
 
 ## Decisions log
 
@@ -176,7 +208,6 @@ inbox waits for the next ingest.
 
 ## Remaining (owner)
 
-- [ ] Portal bundle: `token_apsdemo.json` + `.env` (Turso creds, SHEET_ID,
-      capped Anthropic key) + README pointer
-- [ ] Add interviewer Gmail delegates when known
-- [ ] Set token revocation date after the interview window
+- [ ] Submission note: the hosted URL + the demo password
+- [ ] Set credential revocation date after the interview window
+      (Gmail token, Turso tokens, Anthropic key, Fly app)

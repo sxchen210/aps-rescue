@@ -19,8 +19,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.modify",
-          "https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 ROOT = Path(__file__).resolve().parent
 TOKEN = ROOT / "token_apsdemo.json"
 CLIENT = str(ROOT / "aps_credentials.json")

@@ -30,7 +30,6 @@ sys.path.insert(0, str(HERE.parent / "populate"))
 import gmail_io
 import db as dblib
 from ingest import build_prompt, parse_envelope, PRICE_IN, PRICE_OUT, PRICE_CREAD, PRICE_CWRITE
-import mirror
 from tools import GMAIL_TOOLS, SQL_TOOL, run_tool, SCHEMA_BRIEF
 
 INSTRUCTIONS = (HERE.parent / "discovery" / "instructions.md").read_text()
@@ -263,8 +262,6 @@ def triage_and_draft(result, db, on_event=print_event, client=None):
     sender = m["from"]
     d = gmail_io.create_draft("aps", to=sender, subject=verdict.get("subject") or f"Re: {m['subject']}",
                               body=verdict["body"], thread_id=m["thread_id"])
-    mirror.append_draft(to=sender, subject=verdict.get("subject") or f"Re: {m['subject']}",
-                        body=verdict["body"], in_reply_to=m["subject"][:60])
     return {"draft_id": d["id"], "body": verdict["body"], "reason": verdict.get("reason")}
 
 
@@ -297,10 +294,9 @@ def _pool_next(pool_path):
     return None
 
 
-def simulate_send_and_process(custom=None, pool=None, on_event=print_event,
-                              refresh_mirror=True):
+def simulate_send_and_process(custom=None, pool=None, on_event=print_event):
     """Insert one email (pool-next or custom), then catch-up ingest, grade,
-    triage drafts, and refresh the mirror. Returns a result summary."""
+    and triage drafts. Returns a result summary."""
     db = dblib.connect()
     if custom:
         sc = {"from": custom["from"], "subject": custom["subject"],
@@ -347,15 +343,9 @@ def simulate_send_and_process(custom=None, pool=None, on_event=print_event,
         score = f"scorecard: {hits}/{len(exp)} expected ops landed"
         on_event("info", score)
 
-    changed = []
-    if refresh_mirror:
-        counts = mirror.refresh_tables(db)
-        changed.append("sheet tabs refreshed: " + ", ".join(f"{t}={n}" for t, n in counts.items()))
-        mirror.append_activity(
-            [f"simulate: {sc['subject'][:60]!r} → {sum(len(r['applied']) for r in results)} ops, "
-             f"{len(drafts)} draft(s)"])
-    changed.append(f"{len(drafts)} draft(s) created in Gmail Drafts + Drafts tab")
-    on_event("changed", "\n".join(changed))
+    ops = sum(len(r["applied"]) for r in results)
+    on_event("changed", f"{ops} table op(s) applied · "
+                        f"{len(drafts)} draft(s) created in Gmail Drafts")
     return {"scenario": sc["subject"], "results": results, "drafts": drafts, "score": score}
 
 
@@ -398,20 +388,10 @@ def _run_db_cmd(args):
         n_fired = len(json.loads(fired.read_text())) if fired.exists() else 0
         n_pool = sum(1 for l in DEFAULT_POOL.read_text().splitlines() if l.strip())
         print(f"scenario pool: {n_pool - n_fired} of {n_pool} remaining")
-        sid = os.environ.get("SHEET_ID", "")
-        envf = HERE.parent / ".env"
-        if not sid and envf.exists():
-            for line in envf.read_text().splitlines():
-                if line.startswith("SHEET_ID="):
-                    sid = line.split("=", 1)[1].strip()
-        if sid:
-            print(f"sheet: https://docs.google.com/spreadsheets/d/{sid}")
     elif args.cmd == "ingest":
         results = ingest_new(db)
         for r in results:
             triage_and_draft(r, db)
-        if results:
-            mirror.refresh_tables(db)
     elif args.cmd == "simulate":
         custom = None
         if args.custom_body:  # dev/testing only

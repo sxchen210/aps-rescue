@@ -180,9 +180,9 @@ def main():
          "detail": f"{cov['failed']} failures; {cov['emails_catchalled']} catchalled",
          "source": "populate/out/verify_v2.json"},
         {"label": "dogs found", "value": f"{dogs['found']}/{dogs['gt_dogs']}",
-         "detail": f"of the {dogs['gt_dogs']} dogs the ground truth says "
-                   f"exist, {dogs['found']} have rows; the one miss was only "
-                   "ever mentioned by name",
+         "detail": f"of the {dogs['gt_dogs']} dogs in the world when "
+                   f"verification ran, {dogs['found']} have rows; the one "
+                   "miss was only ever mentioned by name",
          "source": "populate/out/verify_v2.json"},
         {"label": "fosters identified",
          "value": f"{v['tables']['fosters']['found']}/{v['tables']['fosters']['gt_people_who_fostered']}",

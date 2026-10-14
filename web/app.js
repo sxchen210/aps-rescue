@@ -168,7 +168,7 @@ async function viewSimulate() {
     [f.seed_emails.toLocaleString(), "seed emails, six simulated weeks"],
     [f.week1_emails, "more injected as a verified seventh week"],
     [f.pool_total, "scenarios pooled, ready to fire live"],
-    [f.dogs, "dogs in the ground truth"],
+    [f.dogs, "dogs across the full timeline, incl. scenarios not yet fired"],
     [f.households, "foster households"],
     [f.applications, "applications"],
     [f.pattern_cards, "email pattern cards"],

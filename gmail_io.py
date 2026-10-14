@@ -42,8 +42,6 @@ def service(account):
 
 
 @lru_cache(maxsize=None)
-def sheets_service():
-    return build("sheets", "v4", credentials=_creds("aps"))
 
 
 def profile(account):
