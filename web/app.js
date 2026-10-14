@@ -138,7 +138,7 @@ function viewOverview() {
     <p class="premise">This site is a working prototype of the alternative:
       connect a model to the inbox and let it build the understanding of the
       operation. A frontier model discovered the schema from ~1,000 emails in
-      the real inbox, blind (no predefined schema, no custom extraction
+      the inbox, blind (no predefined schema, no custom extraction
       rules); a cheap model has maintained every record since, from each new
       email, at about $0.0004 per ingestion. Every table view renders from
       the discovered <code>schema.json</code>; nothing is hand-built per
