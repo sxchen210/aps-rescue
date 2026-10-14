@@ -19,41 +19,42 @@ evidence.
 **Start here: <https://sxchen210.github.io/aps-rescue>** — four tabs that
 tell the story in pipeline order (Simulate → Discovery → Populate &
 Maintain → Head-to-head). Viewing needs nothing; the two live actions ask
-for the demo password from the portal note.
+for the demo password.
 
-## Three ways in
+## The demo
 
-**1. The hosted demo (no setup).** The link above. *Populate & Maintain*
-is the live state: every table rendered from the discovered
-`schema.json`, row pages with provenance, and a live activity feed.
-*Watch it work* (password) delivers the next pooled scenario email into
-the real inbox and streams the pipeline beat by beat — Haiku's reasoning,
-the ops envelope, the Opus reply decision, the changed rows. *Head-to-head*
-(password) runs the same model with and without table access on a chosen
-question, side by side, live. *Discovery* replays, round by round, how
-the schema was earned blind.
+*Populate & Maintain* is the live state: every table rendered from the
+discovered `schema.json`, row pages with provenance, and a live activity
+feed. *Watch it work* (password gated) delivers the next pooled scenario
+email into the real inbox and streams the pipeline beat by beat —
+Haiku's reasoning, the ops envelope, the Opus reply decision, the
+changed rows. *Head-to-head* (password gated) runs the same model with
+and without table access on a chosen question, side by side, live.
+*Discovery* replays, round by round, how the schema was earned blind.
 
-**2. The repo (evidence, and driving it locally).** Clone and skim the
-committed record: `populate/VERIFICATION.md` (accuracy vs ground truth,
-policy stated), `app/out/QA_COMPARE_REPORT.md` and
-`app/validation/third_party/` (head-to-head gradings, including the
+## The 5-minute path
+
+1. Open the site — *Populate & Maintain*: the live tables, all rendered
+   from the discovered schema.
+2. *Watch it work* → password → **Deliver the next email**: hold on
+   Haiku's reasoning and the ops envelope, then see the changed rows and
+   the draft Opus wrote.
+3. *Head-to-head* → run the first question: the tables window finishes
+   while the search window is still paging the inbox (this will take a 
+   few minutes!)
+4. *Discovery* → the replay: 39 blind rounds, $6.34, the schema earned.
+
+## The repo
+
+The committed record behind every claim: `populate/VERIFICATION.md`
+(accuracy vs ground truth, policy stated), `app/out/QA_COMPARE_REPORT.md`
+and `app/validation/third_party/` (head-to-head gradings, including the
 independent blinded re-grade), `discovery/DISCOVERY_NOTES.md` +
-`discovery/discovery_log*.jsonl` (the raw transcripts). With the portal
-bundle (`token_apsdemo.json` + `.env` at the repo root, both gitignored),
-the whole system also runs from your machine:
-`pip install -r requirements.txt`, then the engine CLI
-(`cd app && APS_DB=turso python3 pipeline.py status|sql|ingest|simulate`)
-or the full backend (`python3 -m uvicorn app.server:app`). The bundle's
-Anthropic key is usage-capped, demo-scoped, and revoked when the window
-closes — shipping it is deliberate: metered calls make every ingestion
-and draft an attributable line item (measured economics in
-`populate/VERIFICATION.md`).
-
-**3. See the real mailbox.** Ask to be added as a Gmail **delegate** on
-animalprotectiveservices2026@gmail.com — you'll open the actual inbox and
-Drafts folder from your own Google account, no shared password, and can
-check any row's `source_email_id` against the real thread. (Or email the
-address yourself — the next catch-up ingest turns your message into rows.)
+`discovery/discovery_log*.jsonl` (the raw transcripts). The code follows
+the same pipeline: `simulation/` (the world generator and leak-check
+boundary), `discovery/` (the schema harness and its artifacts),
+`populate/` (the apply layer and verification), `app/` (the engine and
+the demo backend), `web/` (this site), `scripts/` (one-time drivers).
 
 ## Honest notes (short form — the full versions live in the linked files)
 
@@ -85,24 +86,10 @@ address yourself — the next catch-up ingest turns your message into rows.)
   this ~950-email corpus (the reference inbox holds 117K+) is argument,
   not measurement.
 
-## The 90-second path
-
-1. Open the site — *Populate & Maintain*: the live tables, all rendered
-   from the discovered schema.
-2. *Watch it work* → password → **Deliver the next email**: hold on
-   Haiku's reasoning and the ops envelope, then see the changed rows and
-   the draft Opus wrote.
-3. *Head-to-head* → run the first question: the tables window finishes
-   while the search window is still paging the inbox.
-4. *Discovery* → the replay: 39 blind rounds, $6.34, the schema earned.
-
 ## Teardown
 
 All credentials are demo-scoped, temporary, and revocable in one click
 (Gmail token in the Google account's security page; Turso token in its
 dashboard; the Anthropic key in the API console — usage-capped, retired
 with the demo). The backend is one Fly app: `fly apps destroy
-aps-rescue-demo` ends it; the demo password dies with it. To reset the
-world: clear the inbox, re-run `scripts/aps_insert.py` (seed) and
-`scripts/week1_inject.py` (extension), re-push Turso via
-`scripts/push_turso.py --force`.
+aps-rescue-demo` ends it; the demo password dies with it.
